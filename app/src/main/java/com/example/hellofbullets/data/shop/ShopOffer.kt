@@ -1,4 +1,4 @@
-package com.example.hellofbullets.data.utils
+package com.example.hellofbullets.data.shop
 
 import com.example.hellofbullets.data.equipment.Item
 
