@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+**/build/
+
+# Android Studio
+.idea/
+*.iml
+
+# Local SDK path
+local.properties
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Generated artifacts
+*.apk
+*.aab
+
+# Logs
+*.log
+
+# Profiling
+*.hprof
+
+# Signing keys
+*.jks
+*.keystore
+
+# Firebase
+google-services.json
