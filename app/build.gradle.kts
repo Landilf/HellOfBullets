@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.hellofbullets"
+    namespace = "com.landilf.hellofbullets"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
