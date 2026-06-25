@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.landilf.hellofbullets"
+    namespace = "ru.landilf.hellofbullets"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.hellofbullets"
+        applicationId = "ru.landilf.hellofbullets"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
