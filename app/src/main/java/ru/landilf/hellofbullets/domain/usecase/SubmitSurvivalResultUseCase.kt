@@ -11,7 +11,7 @@ class SubmitSurvivalResultUseCase(
     private val leaderboardRepository: LeaderboardRepository,
     private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase
 ) {
-    suspend operator fun invoke(time: Int, playerLevel: Int) : SurvivalResult {
+    suspend operator fun invoke(time: Int, playerLevel: Int): SurvivalResult {
         val playerState = playerRepository.getPlayerState()
             ?: error("Player state is not initialized")
         val reward = calculateSurvivalRewardUseCase(time, playerLevel)
@@ -29,8 +29,9 @@ class SubmitSurvivalResultUseCase(
         }
 
         val leaderboard = leaderboardRepository.getLeaderboard()
-        val position =
-            leaderboard.indexOfFirst { it.playerName == playerState.playerProfile.name } + 1
+        val position = leaderboard.indexOfFirst { it.playerName == playerState.playerProfile.name }
+            .takeIf { it >= 0 }
+            ?.plus(1)
         val updatedState = PlayerState(
             playerProfile = playerState.playerProfile.copy(
                 expAmount = playerState.playerProfile.expAmount + reward.exp,
