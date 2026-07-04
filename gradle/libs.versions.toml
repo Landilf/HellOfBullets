@@ -13,6 +13,7 @@ junitVersion = "1.1.5"
 kotlin = "2.3.21"
 ksp = "2.3.9"
 lifecycle = "2.8.7"
+lifecycleRuntimeCompose = "2.10.0"
 material = "1.10.0"
 room = "2.8.4"
 ui = "1.11.4"
@@ -30,6 +31,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
