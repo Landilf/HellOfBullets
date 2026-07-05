@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
 
 @Composable
-fun MainScreen(
+fun MainMenuScreen(
     state: MainMenuUiState,
     onClickAction: (MainMenuAction) -> Unit
 ) {
@@ -25,8 +25,8 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(text = stringResource(id = state.appName))
         Text(text = stringResource(id = state.title))
-        Text(text = stringResource(id = state.subtitle))
 
         Button(
             onClick = { onClickAction(MainMenuAction.SelectMode) },

@@ -1,12 +1,14 @@
 <resources>
     <string name="app_name">HellOfBullets</string>
 
-    <string name="main_menu_title">Hell Of Bullets</string>
-    <string name="main_menu_subtitle">Главное меню</string>
+    <string name="main_menu_title">Главное меню</string>
     <string name="main_menu_select_mode">Выбор режима</string>
     <string name="main_menu_skills">Навыки</string>
     <string name="main_menu_equipment">Снаряжение</string>
     <string name="main_menu_shop">Магазин</string>
     <string name="main_menu_settings">Настройки</string>
     <string name="main_menu_exit">Выход</string>
+
+    <string name="page_in_development">В разработке</string>
+    <string name="button_back">Назад</string>
 </resources>

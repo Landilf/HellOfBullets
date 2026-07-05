@@ -4,6 +4,6 @@ import androidx.annotation.StringRes
 import ru.landilf.hellofbullets.R
 
 data class MainMenuUiState(
-    @param:StringRes val title: Int = R.string.main_menu_title,
-    @param:StringRes val subtitle: Int = R.string.main_menu_subtitle
+    @param:StringRes val appName: Int = R.string.app_name,
+    @param:StringRes val title: Int = R.string.main_menu_title
 )
