@@ -10,6 +10,7 @@ import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuAction
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuScreen
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
+import ru.landilf.hellofbullets.presentation.survival.SurvivalScreen
 
 @Composable
 fun AppNavHost(
@@ -85,8 +86,9 @@ fun AppNavHost(
         }
 
         composable(AppDestination.Survival.route) {
-            PlaceholderScreen(
-                titleRes = R.string.select_mode_survival,
+            SurvivalScreen(
+                onStartGameClick = { navController.navigate(AppDestination.SurvivalGame.route) },
+                onShowRecordsClick = { navController.navigate(AppDestination.SurvivalRecords.route) },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -94,6 +96,20 @@ fun AppNavHost(
         composable(AppDestination.Duel.route) {
             PlaceholderScreen(
                 titleRes = R.string.select_mode_duel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(AppDestination.SurvivalGame.route) {
+            PlaceholderScreen(
+                titleRes = R.string.button_start_game,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(AppDestination.SurvivalRecords.route) {
+            PlaceholderScreen(
+                titleRes = R.string.button_show_records,
                 onBackClick = { navController.popBackStack() }
             )
         }
