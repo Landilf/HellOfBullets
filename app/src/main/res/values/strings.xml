@@ -11,4 +11,8 @@
 
     <string name="page_in_development">В разработке</string>
     <string name="button_back">Назад</string>
+
+    <string name="select_mode_title">Выбор режима</string>
+    <string name="select_mode_survival">Выживание</string>
+    <string name="select_mode_duel">Дуэль</string>
 </resources>
