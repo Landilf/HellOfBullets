@@ -1,6 +1,6 @@
 package ru.landilf.hellofbullets.domain.usecase
 
-import ru.landilf.hellofbullets.domain.model.battle.SurvivalResult
+import ru.landilf.hellofbullets.domain.model.battle.common.result.SurvivalResult
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository

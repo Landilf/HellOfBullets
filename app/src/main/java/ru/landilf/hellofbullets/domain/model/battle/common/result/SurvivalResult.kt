@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.domain.model.battle
+package ru.landilf.hellofbullets.domain.model.battle.common.result
 
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 
