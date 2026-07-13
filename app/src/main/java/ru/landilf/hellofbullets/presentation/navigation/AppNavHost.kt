@@ -10,7 +10,7 @@ import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuAction
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuScreen
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
-import ru.landilf.hellofbullets.presentation.survival.SurvivalScreen
+import ru.landilf.hellofbullets.presentation.survival.SurvivalHomeScreen
 
 @Composable
 fun AppNavHost(
@@ -86,7 +86,7 @@ fun AppNavHost(
         }
 
         composable(AppDestination.Survival.route) {
-            SurvivalScreen(
+            SurvivalHomeScreen(
                 onStartGameClick = { navController.navigate(AppDestination.SurvivalGame.route) },
                 onShowRecordsClick = { navController.navigate(AppDestination.SurvivalRecords.route) },
                 onBackClick = { navController.popBackStack() }

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
 
 @Composable
-fun SurvivalScreen(
+fun SurvivalHomeScreen(
     onStartGameClick: () -> Unit,
     onShowRecordsClick: () -> Unit,
     onBackClick: () -> Unit
