@@ -9,5 +9,6 @@ data class SurvivalGameState(
     val elapsedTimeMs: Int,
     val playerStats: PlayerStats,
     val playerRuntimeState: PlayerRuntimeState,
+    val survivalWaveState: SurvivalWaveState?,
     val activeProjectiles: List<Projectile>
 )
