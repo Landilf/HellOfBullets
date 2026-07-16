@@ -3,14 +3,17 @@ package ru.landilf.hellofbullets.domain.engine.battle.survival
 import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileFactory
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveUpdateResult
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
+import javax.inject.Inject
 
-class SurvivalWaveUpdater(
+class SurvivalWaveUpdater @Inject constructor(
     private val projectileFactory: ProjectileFactory
 ) {
 
     fun update(
         waveState: SurvivalWaveState?,
-        deltaTimeMs: Int
+        deltaTimeMs: Int,
+        fieldSize: GameFieldSize
     ): SurvivalWaveUpdateResult {
         if (waveState == null) {
             return SurvivalWaveUpdateResult(
@@ -33,7 +36,7 @@ class SurvivalWaveUpdater(
         }
 
         val currentPattern = waveState.currentWave.patterns[waveState.currentPatternIndex]
-        val projectiles = projectileFactory.createVolley(currentPattern)
+        val projectiles = projectileFactory.createVolley(currentPattern, fieldSize)
 
         return SurvivalWaveUpdateResult(
             waveState = waveState.copy(

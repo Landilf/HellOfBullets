@@ -3,14 +3,17 @@ package ru.landilf.hellofbullets.domain.usecase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
+import javax.inject.Inject
 
-class CreateInitialSurvivalGameStateUseCase {
+class CreateInitialSurvivalGameStateUseCase @Inject constructor() {
     operator fun invoke(
         playerStats: PlayerStats,
-        initialWaveState: SurvivalWaveState
+        initialWaveState: SurvivalWaveState,
+        fieldSize: GameFieldSize
     ): SurvivalGameState {
         return SurvivalGameState(
             phase = SurvivalPhase.ACTIVE,
@@ -19,14 +22,15 @@ class CreateInitialSurvivalGameStateUseCase {
             playerRuntimeState = PlayerRuntimeState(
                 currentHp = playerStats.maxHp,
                 position = Vector2(
-                    x = 0.5f,
-                    y = 0.5f
+                    x = fieldSize.width / 2f,
+                    y = fieldSize.height / 2f
                 ),
-                hitRadius = 0.03f,
+                hitRadius = 3f,
                 isAlive = true
             ),
             survivalWaveState = initialWaveState,
-            activeProjectiles = emptyList()
+            activeProjectiles = emptyList(),
+            fieldSize = fieldSize
         )
     }
 }

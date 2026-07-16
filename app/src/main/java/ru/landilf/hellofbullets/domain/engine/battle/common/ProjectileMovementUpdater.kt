@@ -4,25 +4,30 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProj
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
+import javax.inject.Inject
 
-class ProjectileMovementUpdater {
+class ProjectileMovementUpdater @Inject constructor() {
 
     fun update(
         projectiles: List<Projectile>,
-        deltaTimeMs: Int
+        deltaTimeMs: Int,
+        fieldSize: GameFieldSize
     ): List<Projectile> {
         return projectiles.mapNotNull { projectile ->
             updateProjectile(
                 projectile = projectile,
-                deltaTimeMs = deltaTimeMs
+                deltaTimeMs = deltaTimeMs,
+                fieldSize = fieldSize
             )
         }
     }
 
     private fun updateProjectile(
         projectile: Projectile,
-        deltaTimeMs: Int
+        deltaTimeMs: Int,
+        fieldSize: GameFieldSize
     ): Projectile? {
         val updatedLifetimeMs = projectile.remainingLifetimeMs - deltaTimeMs
 
@@ -34,7 +39,8 @@ class ProjectileMovementUpdater {
             is BulletProjectile -> updateBulletProjectile(
                 projectile = projectile,
                 deltaTimeMs = deltaTimeMs,
-                updatedLifetimeMs = updatedLifetimeMs
+                updatedLifetimeMs = updatedLifetimeMs,
+                fieldSize = fieldSize
             )
 
             is LaserProjectile -> updateLaserProjectile(
@@ -45,7 +51,8 @@ class ProjectileMovementUpdater {
             is RocketProjectile -> updateRocketProjectile(
                 projectile = projectile,
                 deltaTimeMs = deltaTimeMs,
-                updatedLifetimeMs = updatedLifetimeMs
+                updatedLifetimeMs = updatedLifetimeMs,
+                fieldSize = fieldSize
             )
         }
     }
@@ -53,7 +60,8 @@ class ProjectileMovementUpdater {
     private fun updateBulletProjectile(
         projectile: BulletProjectile,
         deltaTimeMs: Int,
-        updatedLifetimeMs: Int
+        updatedLifetimeMs: Int,
+        fieldSize: GameFieldSize
     ): BulletProjectile? {
         val updatedPosition = movePosition(
             position = projectile.position,
@@ -61,7 +69,7 @@ class ProjectileMovementUpdater {
             deltaTimeMs = deltaTimeMs
         )
 
-        if (!isInsideGameBounds(updatedPosition)) {
+        if (!isInsideGameBounds(updatedPosition, fieldSize)) {
             return null
         }
 
@@ -83,7 +91,8 @@ class ProjectileMovementUpdater {
     private fun updateRocketProjectile(
         projectile: RocketProjectile,
         deltaTimeMs: Int,
-        updatedLifetimeMs: Int
+        updatedLifetimeMs: Int,
+        fieldSize: GameFieldSize
     ): RocketProjectile? {
         val updatedPosition = movePosition(
             position = projectile.position,
@@ -94,7 +103,7 @@ class ProjectileMovementUpdater {
         val updatedHomingTimeMs = (projectile.remainingHomingTimeMs - deltaTimeMs)
             .coerceAtLeast(0)
 
-        if (!isInsideGameBounds(updatedPosition)) {
+        if (!isInsideGameBounds(updatedPosition, fieldSize)) {
             return null
         }
 
@@ -119,13 +128,14 @@ class ProjectileMovementUpdater {
     }
 
     private fun isInsideGameBounds(
-        position: Vector2
+        position: Vector2,
+        fieldSize: GameFieldSize
     ): Boolean {
-        return position.x in -BOUNDARY_MARGIN..(1f + BOUNDARY_MARGIN) &&
-                position.y in -BOUNDARY_MARGIN..(1f + BOUNDARY_MARGIN)
+        return position.x in -BOUNDARY_MARGIN..(fieldSize.width + BOUNDARY_MARGIN) &&
+                position.y in -BOUNDARY_MARGIN..(fieldSize.height + BOUNDARY_MARGIN)
     }
 
     private companion object {
-        const val BOUNDARY_MARGIN = 0.1f
+        const val BOUNDARY_MARGIN = 10f
     }
 }

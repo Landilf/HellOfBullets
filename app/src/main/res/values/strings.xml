@@ -13,8 +13,15 @@
     <string name="select_mode_survival">Выживание</string>
     <string name="select_mode_duel">Дуэль</string>
 
-    <string name="page_in_development">В разработке</string>
-    <string name="button_start_game">Играть</string>
+    <string name="survival_title">Выживание</string>
     <string name="button_show_records">Таблица рекордов</string>
+
+    <string name="button_start_game">Играть</string>
     <string name="button_back">Назад</string>
+
+    <string name="error_title">Ошибка</string>
+    <string name="loading_title">Загрузка</string>
+    <string name="loading_message">Игра загружается</string>
+    <string name="page_in_development">В разработке</string>
+
 </resources>

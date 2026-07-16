@@ -2,6 +2,7 @@
 activityCompose = "1.13.0"
 activityKtx = "1.8.0"
 agp = "9.2.1"
+androidxHilt = "1.2.0"
 appcompat = "1.6.1"
 composeBom = "2026.06.01"
 constraintlayout = "2.1.4"
@@ -31,6 +32,7 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-hilt-navigation-compose = {group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt"}
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }

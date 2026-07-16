@@ -6,8 +6,9 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
+import javax.inject.Inject
 
-class PlayerCollisionChecker {
+class PlayerCollisionChecker @Inject constructor() {
 
     fun hasCollision(
         player: PlayerRuntimeState,
@@ -96,11 +97,11 @@ class PlayerCollisionChecker {
                         (point.y - segmentStart.y) * segmentDy
                 ) / (segmentDx * segmentDx + segmentDy * segmentDy)
 
-        val closestProjectionFactor = projection.coerceIn(0f, 1f)
+        val closestPointFactor = projection.coerceIn(0f, 1f)
 
         val closestPoint = Vector2(
-            x = segmentStart.x + segmentDx * closestProjectionFactor,
-            y = segmentStart.y + segmentDy * closestProjectionFactor
+            x = segmentStart.x + segmentDx * closestPointFactor,
+            y = segmentStart.y + segmentDy * closestPointFactor
         )
 
         return calculateDistance(point, closestPoint)
