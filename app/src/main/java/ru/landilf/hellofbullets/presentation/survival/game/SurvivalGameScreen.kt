@@ -1,16 +1,29 @@
 package ru.landilf.hellofbullets.presentation.survival.game
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
+import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
+import ru.landilf.hellofbullets.domain.model.common.Vector2
+import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameCanvas
 
 @Composable
 fun SurvivalGameScreen(
@@ -19,73 +32,81 @@ fun SurvivalGameScreen(
 ) {
     when {
         state.isLoading -> {
-            SurvivalGameContent(
-                title = stringResource(R.string.loading_title),
-                body = stringResource(R.string.loading_message),
-                onBackClick = {
-                    onAction(SurvivalGameAction.OnBackClick)
-                }
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = stringResource(R.string.loading_title))
+            }
         }
 
         state.errorMessage != null -> {
-            SurvivalGameContent(
-                title = stringResource(R.string.error_title),
-                body = state.errorMessage,
-                onBackClick = {
-                    onAction(SurvivalGameAction.OnBackClick)
-                }
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = state.errorMessage)
+            }
         }
 
         state.gameState != null -> {
-            val gameState = state.gameState
-
             SurvivalGameContent(
-                title = stringResource(R.string.survival_title),
-                body = buildString {
-                    appendLine("Фаза: ${gameState.phase}")
-                    appendLine("Время: ${gameState.elapsedTimeMs} мс")
-                    appendLine("Здоровье: ${gameState.playerRuntimeState.currentHp}")
-                    appendLine("Игрок живой: ${gameState.playerRuntimeState.isAlive}")
-                    appendLine("Позиция игрока: ${gameState.playerRuntimeState.position}")
-                    appendLine("Снарядов: ${gameState.activeProjectiles.size}")
-                    appendLine("ID шаблона атаки: ${gameState.survivalWaveState?.currentPatternIndex}")
-                    appendLine("Время до следующего залпа: ${gameState.survivalWaveState?.timeUntilNextVolleyMs}")
-                },
-                onBackClick = {
-                    onAction(SurvivalGameAction.OnBackClick)
-                }
+                gameState = state.gameState,
+                onAction = onAction
             )
         }
 
         else -> {
-            SurvivalGameContent(
-                title = stringResource(R.string.survival_title),
-                body = "Игра недоступна",
-                onBackClick = {
-                    onAction(SurvivalGameAction.OnBackClick)
-                }
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Игра недоступна")
+            }
         }
     }
 }
 
 @Composable
 private fun SurvivalGameContent(
-    title: String,
-    body: String,
-    onBackClick: () -> Unit
+    gameState: SurvivalGameState,
+    onAction: (SurvivalGameAction) -> Unit
 ) {
-    Column(
+    var gameFieldSize by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .background(Color(0xFF101820))
+            .onSizeChanged { gameFieldSize = it }
+            .pointerInput(gameFieldSize) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+
+                    if (gameFieldSize.width == 0 || gameFieldSize.height == 0) {
+                        return@detectDragGestures
+                    }
+
+                    val normalizeDelta = Vector2(
+                        x = dragAmount.x / gameFieldSize.width,
+                        y = dragAmount.y / gameFieldSize.height
+                    )
+
+                    onAction(SurvivalGameAction.OnPlayerDrag(normalizeDelta))
+                }
+            }
     ) {
-        Text(text = title)
-        Text(text = body)
-        Button(onClick = onBackClick) {
+        SurvivalGameCanvas(
+            gameState = gameState,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Button(
+            onClick = { onAction(SurvivalGameAction.OnBackClick) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
             Text(text = stringResource(R.string.button_back))
         }
     }

@@ -15,6 +15,7 @@ import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.Project
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
+import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
 import ru.landilf.hellofbullets.domain.usecase.CreateInitialSurvivalGameStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
@@ -38,6 +39,10 @@ class SurvivalGameViewModel @Inject constructor(
     fun onAction(action: SurvivalGameAction) {
         when (action) {
             SurvivalGameAction.OnBackClick -> Unit
+
+            is SurvivalGameAction.OnPlayerDrag -> {
+                movePlayer(action.dragDelta)
+            }
         }
     }
 
@@ -115,6 +120,26 @@ class SurvivalGameViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun movePlayer(
+        dragDelta: Vector2
+    ) {
+        val currentGameState = _uiState.value.gameState ?: return
+        val currentPlayerState = currentGameState.playerRuntimeState
+
+        val updatedPosition = Vector2(
+            x = (currentGameState.playerRuntimeState.position.x + dragDelta.x).coerceIn(0f, 1f),
+            y = (currentGameState.playerRuntimeState.position.y + dragDelta.y).coerceIn(0f, 1f)
+        )
+
+        _uiState.value = _uiState.value.copy(
+            gameState = currentGameState.copy(
+                playerRuntimeState = currentPlayerState.copy(
+                    position = updatedPosition
+                )
+            )
+        )
     }
 
     private companion object {

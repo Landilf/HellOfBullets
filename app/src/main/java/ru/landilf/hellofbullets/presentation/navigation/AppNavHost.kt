@@ -114,6 +114,7 @@ fun AppNavHost(
                 onAction = { action ->
                     when (action) {
                         SurvivalGameAction.OnBackClick -> navController.popBackStack()
+                        is SurvivalGameAction.OnPlayerDrag -> viewModel.onAction(action)
                     }
                 }
             )
