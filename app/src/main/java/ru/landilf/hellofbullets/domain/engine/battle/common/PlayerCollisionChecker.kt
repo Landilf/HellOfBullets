@@ -97,11 +97,11 @@ class PlayerCollisionChecker @Inject constructor() {
                         (point.y - segmentStart.y) * segmentDy
                 ) / (segmentDx * segmentDx + segmentDy * segmentDy)
 
-        val closestProjectionFactor = projection.coerceIn(0f, 1f)
+        val closestPointFactor = projection.coerceIn(0f, 1f)
 
         val closestPoint = Vector2(
-            x = segmentStart.x + segmentDx * closestProjectionFactor,
-            y = segmentStart.y + segmentDy * closestProjectionFactor
+            x = segmentStart.x + segmentDx * closestPointFactor,
+            y = segmentStart.y + segmentDy * closestPointFactor
         )
 
         return calculateDistance(point, closestPoint)

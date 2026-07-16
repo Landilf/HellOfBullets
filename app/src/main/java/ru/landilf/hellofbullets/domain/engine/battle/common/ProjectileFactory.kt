@@ -7,6 +7,7 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProj
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import javax.inject.Inject
 
@@ -14,54 +15,66 @@ class ProjectileFactory @Inject constructor() {
     private var nextProjectileId = 0L
 
     fun createVolley(
-        pattern: AttackPattern
+        pattern: AttackPattern,
+        fieldSize: GameFieldSize
     ): List<Projectile> {
         return List(pattern.projectileCount) { index ->
             createProjectile(
                 pattern = pattern,
-                index = index
+                index = index,
+                fieldSize = fieldSize
             )
         }
     }
 
     private fun createProjectile(
         pattern: AttackPattern,
-        index: Int
+        index: Int,
+        fieldSize: GameFieldSize
     ): Projectile {
         return when (pattern.projectileType) {
-            ProjectileType.BULLET -> createBulletProjectile(pattern, index)
-            ProjectileType.LASER -> createLaserProjectile(pattern, index)
-            ProjectileType.ROCKET -> createRocketProjectile(pattern, index)
+            ProjectileType.BULLET -> createBulletProjectile(pattern, index, fieldSize)
+            ProjectileType.LASER -> createLaserProjectile(pattern, index, fieldSize)
+            ProjectileType.ROCKET -> createRocketProjectile(pattern, index, fieldSize)
         }
     }
 
     private fun createBulletProjectile(
         pattern: AttackPattern,
-        index: Int
+        index: Int,
+        fieldSize: GameFieldSize
     ): BulletProjectile {
         return BulletProjectile(
             id = generateProjectileId(),
             damage = pattern.projectileDamage,
             hitRadius = pattern.projectileHitRadius,
             remainingLifetimeMs = pattern.projectileLifetimeMs,
-            position = createSpawnPosition(pattern.spawnZone, index, pattern.projectileCount),
+            position = createSpawnPosition(
+                spawnZone = pattern.spawnZone,
+                index = index,
+                totalCount = pattern.projectileCount,
+                fieldSize = fieldSize
+            ),
             velocity = createVelocity(pattern.spawnZone, pattern.projectileSpeed)
         )
     }
 
     private fun createLaserProjectile(
         pattern: AttackPattern,
-        index: Int
+        index: Int,
+        fieldSize: GameFieldSize
     ): LaserProjectile {
         val startPosition = createSpawnPosition(
             spawnZone = pattern.spawnZone,
             index = index,
-            totalCount = pattern.projectileCount
+            totalCount = pattern.projectileCount,
+            fieldSize = fieldSize
         )
 
         val endPosition = createLaserEndPosition(
             spawnZone = pattern.spawnZone,
-            startPosition
+            startPosition = startPosition,
+            fieldSize = fieldSize
         )
 
         return LaserProjectile(
@@ -76,14 +89,20 @@ class ProjectileFactory @Inject constructor() {
 
     private fun createRocketProjectile(
         pattern: AttackPattern,
-        index: Int
+        index: Int,
+        fieldSize: GameFieldSize
     ): RocketProjectile {
         return RocketProjectile(
             id = generateProjectileId(),
             damage = pattern.projectileDamage,
             hitRadius = pattern.projectileHitRadius,
             remainingLifetimeMs = pattern.projectileLifetimeMs,
-            position = createSpawnPosition(pattern.spawnZone, index, pattern.projectileCount),
+            position = createSpawnPosition(
+                spawnZone = pattern.spawnZone,
+                index = index,
+                totalCount = pattern.projectileCount,
+                fieldSize = fieldSize
+            ),
             velocity = createVelocity(pattern.spawnZone, pattern.projectileSpeed),
             remainingHomingTimeMs = 1000
         )
@@ -96,39 +115,40 @@ class ProjectileFactory @Inject constructor() {
     private fun createSpawnPosition(
         spawnZone: SpawnZone,
         index: Int,
-        totalCount: Int
+        totalCount: Int,
+        fieldSize: GameFieldSize
     ): Vector2 {
         val fraction = calculateFraction(index, totalCount)
 
         return when (spawnZone) {
             SpawnZone.LEFT_TOP -> Vector2(
                 x = 0f,
-                y = fraction * 0.5f
+                y = fraction * fieldSize.height * 0.5f
             )
 
             SpawnZone.LEFT_BOTTOM -> Vector2(
                 x = 0f,
-                y = 0.5f + fraction * 0.5f
+                y = 0.5f * fieldSize.height + fraction * fieldSize.height * 0.5f
             )
 
             SpawnZone.TOP -> Vector2(
-                x = fraction,
+                x = fraction * fieldSize.width,
                 y = 0f
             )
 
             SpawnZone.RIGHT_TOP -> Vector2(
-                x = 1f,
-                y = fraction * 0.5f
+                x = fieldSize.width,
+                y = fraction * fieldSize.height * 0.5f
             )
 
             SpawnZone.RIGHT_BOTTOM -> Vector2(
-                x = 1f,
-                y = 0.5f + fraction * 0.5f
+                x = fieldSize.width,
+                y = 0.5f * fieldSize.height + fraction * fieldSize.height * 0.5f
             )
 
             SpawnZone.BOTTOM -> Vector2(
-                x = fraction,
-                y = 1f
+                x = fraction * fieldSize.width,
+                y = fieldSize.height
             )
         }
     }
@@ -157,12 +177,13 @@ class ProjectileFactory @Inject constructor() {
 
     private fun createLaserEndPosition(
         spawnZone: SpawnZone,
-        startPosition: Vector2
+        startPosition: Vector2,
+        fieldSize: GameFieldSize
     ): Vector2 {
         return when (spawnZone) {
             SpawnZone.LEFT_TOP,
             SpawnZone.LEFT_BOTTOM -> Vector2(
-                x = 1f,
+                x = fieldSize.width,
                 y = startPosition.y
             )
 

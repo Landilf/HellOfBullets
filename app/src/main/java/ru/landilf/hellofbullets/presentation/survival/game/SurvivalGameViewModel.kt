@@ -15,6 +15,7 @@ import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.Project
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
 import ru.landilf.hellofbullets.domain.usecase.CreateInitialSurvivalGameStateUseCase
@@ -32,7 +33,6 @@ class SurvivalGameViewModel @Inject constructor(
     private var gameLoopJob: Job? = null
 
     init {
-        loadInitialState()
         startGameLoop()
     }
 
@@ -43,13 +43,107 @@ class SurvivalGameViewModel @Inject constructor(
             is SurvivalGameAction.OnPlayerDrag -> {
                 movePlayer(action.dragDelta)
             }
+
+            is SurvivalGameAction.OnGameFieldSizeChange -> {
+                updateGameFieldSize(
+                    widthPx = action.widthPx,
+                    heightPx = action.heightPx
+                )
+            }
         }
     }
 
-    private fun loadInitialState() {
+    private fun startGameLoop() {
+        gameLoopJob?.cancel()
+
+        gameLoopJob = viewModelScope.launch {
+            while (true) {
+                delay(FRAME_DELAY_MS)
+
+                val currentGameState = _uiState.value.gameState ?: continue
+
+                if (currentGameState.phase != SurvivalPhase.ACTIVE) {
+                    continue
+                }
+
+                val updateGameState = updateSurvivalGameStateUseCase(
+                    gameState = currentGameState,
+                    deltaTimeMs = FRAME_DELAY_MS.toInt(),
+                    fieldSize = currentGameState.fieldSize
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    gameState = updateGameState
+                )
+            }
+        }
+    }
+
+    private fun movePlayer(
+        dragDelta: Vector2
+    ) {
+        val currentGameState = _uiState.value.gameState ?: return
+        val currentPlayerState = currentGameState.playerRuntimeState
+        val fieldSize = currentGameState.fieldSize
+
+        val updatedPosition = Vector2(
+            x = (currentPlayerState.position.x + dragDelta.x).coerceIn(
+                minimumValue = 0f,
+                maximumValue = fieldSize.width
+            ),
+            y = (currentPlayerState.position.y + dragDelta.y).coerceIn(
+                minimumValue = 0f,
+                maximumValue = fieldSize.height
+            )
+        )
+
+        _uiState.value = _uiState.value.copy(
+            gameState = currentGameState.copy(
+                playerRuntimeState = currentPlayerState.copy(
+                    position = updatedPosition
+                )
+            )
+        )
+    }
+
+    private fun updateGameFieldSize(
+        widthPx: Int,
+        heightPx: Int
+    ) {
+        if (widthPx <= 0 || heightPx <= 0) {
+            return
+        }
+
+        val updatedFieldSize = createGameFieldSize(
+            widthPx = widthPx,
+            heightPx = heightPx
+        )
+
+        if (_uiState.value.gameState == null) {
+            loadInitialState(updatedFieldSize)
+        }
+    }
+
+    private fun createGameFieldSize(
+        widthPx: Int,
+        heightPx: Int
+    ): GameFieldSize {
+        val worldWidth = 100f
+        val worldHeight = worldWidth * heightPx.toFloat() / widthPx.toFloat()
+
+        return GameFieldSize(
+            width = worldWidth,
+            height = worldHeight
+        )
+    }
+
+    private fun loadInitialState(
+        fieldSize: GameFieldSize
+    ) {
         val initialGameState = createInitialSurvivalGameStateUseCase(
             playerStats = createInitialPlayerState(),
-            initialWaveState = createInitialWaveState()
+            initialWaveState = createInitialWaveState(),
+            fieldSize = fieldSize
         )
 
         _uiState.value = SurvivalGameUiState(
@@ -74,11 +168,11 @@ class SurvivalGameViewModel @Inject constructor(
             id = 1L,
             projectileType = ProjectileType.BULLET,
             spawnZone = SpawnZone.TOP,
-            projectileCount = 3,
-            spawnIntervalMs = 1000,
-            projectileSpeed = 0.25f,
+            projectileCount = 4,
+            spawnIntervalMs = 500,
+            projectileSpeed = 75f,
             projectileDamage = 1,
-            projectileHitRadius = 0.03f,
+            projectileHitRadius = 2f,
             projectileLifetimeMs = 5000
         )
 
@@ -94,51 +188,6 @@ class SurvivalGameViewModel @Inject constructor(
             currentPatternIndex = 0,
             elapsedWaveTimeMs = 0,
             timeUntilNextVolleyMs = initialPattern.spawnIntervalMs
-        )
-    }
-
-    private fun startGameLoop() {
-        gameLoopJob?.cancel()
-
-        gameLoopJob = viewModelScope.launch {
-            while (true) {
-                delay(FRAME_DELAY_MS)
-
-                val currentGameState = _uiState.value.gameState ?: continue
-
-                if (currentGameState.phase != SurvivalPhase.ACTIVE) {
-                    continue
-                }
-
-                val updateGameState = updateSurvivalGameStateUseCase(
-                    gameState = currentGameState,
-                    deltaTimeMs = FRAME_DELAY_MS.toInt()
-                )
-
-                _uiState.value = _uiState.value.copy(
-                    gameState = updateGameState
-                )
-            }
-        }
-    }
-
-    private fun movePlayer(
-        dragDelta: Vector2
-    ) {
-        val currentGameState = _uiState.value.gameState ?: return
-        val currentPlayerState = currentGameState.playerRuntimeState
-
-        val updatedPosition = Vector2(
-            x = (currentGameState.playerRuntimeState.position.x + dragDelta.x).coerceIn(0f, 1f),
-            y = (currentGameState.playerRuntimeState.position.y + dragDelta.y).coerceIn(0f, 1f)
-        )
-
-        _uiState.value = _uiState.value.copy(
-            gameState = currentGameState.copy(
-                playerRuntimeState = currentPlayerState.copy(
-                    position = updatedPosition
-                )
-            )
         )
     }
 

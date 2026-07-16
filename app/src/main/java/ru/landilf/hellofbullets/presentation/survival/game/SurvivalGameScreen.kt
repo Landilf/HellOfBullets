@@ -30,38 +30,55 @@ fun SurvivalGameScreen(
     state: SurvivalGameUiState,
     onAction: (SurvivalGameAction) -> Unit
 ) {
-    when {
-        state.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = stringResource(R.string.loading_title))
+    var gameFieldSize by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onSizeChanged {
+                gameFieldSize = it
+                onAction(
+                    SurvivalGameAction.OnGameFieldSizeChange(
+                        widthPx = it.width,
+                        heightPx = it.height
+                    )
+                )
             }
-        }
-
-        state.errorMessage != null -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = state.errorMessage)
+    ) {
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = stringResource(R.string.loading_title))
+                }
             }
-        }
 
-        state.gameState != null -> {
-            SurvivalGameContent(
-                gameState = state.gameState,
-                onAction = onAction
-            )
-        }
+            state.errorMessage != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = state.errorMessage)
+                }
+            }
 
-        else -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Игра недоступна")
+            state.gameState != null -> {
+                SurvivalGameContent(
+                    gameState = state.gameState,
+                    gameFieldSize = gameFieldSize,
+                    onAction = onAction
+                )
+            }
+
+            else -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Игра недоступна")
+                }
             }
         }
     }
@@ -70,15 +87,13 @@ fun SurvivalGameScreen(
 @Composable
 private fun SurvivalGameContent(
     gameState: SurvivalGameState,
-    onAction: (SurvivalGameAction) -> Unit
+    gameFieldSize: IntSize,
+    onAction: (SurvivalGameAction) -> Unit,
 ) {
-    var gameFieldSize by remember { mutableStateOf(IntSize.Zero) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF101820))
-            .onSizeChanged { gameFieldSize = it }
             .pointerInput(gameFieldSize) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
@@ -87,12 +102,12 @@ private fun SurvivalGameContent(
                         return@detectDragGestures
                     }
 
-                    val normalizeDelta = Vector2(
-                        x = dragAmount.x / gameFieldSize.width,
-                        y = dragAmount.y / gameFieldSize.height
+                    val worldDelta = Vector2(
+                        x = dragAmount.x / gameFieldSize.width * gameState.fieldSize.width,
+                        y = dragAmount.y / gameFieldSize.height * gameState.fieldSize.height
                     )
 
-                    onAction(SurvivalGameAction.OnPlayerDrag(normalizeDelta))
+                    onAction(SurvivalGameAction.OnPlayerDrag(worldDelta))
                 }
             }
     ) {

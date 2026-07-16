@@ -5,6 +5,7 @@ import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileMovementUp
 import ru.landilf.hellofbullets.domain.engine.battle.survival.SurvivalWaveUpdater
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import javax.inject.Inject
 
 class UpdateSurvivalGameStateUseCase @Inject constructor(
@@ -14,7 +15,7 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
 ) {
     operator fun invoke(
         gameState: SurvivalGameState,
-        deltaTimeMs: Int
+        deltaTimeMs: Int,
     ): SurvivalGameState {
         if (gameState.phase != SurvivalPhase.ACTIVE) {
             return gameState
@@ -22,7 +23,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
 
         val waveUpdateResult = survivalWaveUpdater.update(
             waveState = gameState.survivalWaveState,
-            deltaTimeMs = deltaTimeMs
+            deltaTimeMs = deltaTimeMs,
+            fieldSize = gameState.fieldSize
         )
 
         val projectilesAfterSpawn =
@@ -30,7 +32,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
 
         val updatedProjectiles = projectileMovementUpdater.update(
             projectiles = projectilesAfterSpawn,
-            deltaTimeMs = deltaTimeMs
+            deltaTimeMs = deltaTimeMs,
+            fieldSize = gameState.fieldSize
         )
 
         val hasCollision = playerCollisionChecker.hasCollision(

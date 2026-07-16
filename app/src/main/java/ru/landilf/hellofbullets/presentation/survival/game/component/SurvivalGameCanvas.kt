@@ -13,6 +13,7 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProje
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
+import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 
 @Composable
@@ -37,52 +38,55 @@ private fun DrawScope.drawGameField(
     drawPlayer(
         position = gameState.playerRuntimeState.position,
         radius = gameState.playerRuntimeState.hitRadius,
-        isAlive = gameState.playerRuntimeState.isAlive
+        isAlive = gameState.playerRuntimeState.isAlive,
+        fieldSize = gameState.fieldSize
     )
 
     gameState.activeProjectiles.forEach { projectile ->
-        drawProjectile(projectile)
+        drawProjectile(projectile, gameState.fieldSize)
     }
 }
 
 private fun DrawScope.drawPlayer(
     position: Vector2,
     radius: Float,
-    isAlive: Boolean
+    isAlive: Boolean,
+    fieldSize: GameFieldSize
 ) {
     drawCircle(
         color = if (isAlive) Color(0xFF7CFFB2) else Color.Red,
-        radius = radius.toCanvasPx(size.minDimension),
-        center = position.toCanvasOffset(size.width, size.height)
+        radius = radius.toCanvasPx(fieldSize, size.width),
+        center = position.toCanvasOffset(fieldSize, size.width, size.height)
     )
 }
 
 private fun DrawScope.drawProjectile(
-    projectile: Projectile
+    projectile: Projectile,
+    fieldSize: GameFieldSize
 ) {
     when (projectile) {
         is BulletProjectile -> {
             drawCircle(
                 color = Color(0xFFFFD166),
-                radius = projectile.hitRadius.toCanvasPx(size.minDimension),
-                center = projectile.position.toCanvasOffset(size.width, size.height)
+                radius = projectile.hitRadius.toCanvasPx(fieldSize, size.width),
+                center = projectile.position.toCanvasOffset(fieldSize, size.width, size.height)
             )
         }
 
         is LaserProjectile -> {
             drawLine(
                 color = Color(0xFF70D6FF),
-                start = projectile.startPosition.toCanvasOffset(size.width, size.height),
-                end = projectile.endPosition.toCanvasOffset(size.width, size.height),
-                strokeWidth = projectile.hitRadius.toCanvasPx(size.minDimension)
+                start = projectile.startPosition.toCanvasOffset(fieldSize, size.width, size.height),
+                end = projectile.endPosition.toCanvasOffset(fieldSize, size.width, size.height),
+                strokeWidth = projectile.hitRadius.toCanvasPx(fieldSize, size.width)
             )
         }
 
         is RocketProjectile -> {
             drawCircle(
                 color = Color(0xFFFF6B6B),
-                radius = projectile.hitRadius.toCanvasPx(size.minDimension),
-                center = projectile.position.toCanvasOffset(size.width, size.height),
+                radius = projectile.hitRadius.toCanvasPx(fieldSize, size.width),
+                center = projectile.position.toCanvasOffset(fieldSize, size.width, size.height),
                 style = Stroke(width = 3.dp.toPx())
             )
         }
@@ -90,17 +94,19 @@ private fun DrawScope.drawProjectile(
 }
 
 private fun Vector2.toCanvasOffset(
+    fieldSize: GameFieldSize,
     canvasWidth: Float,
     canvasHeight: Float
 ): Offset {
     return Offset(
-        x = x * canvasWidth,
-        y = y * canvasHeight
+        x = x / fieldSize.width * canvasWidth,
+        y = y / fieldSize.height * canvasHeight
     )
 }
 
 private fun Float.toCanvasPx(
-    minCanvasSize: Float
+    fieldSize: GameFieldSize,
+    canvasWidth: Float,
 ): Float {
-    return this * minCanvasSize
+    return this / fieldSize.width * canvasWidth
 }
