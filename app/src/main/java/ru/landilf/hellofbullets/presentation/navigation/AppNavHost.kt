@@ -1,6 +1,8 @@
 package ru.landilf.hellofbullets.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +13,9 @@ import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuScreen
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
 import ru.landilf.hellofbullets.presentation.survival.SurvivalHomeScreen
+import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameAction
+import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameScreen
+import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameViewModel
 
 @Composable
 fun AppNavHost(
@@ -101,9 +106,16 @@ fun AppNavHost(
         }
 
         composable(AppDestination.SurvivalGame.route) {
-            PlaceholderScreen(
-                titleRes = R.string.button_start_game,
-                onBackClick = { navController.popBackStack() }
+            val viewModel: SurvivalGameViewModel = hiltViewModel()
+            val state = viewModel.uiState.collectAsState()
+
+            SurvivalGameScreen(
+                state = state.value,
+                onAction = { action ->
+                    when (action) {
+                        SurvivalGameAction.OnBackClick -> navController.popBackStack()
+                    }
+                }
             )
         }
 

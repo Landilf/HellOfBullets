@@ -3,8 +3,9 @@ package ru.landilf.hellofbullets.domain.engine.battle.survival
 import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileFactory
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveUpdateResult
+import javax.inject.Inject
 
-class SurvivalWaveUpdater(
+class SurvivalWaveUpdater @Inject constructor(
     private val projectileFactory: ProjectileFactory
 ) {
 

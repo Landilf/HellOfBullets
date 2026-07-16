@@ -6,8 +6,9 @@ import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
+import javax.inject.Inject
 
-class CreateInitialSurvivalGameStateUseCase {
+class CreateInitialSurvivalGameStateUseCase @Inject constructor() {
     operator fun invoke(
         playerStats: PlayerStats,
         initialWaveState: SurvivalWaveState

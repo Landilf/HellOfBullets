@@ -5,8 +5,9 @@ import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileMovementUp
 import ru.landilf.hellofbullets.domain.engine.battle.survival.SurvivalWaveUpdater
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
+import javax.inject.Inject
 
-class UpdateSurvivalGameStateUseCase(
+class UpdateSurvivalGameStateUseCase @Inject constructor(
     private val survivalWaveUpdater: SurvivalWaveUpdater,
     private val projectileMovementUpdater: ProjectileMovementUpdater,
     private val playerCollisionChecker: PlayerCollisionChecker

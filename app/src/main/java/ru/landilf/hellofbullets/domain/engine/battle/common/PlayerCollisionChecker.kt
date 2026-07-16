@@ -6,8 +6,9 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
+import javax.inject.Inject
 
-class PlayerCollisionChecker {
+class PlayerCollisionChecker @Inject constructor() {
 
     fun hasCollision(
         player: PlayerRuntimeState,

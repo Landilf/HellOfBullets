@@ -8,8 +8,9 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProje
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.common.Vector2
+import javax.inject.Inject
 
-class ProjectileFactory {
+class ProjectileFactory @Inject constructor() {
     private var nextProjectileId = 0L
 
     fun createVolley(
