@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
+import ru.landilf.hellofbullets.domain.usecase.CalculateSurvivalRewardUseCase
 import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
 import javax.inject.Inject
@@ -22,7 +23,8 @@ import kotlin.time.TimeSource
 @HiltViewModel
 class SurvivalGameViewModel @Inject constructor(
     private val createDefaultSurvivalGameStateUseCase: CreateDefaultSurvivalGameStateUseCase,
-    private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase
+    private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase,
+    private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalGameUiState())
     val uiState: StateFlow<SurvivalGameUiState> = _uiState.asStateFlow()
@@ -94,13 +96,24 @@ class SurvivalGameViewModel @Inject constructor(
                         )
                     }
 
-                    val updateGameState = updateSurvivalGameStateUseCase(
+                    val updatedGameState = updateSurvivalGameStateUseCase(
                         gameState = currentGameState,
                         deltaTimeMs = safeDeltaTimeMs
                     )
 
+                    if (updatedGameState.phase == SurvivalPhase.FINISHED) {
+                        val result = createResult(updatedGameState.elapsedTimeMs)
+
+                        return@update currentState.copy(
+                            gameState = updatedGameState,
+                            isResultVisible = true,
+                            result = result,
+                            isPaused = false
+                        )
+                    }
+
                     currentState.copy(
-                        gameState = updateGameState
+                        gameState = updatedGameState
                     )
                 }
             }
@@ -207,12 +220,28 @@ class SurvivalGameViewModel @Inject constructor(
             gameState = initialGameState,
             errorMessage = null,
             isPaused = false,
-            isResultVisible = false
+            isResultVisible = false,
+            result = null
+        )
+    }
+
+    private fun createResult(
+        elapsedTimeMs: Int
+    ): SurvivalResultUiState {
+        val reward = calculateSurvivalRewardUseCase(
+            time = elapsedTimeMs / 1000,
+            playerLevel = DEFAULT_PLAYER_LEVEL
+        )
+
+        return SurvivalResultUiState(
+            elapsedTimeMs = elapsedTimeMs,
+            reward = reward
         )
     }
 
     private companion object {
         const val FRAME_DELAY_MS = 16L
         const val MAX_DELTA_TIME_MS = 100L
+        const val DEFAULT_PLAYER_LEVEL = 1
     }
 }

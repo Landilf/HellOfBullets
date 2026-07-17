@@ -7,5 +7,6 @@ data class SurvivalGameUiState(
     val gameState: SurvivalGameState? = null,
     val errorMessage: String? = null,
     val isPaused: Boolean = false,
-    val isResultVisible: Boolean = false
+    val isResultVisible: Boolean = false,
+    val result: SurvivalResultUiState? = null
 )

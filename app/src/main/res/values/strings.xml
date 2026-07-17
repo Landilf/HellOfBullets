@@ -20,9 +20,14 @@
     <string name="back_button">Назад</string>
 
     <string name="pause_title">Пауза</string>
-    <string name="pause_resume_button">Продолжить</string>
-    <string name="pause_restart_button">Начать заново</string>
-    <string name="pause_exit_button">Выйти в меню</string>
+    <string name="game_resume_button">Продолжить</string>
+    <string name="game_restart_button">Начать заново</string>
+    <string name="game_exit_button">В меню</string>
+
+    <string name="result_title">Результаты</string>
+    <string name="result_time_value">Время: %1$s</string>
+    <string name="result_exp_value">Опыт: %1$d</string>
+    <string name="result_silver_value">Серебро: %1$d</string>
 
     <string name="error_title">Ошибка</string>
     <string name="loading_title">Загрузка</string>

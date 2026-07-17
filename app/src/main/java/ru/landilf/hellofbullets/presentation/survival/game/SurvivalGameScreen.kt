@@ -21,6 +21,7 @@ import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.presentation.survival.game.component.PauseMenuOverlay
+import ru.landilf.hellofbullets.presentation.survival.game.component.ResultOverlay
 import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameCanvas
 import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameHud
 
@@ -130,6 +131,14 @@ private fun SurvivalGameContent(
         if (state.isPaused) {
             PauseMenuOverlay(
                 onResumeClick = { onAction(SurvivalGameAction.OnResumeClick) },
+                onRestartClick = { onAction(SurvivalGameAction.OnRestartClick) },
+                onExitClick = { onAction(SurvivalGameAction.OnExitClick) }
+            )
+        }
+
+        if (state.isResultVisible && state.result != null) {
+            ResultOverlay(
+                result = state.result,
                 onRestartClick = { onAction(SurvivalGameAction.OnRestartClick) },
                 onExitClick = { onAction(SurvivalGameAction.OnExitClick) }
             )

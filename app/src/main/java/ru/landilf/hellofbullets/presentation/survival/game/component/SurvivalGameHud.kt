@@ -10,12 +10,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
+import ru.landilf.hellofbullets.presentation.common.formatter.formatElapsedTime
 
 @Composable
 fun SurvivalGameHud(
@@ -55,14 +55,4 @@ fun SurvivalGameHud(
             )
         }
     }
-}
-
-private fun formatElapsedTime(
-    elapsedTimeMs: Int
-): String {
-    val totalSeconds = elapsedTimeMs / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-
-    return "%02d:%02d".format(minutes, seconds)
 }
