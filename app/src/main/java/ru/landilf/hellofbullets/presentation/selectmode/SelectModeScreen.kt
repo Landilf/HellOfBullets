@@ -26,28 +26,28 @@ fun SelectModeScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(id = R.string.select_mode_title))
-        Text(text = stringResource(id = R.string.page_in_development))
+        Text(stringResource(R.string.select_mode_title))
+        Text(stringResource(R.string.page_in_development))
 
         Button(
             onClick = onSurvivalClick,
             modifier = Modifier.padding(24.dp)
         ) {
-            Text(text = stringResource(id = R.string.select_mode_survival))
+            Text(stringResource(R.string.select_mode_survival))
         }
 
         Button(
             onClick = onDuelClick,
             modifier = Modifier.padding(24.dp)
         ) {
-            Text(text = stringResource(id = R.string.select_mode_duel))
+            Text(stringResource(R.string.select_mode_duel))
         }
 
         Button(
             onClick = onBackClick,
             modifier = Modifier.padding(24.dp)
         ) {
-            Text(text = stringResource(id = R.string.button_back))
+            Text(stringResource(R.string.back_button))
         }
     }
 }

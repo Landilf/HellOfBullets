@@ -31,9 +31,21 @@ fun NavGraphBuilder.survivalGraph(
             state = state.value,
             onAction = { action ->
                 when (action) {
-                    SurvivalGameAction.OnBackClick -> navController.popBackStack()
-                    is SurvivalGameAction.OnPlayerDrag -> viewModel.onAction(action)
-                    is SurvivalGameAction.OnGameFieldSizeChange -> viewModel.onAction(action)
+                    SurvivalGameAction.OnBackClick -> {
+                        navController.popBackStack()
+                    }
+
+                    SurvivalGameAction.OnPauseClick,
+                    SurvivalGameAction.OnResumeClick,
+                    SurvivalGameAction.OnRestartClick,
+                    is SurvivalGameAction.OnPlayerDrag,
+                    is SurvivalGameAction.OnGameFieldSizeChange -> {
+                        viewModel.onAction(action)
+                    }
+
+                    SurvivalGameAction.OnExitClick -> {
+                        navController.popBackStack(AppDestination.SurvivalHome.route, false)
+                    }
                 }
             }
         )
@@ -41,7 +53,7 @@ fun NavGraphBuilder.survivalGraph(
 
     composable(AppDestination.SurvivalRecords.route) {
         PlaceholderScreen(
-            titleRes = R.string.button_show_records,
+            titleRes = R.string.show_records_button,
             onBackClick = { navController.popBackStack() }
         )
     }

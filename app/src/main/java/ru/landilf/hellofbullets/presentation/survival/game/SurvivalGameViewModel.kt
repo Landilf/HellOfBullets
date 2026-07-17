@@ -37,6 +37,20 @@ class SurvivalGameViewModel @Inject constructor(
         when (action) {
             SurvivalGameAction.OnBackClick -> Unit
 
+            SurvivalGameAction.OnPauseClick -> {
+                pauseGame()
+            }
+
+            SurvivalGameAction.OnResumeClick -> {
+                resumeGame()
+            }
+
+            SurvivalGameAction.OnRestartClick -> {
+                restartGame()
+            }
+
+            SurvivalGameAction.OnExitClick -> Unit
+
             is SurvivalGameAction.OnPlayerDrag -> {
                 movePlayer(action.dragDelta)
             }
@@ -70,8 +84,14 @@ class SurvivalGameViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     val currentGameState = currentState.gameState ?: return@update currentState
 
-                    if (currentGameState.phase != SurvivalPhase.ACTIVE) {
+                    if (currentState.isPaused) {
                         return@update currentState
+                    }
+
+                    if (currentGameState.phase != SurvivalPhase.ACTIVE) {
+                        return@update currentState.copy(
+                            isResultVisible = true
+                        )
                     }
 
                     val updateGameState = updateSurvivalGameStateUseCase(
@@ -87,11 +107,41 @@ class SurvivalGameViewModel @Inject constructor(
         }
     }
 
+    private fun pauseGame() {
+        _uiState.update { currentState ->
+            if (currentState.gameState == null || currentState.isResultVisible) {
+                return@update currentState
+            }
+
+            currentState.copy(
+                isPaused = true
+            )
+        }
+    }
+
+    private fun resumeGame() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isPaused = false
+            )
+        }
+    }
+
+    private fun restartGame() {
+        val fieldSize = _uiState.value.gameState?.fieldSize ?: return
+        loadInitialState(fieldSize)
+    }
+
     private fun movePlayer(
         dragDelta: Vector2
     ) {
         _uiState.update { currentState ->
             val currentGameState = currentState.gameState ?: return@update currentState
+
+            if (currentState.isPaused || currentGameState.phase != SurvivalPhase.ACTIVE) {
+                return@update currentState
+            }
+
             val currentPlayerState = currentGameState.playerRuntimeState
             val fieldSize = currentGameState.fieldSize
 
@@ -155,7 +205,9 @@ class SurvivalGameViewModel @Inject constructor(
         _uiState.value = SurvivalGameUiState(
             isLoading = false,
             gameState = initialGameState,
-            errorMessage = null
+            errorMessage = null,
+            isPaused = false,
+            isResultVisible = false
         )
     }
 
