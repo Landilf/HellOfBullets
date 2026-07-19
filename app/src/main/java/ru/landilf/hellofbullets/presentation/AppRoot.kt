@@ -14,7 +14,7 @@ fun AppRoot(
 
     AppNavHost(
         navController = navController,
-        mainMenuState = mainMenuState,
+        mainMenuUiState = mainMenuState,
         onExit = onExit
     )
 }

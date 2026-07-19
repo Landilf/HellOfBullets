@@ -8,24 +8,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
-import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
-import ru.landilf.hellofbullets.domain.model.player.PlayerStats
-import ru.landilf.hellofbullets.domain.usecase.CreateInitialSurvivalGameStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.CalculateSurvivalRewardUseCase
+import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
 import javax.inject.Inject
+import kotlin.time.TimeSource
 
 @HiltViewModel
 class SurvivalGameViewModel @Inject constructor(
-    private val createInitialSurvivalGameStateUseCase: CreateInitialSurvivalGameStateUseCase,
-    private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase
+    private val createDefaultSurvivalGameStateUseCase: CreateDefaultSurvivalGameStateUseCase,
+    private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase,
+    private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalGameUiState())
     val uiState: StateFlow<SurvivalGameUiState> = _uiState.asStateFlow()
@@ -39,6 +38,20 @@ class SurvivalGameViewModel @Inject constructor(
     fun onAction(action: SurvivalGameAction) {
         when (action) {
             SurvivalGameAction.OnBackClick -> Unit
+
+            SurvivalGameAction.OnPauseClick -> {
+                pauseGame()
+            }
+
+            SurvivalGameAction.OnResumeClick -> {
+                resumeGame()
+            }
+
+            SurvivalGameAction.OnRestartClick -> {
+                restartGame()
+            }
+
+            SurvivalGameAction.OnExitClick -> Unit
 
             is SurvivalGameAction.OnPlayerDrag -> {
                 movePlayer(action.dragDelta)
@@ -57,53 +70,126 @@ class SurvivalGameViewModel @Inject constructor(
         gameLoopJob?.cancel()
 
         gameLoopJob = viewModelScope.launch {
-            while (true) {
+            var previousTimeMark = TimeSource.Monotonic.markNow()
+
+            while (isActive) {
                 delay(FRAME_DELAY_MS)
 
-                val currentGameState = _uiState.value.gameState ?: continue
+                val elapsedTimeMs = previousTimeMark.elapsedNow().inWholeMilliseconds
+                previousTimeMark = TimeSource.Monotonic.markNow()
 
-                if (currentGameState.phase != SurvivalPhase.ACTIVE) {
-                    continue
+                val safeDeltaTimeMs = elapsedTimeMs
+                    .coerceAtLeast(1L)
+                    .coerceAtMost(MAX_DELTA_TIME_MS)
+                    .toInt()
+
+                _uiState.update { currentState ->
+                    val currentGameState = currentState.gameState ?: return@update currentState
+
+                    when (currentGameState.phase) {
+                        SurvivalPhase.PAUSED -> return@update currentState
+
+                        SurvivalPhase.FINISHED -> {
+                            return@update currentState.copy(
+                                isResultVisible = true
+                            )
+                        }
+
+                        SurvivalPhase.ACTIVE -> Unit
+                    }
+
+                    val updatedGameState = updateSurvivalGameStateUseCase(
+                        gameState = currentGameState,
+                        deltaTimeMs = safeDeltaTimeMs
+                    )
+
+                    if (updatedGameState.phase == SurvivalPhase.FINISHED) {
+                        val result = createResult(updatedGameState.elapsedTimeMs)
+
+                        return@update currentState.copy(
+                            gameState = updatedGameState,
+                            isResultVisible = true,
+                            result = result
+                        )
+                    }
+
+                    currentState.copy(
+                        gameState = updatedGameState
+                    )
                 }
-
-                val updateGameState = updateSurvivalGameStateUseCase(
-                    gameState = currentGameState,
-                    deltaTimeMs = FRAME_DELAY_MS.toInt(),
-                    fieldSize = currentGameState.fieldSize
-                )
-
-                _uiState.value = _uiState.value.copy(
-                    gameState = updateGameState
-                )
             }
         }
+    }
+
+    private fun pauseGame() {
+        _uiState.update { currentState ->
+            val gameState = currentState.gameState ?: return@update currentState
+
+            if (gameState.phase != SurvivalPhase.ACTIVE) {
+                return@update currentState
+            }
+
+            currentState.copy(
+                gameState = gameState.copy(
+                    phase = SurvivalPhase.PAUSED
+                )
+            )
+        }
+    }
+
+    private fun resumeGame() {
+        _uiState.update { currentState ->
+            val gameState = currentState.gameState ?: return@update currentState
+
+            if (gameState.phase != SurvivalPhase.PAUSED) {
+                return@update currentState
+            }
+
+            currentState.copy(
+                gameState = gameState.copy(
+                    phase = SurvivalPhase.ACTIVE
+                )
+            )
+        }
+    }
+
+    private fun restartGame() {
+        val fieldSize = _uiState.value.gameState?.fieldSize ?: return
+        loadInitialState(fieldSize)
     }
 
     private fun movePlayer(
         dragDelta: Vector2
     ) {
-        val currentGameState = _uiState.value.gameState ?: return
-        val currentPlayerState = currentGameState.playerRuntimeState
-        val fieldSize = currentGameState.fieldSize
+        _uiState.update { currentState ->
+            val currentGameState = currentState.gameState ?: return@update currentState
 
-        val updatedPosition = Vector2(
-            x = (currentPlayerState.position.x + dragDelta.x).coerceIn(
-                minimumValue = 0f,
-                maximumValue = fieldSize.width
-            ),
-            y = (currentPlayerState.position.y + dragDelta.y).coerceIn(
-                minimumValue = 0f,
-                maximumValue = fieldSize.height
-            )
-        )
+            if (currentGameState.phase != SurvivalPhase.ACTIVE) {
+                return@update currentState
+            }
 
-        _uiState.value = _uiState.value.copy(
-            gameState = currentGameState.copy(
-                playerRuntimeState = currentPlayerState.copy(
-                    position = updatedPosition
+            val currentPlayerState = currentGameState.playerRuntimeState
+            val fieldSize = currentGameState.fieldSize
+
+            val updatedPosition = Vector2(
+                x = (currentPlayerState.position.x + dragDelta.x).coerceIn(
+                    minimumValue = currentPlayerState.hitRadius,
+                    maximumValue = fieldSize.width - currentPlayerState.hitRadius
+                ),
+                y = (currentPlayerState.position.y + dragDelta.y).coerceIn(
+                    minimumValue = currentPlayerState.hitRadius,
+                    maximumValue = fieldSize.height - currentPlayerState.hitRadius
                 )
             )
-        )
+
+            currentState.copy(
+                gameState = currentGameState.copy(
+                    playerRuntimeState = currentPlayerState.copy(
+                        position = updatedPosition
+                    )
+                )
+            )
+        }
     }
 
     private fun updateGameFieldSize(
@@ -140,58 +226,34 @@ class SurvivalGameViewModel @Inject constructor(
     private fun loadInitialState(
         fieldSize: GameFieldSize
     ) {
-        val initialGameState = createInitialSurvivalGameStateUseCase(
-            playerStats = createInitialPlayerState(),
-            initialWaveState = createInitialWaveState(),
-            fieldSize = fieldSize
-        )
+        val initialGameState = createDefaultSurvivalGameStateUseCase(fieldSize)
 
         _uiState.value = SurvivalGameUiState(
             isLoading = false,
             gameState = initialGameState,
-            errorMessage = null
+            errorMessage = null,
+            isResultVisible = false,
+            result = null
         )
     }
 
-    private fun createInitialPlayerState(): PlayerStats {
-        return PlayerStats(
-            maxHp = 1,
-            damage = 0,
-            defense = 0,
-            cooldownReduction = 0,
-            effectDurationBonus = 0
-        )
-    }
-
-    private fun createInitialWaveState(): SurvivalWaveState {
-        val initialPattern = AttackPattern(
-            id = 1L,
-            projectileType = ProjectileType.BULLET,
-            spawnZone = SpawnZone.TOP,
-            projectileCount = 4,
-            spawnIntervalMs = 500,
-            projectileSpeed = 75f,
-            projectileDamage = 1,
-            projectileHitRadius = 2f,
-            projectileLifetimeMs = 5000
+    private fun createResult(
+        elapsedTimeMs: Int
+    ): SurvivalResultUiState {
+        val reward = calculateSurvivalRewardUseCase(
+            time = elapsedTimeMs / 1000,
+            playerLevel = DEFAULT_PLAYER_LEVEL
         )
 
-        val initialWave = AttackWave(
-            id = 1L,
-            patterns = listOf(initialPattern),
-            durationMs = 30_000,
-            breakAfterMs = 2_000
-        )
-
-        return SurvivalWaveState(
-            currentWave = initialWave,
-            currentPatternIndex = 0,
-            elapsedWaveTimeMs = 0,
-            timeUntilNextVolleyMs = initialPattern.spawnIntervalMs
+        return SurvivalResultUiState(
+            elapsedTimeMs = elapsedTimeMs,
+            reward = reward
         )
     }
 
     private companion object {
         const val FRAME_DELAY_MS = 16L
+        const val MAX_DELTA_TIME_MS = 100L
+        const val DEFAULT_PLAYER_LEVEL = 1
     }
 }

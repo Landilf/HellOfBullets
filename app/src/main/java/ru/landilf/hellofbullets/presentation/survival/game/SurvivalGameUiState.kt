@@ -5,5 +5,7 @@ import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 data class SurvivalGameUiState(
     val isLoading: Boolean = true,
     val gameState: SurvivalGameState? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isResultVisible: Boolean = false,
+    val result: SurvivalResultUiState? = null
 )

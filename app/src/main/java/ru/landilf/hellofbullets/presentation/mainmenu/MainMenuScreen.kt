@@ -25,49 +25,49 @@ fun MainMenuScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(id = state.appName))
-        Text(text = stringResource(id = state.title))
+        Text(stringResource(state.appName))
+        Text(stringResource(state.title))
 
         Button(
             onClick = { onClickAction(MainMenuAction.SelectMode) },
             modifier = Modifier.padding(top = 24.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_select_mode))
+            Text(stringResource(R.string.main_menu_select_mode))
         }
 
         Button(
             onClick = { onClickAction(MainMenuAction.Skills) },
             modifier = Modifier.padding(top = 12.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_skills))
+            Text(stringResource(R.string.main_menu_skills))
         }
 
         Button(
             onClick = { onClickAction(MainMenuAction.Equipment) },
             modifier = Modifier.padding(top = 12.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_equipment))
+            Text(stringResource(R.string.main_menu_equipment))
         }
 
         Button(
             onClick = { onClickAction(MainMenuAction.Shop) },
             modifier = Modifier.padding(top = 12.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_shop))
+            Text(stringResource(R.string.main_menu_shop))
         }
 
         Button(
             onClick = { onClickAction(MainMenuAction.Settings) },
             modifier = Modifier.padding(top = 12.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_settings))
+            Text(stringResource(R.string.main_menu_settings))
         }
 
         Button(
             onClick = { onClickAction(MainMenuAction.Exit) },
             modifier = Modifier.padding(top = 12.dp)
         ) {
-            Text(text = stringResource(id = R.string.main_menu_exit))
+            Text(stringResource(R.string.main_menu_exit))
         }
     }
 }

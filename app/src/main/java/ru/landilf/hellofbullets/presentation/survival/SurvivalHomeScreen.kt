@@ -26,28 +26,28 @@ fun SurvivalHomeScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(id = R.string.select_mode_survival))
-        Text(text = stringResource(id = R.string.page_in_development))
+        Text(stringResource(R.string.select_mode_survival))
+        Text(stringResource(R.string.page_in_development))
 
         Button(
             modifier = Modifier.padding(24.dp),
             onClick = onStartGameClick
         ) {
-            Text(text = stringResource(id = R.string.button_start_game))
+            Text(stringResource(R.string.start_game_button))
         }
 
         Button(
             modifier = Modifier.padding(24.dp),
             onClick = onShowRecordsClick
         ) {
-            Text(text = stringResource(id = R.string.button_show_records))
+            Text(stringResource(R.string.show_records_button))
         }
 
         Button(
             modifier = Modifier.padding(24.dp),
             onClick = onBackClick
         ) {
-            Text(text = stringResource(id = R.string.button_back))
+            Text(stringResource(R.string.back_button))
         }
     }
 }

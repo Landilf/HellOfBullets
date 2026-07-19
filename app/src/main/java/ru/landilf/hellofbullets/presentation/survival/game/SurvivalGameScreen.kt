@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,11 +17,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
+import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.Vector2
+import ru.landilf.hellofbullets.presentation.survival.game.component.PauseMenuOverlay
+import ru.landilf.hellofbullets.presentation.survival.game.component.ResultOverlay
 import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameCanvas
+import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameHud
 
 @Composable
 fun SurvivalGameScreen(
@@ -51,7 +52,7 @@ fun SurvivalGameScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = stringResource(R.string.loading_title))
+                    Text(stringResource(R.string.loading_title))
                 }
             }
 
@@ -60,12 +61,13 @@ fun SurvivalGameScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = state.errorMessage)
+                    Text(state.errorMessage)
                 }
             }
 
             state.gameState != null -> {
                 SurvivalGameContent(
+                    state = state,
                     gameState = state.gameState,
                     gameFieldSize = gameFieldSize,
                     onAction = onAction
@@ -77,7 +79,7 @@ fun SurvivalGameScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Игра недоступна")
+                    Text(stringResource(R.string.page_game_unavailable))
                 }
             }
         }
@@ -86,10 +88,13 @@ fun SurvivalGameScreen(
 
 @Composable
 private fun SurvivalGameContent(
+    state: SurvivalGameUiState,
     gameState: SurvivalGameState,
     gameFieldSize: IntSize,
     onAction: (SurvivalGameAction) -> Unit,
 ) {
+    val isPaused = gameState.phase == SurvivalPhase.PAUSED
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -97,6 +102,10 @@ private fun SurvivalGameContent(
             .pointerInput(gameFieldSize) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
+
+                    if (isPaused) {
+                        return@detectDragGestures
+                    }
 
                     if (gameFieldSize.width == 0 || gameFieldSize.height == 0) {
                         return@detectDragGestures
@@ -116,13 +125,26 @@ private fun SurvivalGameContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        Button(
-            onClick = { onAction(SurvivalGameAction.OnBackClick) },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            Text(text = stringResource(R.string.button_back))
+        SurvivalGameHud(
+            elapsedTimeMs = gameState.elapsedTimeMs,
+            onPausedClick = { onAction(SurvivalGameAction.OnPauseClick) },
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+
+        if (isPaused) {
+            PauseMenuOverlay(
+                onResumeClick = { onAction(SurvivalGameAction.OnResumeClick) },
+                onRestartClick = { onAction(SurvivalGameAction.OnRestartClick) },
+                onExitClick = { onAction(SurvivalGameAction.OnExitClick) }
+            )
+        }
+
+        if (state.isResultVisible && state.result != null) {
+            ResultOverlay(
+                result = state.result,
+                onRestartClick = { onAction(SurvivalGameAction.OnRestartClick) },
+                onExitClick = { onAction(SurvivalGameAction.OnExitClick) }
+            )
         }
     }
 }

@@ -9,9 +9,10 @@ import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
 import javax.inject.Inject
 
-class CreateInitialSurvivalGameStateUseCase @Inject constructor() {
+class BuildSurvivalGameStateUseCase @Inject constructor() {
     operator fun invoke(
         playerStats: PlayerStats,
+        playerHitRadius: Float,
         initialWaveState: SurvivalWaveState,
         fieldSize: GameFieldSize
     ): SurvivalGameState {
@@ -25,7 +26,7 @@ class CreateInitialSurvivalGameStateUseCase @Inject constructor() {
                     x = fieldSize.width / 2f,
                     y = fieldSize.height / 2f
                 ),
-                hitRadius = 3f,
+                hitRadius = playerHitRadius,
                 isAlive = true
             ),
             survivalWaveState = initialWaveState,

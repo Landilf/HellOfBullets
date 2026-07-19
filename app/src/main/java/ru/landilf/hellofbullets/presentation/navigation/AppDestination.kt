@@ -8,7 +8,7 @@ sealed class AppDestination(val route: String) {
     object Shop : AppDestination("shop")
     object Settings : AppDestination("settings")
 
-    object Survival : AppDestination("survival")
+    object SurvivalHome : AppDestination("survival_home")
     object Duel : AppDestination("duel")
 
     object SurvivalGame : AppDestination("survival_game")

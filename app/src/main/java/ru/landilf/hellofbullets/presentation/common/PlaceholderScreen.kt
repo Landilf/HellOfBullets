@@ -26,14 +26,14 @@ fun PlaceholderScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(id = titleRes))
-        Text(text = stringResource(id = R.string.page_in_development))
+        Text(stringResource(titleRes))
+        Text(stringResource(R.string.page_in_development))
 
         Button(
             onClick = onBackClick,
             modifier = Modifier.padding(24.dp)
         ) {
-            Text(stringResource(id = R.string.button_back))
+            Text(stringResource(R.string.back_button))
         }
     }
 }
