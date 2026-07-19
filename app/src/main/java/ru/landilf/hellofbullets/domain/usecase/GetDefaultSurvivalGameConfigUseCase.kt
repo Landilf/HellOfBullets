@@ -1,10 +1,11 @@
 package ru.landilf.hellofbullets.domain.usecase
 
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
 import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalGameConfig
 import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalPlayerConfig
-import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalWaveConfig
 import javax.inject.Inject
 
 class GetDefaultSurvivalGameConfigUseCase @Inject constructor() {
@@ -18,19 +19,25 @@ class GetDefaultSurvivalGameConfigUseCase @Inject constructor() {
                 effectDurationBonus = 0,
                 hitRadius = 3f
             ),
-            waveConfig = DefaultSurvivalWaveConfig(
-                waveId = 1L,
-                patternId = 1L,
-                projectileType = ProjectileType.BULLET,
-                spawnZone = SpawnZone.TOP,
-                projectileCount = 4,
-                spawnIntervalMs = 500,
-                projectileSpeed = 75f,
-                projectileDamage = 1,
-                projectileHitRadius = 2f,
-                projectileLifetimeMs = 5000,
-                waveDurationMs = 30_000,
-                breakAfterMs = 2_000
+            waves = listOf(
+                AttackWave(
+                    id = 1L,
+                    patterns = listOf(
+                        AttackPattern(
+                            id = 1L,
+                            projectileType = ProjectileType.BULLET,
+                            spawnZone = SpawnZone.TOP,
+                            projectileCount = 4,
+                            spawnIntervalMs = 500,
+                            projectileSpeed = 75f,
+                            projectileDamage = 1,
+                            projectileHitRadius = 2f,
+                            projectileLifetimeMs = 5_000,
+                        )
+                    ),
+                    durationMs = 30_000,
+                    breakDurationMs = 2_000
+                )
             )
         )
     }

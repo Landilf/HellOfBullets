@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
+import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.presentation.survival.game.component.PauseMenuOverlay
 import ru.landilf.hellofbullets.presentation.survival.game.component.ResultOverlay
@@ -92,6 +93,8 @@ private fun SurvivalGameContent(
     gameFieldSize: IntSize,
     onAction: (SurvivalGameAction) -> Unit,
 ) {
+    val isPaused = gameState.phase == SurvivalPhase.PAUSED
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,7 +103,7 @@ private fun SurvivalGameContent(
                 detectDragGestures { change, dragAmount ->
                     change.consume()
 
-                    if (state.isPaused) {
+                    if (isPaused) {
                         return@detectDragGestures
                     }
 
@@ -128,7 +131,7 @@ private fun SurvivalGameContent(
             modifier = Modifier.align(Alignment.TopCenter)
         )
 
-        if (state.isPaused) {
+        if (isPaused) {
             PauseMenuOverlay(
                 onResumeClick = { onAction(SurvivalGameAction.OnResumeClick) },
                 onRestartClick = { onAction(SurvivalGameAction.OnRestartClick) },

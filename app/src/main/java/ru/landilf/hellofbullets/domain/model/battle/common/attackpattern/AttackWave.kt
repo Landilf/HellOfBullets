@@ -4,5 +4,5 @@ data class AttackWave(
     val id: Long,
     val patterns: List<AttackPattern>,
     val durationMs: Int,
-    val breakAfterMs: Int
+    val breakDurationMs: Int
 )

@@ -1,12 +1,11 @@
 package ru.landilf.hellofbullets.domain.usecase
 
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
+import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWavePhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalPlayerConfig
-import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalWaveConfig
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
 import javax.inject.Inject
 
@@ -19,7 +18,7 @@ class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
     ): SurvivalGameState {
         val config = getDefaultSurvivalGameConfigUseCase()
         val playerStats = createInitialPlayerStats(config.playerConfig)
-        val initialWaveState = createInitialWaveState(config.waveConfig)
+        val initialWaveState = createInitialWaveState(config.waves)
 
         return buildSurvivalGameStateUseCase(
             playerStats = playerStats,
@@ -39,31 +38,28 @@ class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
         )
     }
 
-    private fun createInitialWaveState(waveConfig: DefaultSurvivalWaveConfig): SurvivalWaveState {
-        val initialPattern = AttackPattern(
-            id = waveConfig.patternId,
-            projectileType = waveConfig.projectileType,
-            spawnZone = waveConfig.spawnZone,
-            projectileCount = waveConfig.projectileCount,
-            spawnIntervalMs = waveConfig.spawnIntervalMs,
-            projectileSpeed = waveConfig.projectileSpeed,
-            projectileDamage = waveConfig.projectileDamage,
-            projectileHitRadius = waveConfig.projectileHitRadius,
-            projectileLifetimeMs = waveConfig.projectileLifetimeMs
-        )
+    private fun createInitialWaveState(
+        waves: List<AttackWave>
+    ): SurvivalWaveState {
+        require(waves.isNotEmpty()) {
+            "Режим выживания требует хотя бы одну волну снарядов"
+        }
 
-        val initialWave = AttackWave(
-            id = waveConfig.waveId,
-            patterns = listOf(initialPattern),
-            durationMs = waveConfig.waveDurationMs,
-            breakAfterMs = waveConfig.breakAfterMs
-        )
+        val firstWave = waves.first()
+
+        require(firstWave.patterns.isNotEmpty()) {
+            "Волна снарядов должна содержать хотя бы один шаблон атаки"
+        }
+
+        val firstPattern = firstWave.patterns.first()
 
         return SurvivalWaveState(
-            currentWave = initialWave,
+            waves = waves,
+            currentWaveIndex = 0,
+            phase = SurvivalWavePhase.ACTIVE,
+            timeUntilPhaseEndMs = firstWave.durationMs,
             currentPatternIndex = 0,
-            elapsedWaveTimeMs = 0,
-            timeUntilNextVolleyMs = initialPattern.spawnIntervalMs
+            timeUntilNextVolleyMs = firstPattern.spawnIntervalMs
         )
     }
 }

@@ -86,14 +86,16 @@ class SurvivalGameViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     val currentGameState = currentState.gameState ?: return@update currentState
 
-                    if (currentState.isPaused) {
-                        return@update currentState
-                    }
+                    when (currentGameState.phase) {
+                        SurvivalPhase.PAUSED -> return@update currentState
 
-                    if (currentGameState.phase != SurvivalPhase.ACTIVE) {
-                        return@update currentState.copy(
-                            isResultVisible = true
-                        )
+                        SurvivalPhase.FINISHED -> {
+                            return@update currentState.copy(
+                                isResultVisible = true
+                            )
+                        }
+
+                        SurvivalPhase.ACTIVE -> Unit
                     }
 
                     val updatedGameState = updateSurvivalGameStateUseCase(
@@ -107,8 +109,7 @@ class SurvivalGameViewModel @Inject constructor(
                         return@update currentState.copy(
                             gameState = updatedGameState,
                             isResultVisible = true,
-                            result = result,
-                            isPaused = false
+                            result = result
                         )
                     }
 
@@ -122,20 +123,32 @@ class SurvivalGameViewModel @Inject constructor(
 
     private fun pauseGame() {
         _uiState.update { currentState ->
-            if (currentState.gameState == null || currentState.isResultVisible) {
+            val gameState = currentState.gameState ?: return@update currentState
+
+            if (gameState.phase != SurvivalPhase.ACTIVE) {
                 return@update currentState
             }
 
             currentState.copy(
-                isPaused = true
+                gameState = gameState.copy(
+                    phase = SurvivalPhase.PAUSED
+                )
             )
         }
     }
 
     private fun resumeGame() {
         _uiState.update { currentState ->
+            val gameState = currentState.gameState ?: return@update currentState
+
+            if (gameState.phase != SurvivalPhase.PAUSED) {
+                return@update currentState
+            }
+
             currentState.copy(
-                isPaused = false
+                gameState = gameState.copy(
+                    phase = SurvivalPhase.ACTIVE
+                )
             )
         }
     }
@@ -151,7 +164,7 @@ class SurvivalGameViewModel @Inject constructor(
         _uiState.update { currentState ->
             val currentGameState = currentState.gameState ?: return@update currentState
 
-            if (currentState.isPaused || currentGameState.phase != SurvivalPhase.ACTIVE) {
+            if (currentGameState.phase != SurvivalPhase.ACTIVE) {
                 return@update currentState
             }
 
@@ -219,7 +232,6 @@ class SurvivalGameViewModel @Inject constructor(
             isLoading = false,
             gameState = initialGameState,
             errorMessage = null,
-            isPaused = false,
             isResultVisible = false,
             result = null
         )
