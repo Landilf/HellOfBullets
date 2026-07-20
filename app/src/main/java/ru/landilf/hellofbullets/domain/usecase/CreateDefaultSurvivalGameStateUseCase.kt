@@ -1,6 +1,8 @@
 package ru.landilf.hellofbullets.domain.usecase
 
+import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomSeedGenerator
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
+import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWavePhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
@@ -11,7 +13,8 @@ import javax.inject.Inject
 
 class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
     private val getDefaultSurvivalGameConfigUseCase: GetDefaultSurvivalGameConfigUseCase,
-    private val buildSurvivalGameStateUseCase: BuildSurvivalGameStateUseCase
+    private val buildSurvivalGameStateUseCase: BuildSurvivalGameStateUseCase,
+    private val battleRandomSeedGenerator: BattleRandomSeedGenerator
 ) {
     operator fun invoke(
         fieldSize: GameFieldSize
@@ -19,11 +22,15 @@ class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
         val config = getDefaultSurvivalGameConfigUseCase()
         val playerStats = createInitialPlayerStats(config.playerConfig)
         val initialWaveState = createInitialWaveState(config.waves)
+        val randomState = BattleRandomState(
+            seed = battleRandomSeedGenerator.nextSeed()
+        )
 
         return buildSurvivalGameStateUseCase(
             playerStats = playerStats,
             playerHitRadius = config.playerConfig.hitRadius,
             initialWaveState = initialWaveState,
+            randomState = randomState,
             fieldSize = fieldSize
         )
     }
@@ -42,13 +49,13 @@ class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
         waves: List<AttackWave>
     ): SurvivalWaveState {
         require(waves.isNotEmpty()) {
-            "Режим выживания требует хотя бы одну волну снарядов"
+            "SurvivalWaveState требует хотя бы один элемент в waves при создании"
         }
 
         val firstWave = waves.first()
 
         require(firstWave.patterns.isNotEmpty()) {
-            "Волна снарядов должна содержать хотя бы один шаблон атаки"
+            "AttackWave требует хотя бы один элемент в patterns"
         }
 
         val firstPattern = firstWave.patterns.first()

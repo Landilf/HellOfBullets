@@ -5,7 +5,6 @@ import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileMovementUp
 import ru.landilf.hellofbullets.domain.engine.battle.survival.SurvivalWaveUpdater
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
-import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import javax.inject.Inject
 
 class UpdateSurvivalGameStateUseCase @Inject constructor(
@@ -24,6 +23,7 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
         val waveUpdateResult = survivalWaveUpdater.update(
             waveState = gameState.survivalWaveState,
             deltaTimeMs = deltaTimeMs,
+            initialGenerationState = gameState.projectileGenerationState,
             fieldSize = gameState.fieldSize
         )
 
@@ -55,7 +55,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
             elapsedTimeMs = gameState.elapsedTimeMs + deltaTimeMs,
             playerRuntimeState = updatedPlayerRuntimeState,
             survivalWaveState = waveUpdateResult.waveState,
-            activeProjectiles = updatedProjectiles
+            activeProjectiles = updatedProjectiles,
+            projectileGenerationState = waveUpdateResult.nextGenerationState
         )
     }
 }
