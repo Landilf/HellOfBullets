@@ -1,5 +1,7 @@
 package ru.landilf.hellofbullets.domain.usecase
 
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileGenerationState
+import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
@@ -14,6 +16,7 @@ class BuildSurvivalGameStateUseCase @Inject constructor() {
         playerStats: PlayerStats,
         playerHitRadius: Float,
         initialWaveState: SurvivalWaveState,
+        randomState: BattleRandomState,
         fieldSize: GameFieldSize
     ): SurvivalGameState {
         return SurvivalGameState(
@@ -31,7 +34,10 @@ class BuildSurvivalGameStateUseCase @Inject constructor() {
             ),
             survivalWaveState = initialWaveState,
             activeProjectiles = emptyList(),
-            nextProjectileId = 0L,
+            projectileGenerationState = ProjectileGenerationState(
+                nextProjectileId = 0L,
+                randomState = randomState
+            ),
             fieldSize = fieldSize
         )
     }

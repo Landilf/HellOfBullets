@@ -3,7 +3,8 @@ package ru.landilf.hellofbullets.domain.usecase
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ArenaEdgeSection
+import ru.landilf.hellofbullets.domain.model.common.FloatRange
 import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalGameConfig
 import ru.landilf.hellofbullets.domain.model.config.survival.DefaultSurvivalPlayerConfig
 import javax.inject.Inject
@@ -26,10 +27,14 @@ class GetDefaultSurvivalGameConfigUseCase @Inject constructor() {
                         AttackPattern(
                             id = 1L,
                             projectileType = ProjectileType.BULLET,
-                            spawnZone = SpawnZone.TOP,
+                            spawnSection = ArenaEdgeSection.TOP,
+                            targetSections = listOf(ArenaEdgeSection.BOTTOM),
                             projectileCount = 4,
                             spawnIntervalMs = 500,
-                            projectileSpeed = 75f,
+                            projectileSpeedRange = FloatRange(
+                                min = 75f,
+                                max = 75f
+                            ),
                             projectileDamage = 1,
                             projectileHitRadius = 2f,
                             projectileLifetimeMs = 5_000,

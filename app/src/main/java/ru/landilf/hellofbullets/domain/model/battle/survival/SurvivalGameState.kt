@@ -1,6 +1,8 @@
 package ru.landilf.hellofbullets.domain.model.battle.survival
 
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileGenerationState
+import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.player.PlayerRuntimeState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStats
@@ -12,6 +14,6 @@ data class SurvivalGameState(
     val playerRuntimeState: PlayerRuntimeState,
     val survivalWaveState: SurvivalWaveState?,
     val activeProjectiles: List<Projectile>,
-    val nextProjectileId: Long,
+    val projectileGenerationState: ProjectileGenerationState,
     val fieldSize: GameFieldSize
 )

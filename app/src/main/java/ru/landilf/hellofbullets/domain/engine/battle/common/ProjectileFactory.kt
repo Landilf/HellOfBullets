@@ -1,63 +1,77 @@
 package ru.landilf.hellofbullets.domain.engine.battle.common
 
+import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomGenerator
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ArenaEdgeSection
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
-import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZone
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileCreationResult
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileGenerationState
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
+import ru.landilf.hellofbullets.domain.model.battle.common.random.RandomResult
+import ru.landilf.hellofbullets.domain.model.common.FloatRange
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import javax.inject.Inject
+import kotlin.math.sqrt
 
-class ProjectileFactory @Inject constructor() {
+class ProjectileFactory @Inject constructor(
+    private val randomGenerator: BattleRandomGenerator
+) {
     fun createVolley(
         pattern: AttackPattern,
-        firstProjectileId: Long,
+        generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
     ): ProjectileCreationResult {
-        val projectiles = List(pattern.projectileCount) { index ->
-            createProjectile(
-                pattern = pattern,
-                index = index,
-                projectileId = firstProjectileId + index,
-                fieldSize = fieldSize
-            )
+        var currentGenerationState = generationState
+
+        val projectiles = buildList {
+            repeat(pattern.projectileCount) {
+                val result = createProjectile(
+                    pattern = pattern,
+                    generationState = currentGenerationState,
+                    fieldSize = fieldSize
+                )
+
+                add(result.projectile)
+
+                currentGenerationState = currentGenerationState.copy(
+                    nextProjectileId = currentGenerationState.nextProjectileId + 1,
+                    randomState = result.nextRandomState
+                )
+            }
         }
 
         return ProjectileCreationResult(
             projectiles = projectiles,
-            nextProjectileId = firstProjectileId + pattern.projectileCount
+            nextGenerationState = currentGenerationState
         )
     }
 
     private fun createProjectile(
         pattern: AttackPattern,
-        index: Int,
-        projectileId: Long,
+        generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
-    ): Projectile {
+    ): RandomProjectileResult {
         return when (pattern.projectileType) {
             ProjectileType.BULLET -> createBulletProjectile(
                 pattern = pattern,
-                index = index,
-                projectileId = projectileId,
+                generationState = generationState,
                 fieldSize = fieldSize
             )
 
             ProjectileType.LASER -> createLaserProjectile(
                 pattern = pattern,
-                index = index,
-                projectileId = projectileId,
+                generationState = generationState,
                 fieldSize = fieldSize
             )
 
             ProjectileType.ROCKET -> createRocketProjectile(
                 pattern = pattern,
-                index = index,
-                projectileId = projectileId,
+                generationState = generationState,
                 fieldSize = fieldSize
             )
         }
@@ -65,177 +79,273 @@ class ProjectileFactory @Inject constructor() {
 
     private fun createBulletProjectile(
         pattern: AttackPattern,
-        index: Int,
-        projectileId: Long,
+        generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
-    ): BulletProjectile {
-        return BulletProjectile(
-            id = projectileId,
-            damage = pattern.projectileDamage,
-            hitRadius = pattern.projectileHitRadius,
-            remainingLifetimeMs = pattern.projectileLifetimeMs,
-            position = createSpawnPosition(
-                spawnZone = pattern.spawnZone,
-                index = index,
-                totalCount = pattern.projectileCount,
-                fieldSize = fieldSize
+    ): RandomProjectileResult {
+        val pathResult = createProjectilePath(
+            pattern = pattern,
+            randomState = generationState.randomState,
+            fieldSize = fieldSize
+        )
+        val velocityResult = createVelocity(
+            startPosition = pathResult.value.startPosition,
+            targetPosition = pathResult.value.targetPosition,
+            fallbackSection = pattern.spawnSection,
+            speedRange = pattern.projectileSpeedRange,
+            randomState = pathResult.nextState
+        )
+
+        return RandomProjectileResult(
+            projectile = BulletProjectile(
+                id = generationState.nextProjectileId,
+                damage = pattern.projectileDamage,
+                hitRadius = pattern.projectileHitRadius,
+                remainingLifetimeMs = pattern.projectileLifetimeMs,
+                position = pathResult.value.startPosition,
+                velocity = velocityResult.value
             ),
-            velocity = createVelocity(pattern.spawnZone, pattern.projectileSpeed)
+            nextRandomState = velocityResult.nextState
         )
     }
 
     private fun createLaserProjectile(
         pattern: AttackPattern,
-        index: Int,
-        projectileId: Long,
+        generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
-    ): LaserProjectile {
-        val startPosition = createSpawnPosition(
-            spawnZone = pattern.spawnZone,
-            index = index,
-            totalCount = pattern.projectileCount,
+    ): RandomProjectileResult {
+        val pathResult = createProjectilePath(
+            pattern = pattern,
+            randomState = generationState.randomState,
             fieldSize = fieldSize
         )
 
-        val endPosition = createLaserEndPosition(
-            spawnZone = pattern.spawnZone,
-            startPosition = startPosition,
-            fieldSize = fieldSize
-        )
-
-        return LaserProjectile(
-            id = projectileId,
-            damage = pattern.projectileDamage,
-            hitRadius = pattern.projectileHitRadius,
-            remainingLifetimeMs = pattern.projectileLifetimeMs,
-            startPosition = startPosition,
-            endPosition = endPosition
+        return RandomProjectileResult(
+            projectile = LaserProjectile(
+                id = generationState.nextProjectileId,
+                damage = pattern.projectileDamage,
+                hitRadius = pattern.projectileHitRadius,
+                remainingLifetimeMs = pattern.projectileLifetimeMs,
+                startPosition = pathResult.value.startPosition,
+                endPosition = pathResult.value.targetPosition
+            ),
+            nextRandomState = pathResult.nextState
         )
     }
 
     private fun createRocketProjectile(
         pattern: AttackPattern,
-        index: Int,
-        projectileId: Long,
+        generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
-    ): RocketProjectile {
-        return RocketProjectile(
-            id = projectileId,
-            damage = pattern.projectileDamage,
-            hitRadius = pattern.projectileHitRadius,
-            remainingLifetimeMs = pattern.projectileLifetimeMs,
-            position = createSpawnPosition(
-                spawnZone = pattern.spawnZone,
-                index = index,
-                totalCount = pattern.projectileCount,
-                fieldSize = fieldSize
+    ): RandomProjectileResult {
+        val pathResult = createProjectilePath(
+            pattern = pattern,
+            randomState = generationState.randomState,
+            fieldSize = fieldSize
+        )
+        val velocityResult = createVelocity(
+            startPosition = pathResult.value.startPosition,
+            targetPosition = pathResult.value.targetPosition,
+            fallbackSection = pattern.spawnSection,
+            speedRange = pattern.projectileSpeedRange,
+            randomState = pathResult.nextState
+        )
+
+        return RandomProjectileResult(
+            projectile = RocketProjectile(
+                id = generationState.nextProjectileId,
+                damage = pattern.projectileDamage,
+                hitRadius = pattern.projectileHitRadius,
+                remainingLifetimeMs = pattern.projectileLifetimeMs,
+                position = pathResult.value.startPosition,
+                velocity = velocityResult.value,
+                remainingHomingTimeMs = 1000
             ),
-            velocity = createVelocity(pattern.spawnZone, pattern.projectileSpeed),
-            remainingHomingTimeMs = 1000
+            nextRandomState = velocityResult.nextState
         )
     }
 
-    private fun createSpawnPosition(
-        spawnZone: SpawnZone,
-        index: Int,
-        totalCount: Int,
+    private fun createProjectilePath(
+        pattern: AttackPattern,
+        randomState: BattleRandomState,
         fieldSize: GameFieldSize
-    ): Vector2 {
-        val fraction = calculateFraction(index, totalCount)
+    ): RandomResult<ProjectilePath> {
+        val spawnPositionResult = createRandomPosition(
+            section = pattern.spawnSection,
+            randomState = randomState,
+            fieldSize = fieldSize
+        )
+        val targetSectionResult = randomGenerator.pick(
+            randomState = spawnPositionResult.nextState,
+            values = pattern.targetSections
+        )
+        val targetPositionResult = createRandomPosition(
+            section = targetSectionResult.value,
+            randomState = targetSectionResult.nextState,
+            fieldSize = fieldSize
+        )
 
-        return when (spawnZone) {
-            SpawnZone.LEFT_TOP -> Vector2(
-                x = 0f,
-                y = fraction * fieldSize.height * 0.5f
-            )
+        return RandomResult(
+            value = ProjectilePath(
+                startPosition = spawnPositionResult.value,
+                targetPosition = targetPositionResult.value
+            ),
+            nextState = targetPositionResult.nextState
+        )
+    }
 
-            SpawnZone.LEFT_BOTTOM -> Vector2(
-                x = 0f,
-                y = 0.5f * fieldSize.height + fraction * fieldSize.height * 0.5f
-            )
+    private fun createRandomPosition(
+        section: ArenaEdgeSection,
+        randomState: BattleRandomState,
+        fieldSize: GameFieldSize
+    ): RandomResult<Vector2> {
+        return when (section) {
+            ArenaEdgeSection.TOP -> {
+                val xResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(0f, fieldSize.width)
+                )
 
-            SpawnZone.TOP -> Vector2(
-                x = fraction * fieldSize.width,
-                y = 0f
-            )
+                RandomResult(
+                    value = Vector2(
+                        x = xResult.value,
+                        y = 0f
+                    ),
+                    nextState = xResult.nextState
+                )
+            }
 
-            SpawnZone.RIGHT_TOP -> Vector2(
-                x = fieldSize.width,
-                y = fraction * fieldSize.height * 0.5f
-            )
+            ArenaEdgeSection.BOTTOM -> {
+                val xResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(0f, fieldSize.width)
+                )
 
-            SpawnZone.RIGHT_BOTTOM -> Vector2(
-                x = fieldSize.width,
-                y = 0.5f * fieldSize.height + fraction * fieldSize.height * 0.5f
-            )
+                RandomResult(
+                    value = Vector2(
+                        x = xResult.value,
+                        y = fieldSize.height
+                    ),
+                    nextState = xResult.nextState
+                )
+            }
 
-            SpawnZone.BOTTOM -> Vector2(
-                x = fraction * fieldSize.width,
-                y = fieldSize.height
-            )
+            ArenaEdgeSection.LEFT_UPPER -> {
+                val yResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(0f, fieldSize.height / 2f)
+                )
+
+                RandomResult(
+                    value = Vector2(
+                        x = 0f,
+                        y = yResult.value
+                    ),
+                    nextState = yResult.nextState
+                )
+            }
+
+            ArenaEdgeSection.LEFT_LOWER -> {
+                val yResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(fieldSize.height / 2f, fieldSize.height)
+                )
+
+                RandomResult(
+                    value = Vector2(
+                        x = 0f,
+                        y = yResult.value
+                    ),
+                    nextState = yResult.nextState
+                )
+            }
+
+            ArenaEdgeSection.RIGHT_UPPER -> {
+                val yResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(0f, fieldSize.height / 2f)
+                )
+
+                RandomResult(
+                    value = Vector2(
+                        x = fieldSize.width,
+                        y = yResult.value
+                    ),
+                    nextState = yResult.nextState
+                )
+            }
+
+            ArenaEdgeSection.RIGHT_LOWER -> {
+                val yResult = randomGenerator.nextFloat(
+                    randomState = randomState,
+                    range = FloatRange(fieldSize.height / 2f, fieldSize.height)
+                )
+
+                RandomResult(
+                    value = Vector2(
+                        x = fieldSize.width,
+                        y = yResult.value
+                    ),
+                    nextState = yResult.nextState
+                )
+            }
         }
     }
 
     private fun createVelocity(
-        spawnZone: SpawnZone,
-        speed: Float
-    ): Vector2 {
-        val direction = when (spawnZone) {
-            SpawnZone.LEFT_TOP,
-            SpawnZone.LEFT_BOTTOM -> Vector2(1f, 0f)
+        startPosition: Vector2,
+        targetPosition: Vector2,
+        fallbackSection: ArenaEdgeSection,
+        speedRange: FloatRange,
+        randomState: BattleRandomState
+    ): RandomResult<Vector2> {
+        val speedResult = randomGenerator.nextFloat(
+            randomState = randomState,
+            range = speedRange
+        )
 
-            SpawnZone.TOP -> Vector2(0f, 1f)
+        val deltaX = targetPosition.x - startPosition.x
+        val deltaY = targetPosition.y - startPosition.y
+        val distance = sqrt(deltaX * deltaX + deltaY * deltaY)
 
-            SpawnZone.RIGHT_TOP,
-            SpawnZone.RIGHT_BOTTOM -> Vector2(-1f, 0f)
-
-            SpawnZone.BOTTOM -> Vector2(0f, -1f)
+        val direction = if (distance > 0f) {
+            Vector2(
+                x = deltaX / distance,
+                y = deltaY / distance
+            )
+        } else {
+            createFallbackDirection(fallbackSection)
         }
 
-        return Vector2(
-            x = direction.x * speed,
-            y = direction.y * speed
+        return RandomResult(
+            value = Vector2(
+                x = direction.x * speedResult.value,
+                y = direction.y * speedResult.value
+            ),
+            nextState = speedResult.nextState
         )
     }
 
-    private fun createLaserEndPosition(
-        spawnZone: SpawnZone,
-        startPosition: Vector2,
-        fieldSize: GameFieldSize
+    private fun createFallbackDirection(
+        section: ArenaEdgeSection
     ): Vector2 {
-        return when (spawnZone) {
-            SpawnZone.LEFT_TOP,
-            SpawnZone.LEFT_BOTTOM -> Vector2(
-                x = fieldSize.width,
-                y = startPosition.y
-            )
+        return when (section) {
+            ArenaEdgeSection.TOP -> Vector2(0f, 1f)
+            ArenaEdgeSection.BOTTOM -> Vector2(0f, -1f)
+            ArenaEdgeSection.LEFT_UPPER,
+            ArenaEdgeSection.LEFT_LOWER -> Vector2(1f, 0f)
 
-            SpawnZone.TOP -> Vector2(
-                x = startPosition.x,
-                y = 1f
-            )
-
-            SpawnZone.RIGHT_TOP,
-            SpawnZone.RIGHT_BOTTOM -> Vector2(
-                x = 0f,
-                y = startPosition.y
-            )
-
-            SpawnZone.BOTTOM -> Vector2(
-                x = startPosition.x,
-                y = 0f
-            )
+            ArenaEdgeSection.RIGHT_UPPER,
+            ArenaEdgeSection.RIGHT_LOWER -> Vector2(-1f, 0f)
         }
     }
 
-    private fun calculateFraction(
-        index: Int,
-        totalCount: Int
-    ): Float {
-        if (totalCount <= 1) {
-            return 0.5f
-        }
+    private data class ProjectilePath(
+        val startPosition: Vector2,
+        val targetPosition: Vector2
+    )
 
-        return index.toFloat() / (totalCount - 1).toFloat()
-    }
+    private data class RandomProjectileResult(
+        val projectile: Projectile,
+        val nextRandomState: BattleRandomState
+    )
 }
