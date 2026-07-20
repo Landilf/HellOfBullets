@@ -6,46 +6,71 @@ import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.SpawnZo
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileCreationResult
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import javax.inject.Inject
 
 class ProjectileFactory @Inject constructor() {
-    private var nextProjectileId = 0L
-
     fun createVolley(
         pattern: AttackPattern,
+        firstProjectileId: Long,
         fieldSize: GameFieldSize
-    ): List<Projectile> {
-        return List(pattern.projectileCount) { index ->
+    ): ProjectileCreationResult {
+        val projectiles = List(pattern.projectileCount) { index ->
             createProjectile(
                 pattern = pattern,
                 index = index,
+                projectileId = firstProjectileId + index,
                 fieldSize = fieldSize
             )
         }
+
+        return ProjectileCreationResult(
+            projectiles = projectiles,
+            nextProjectileId = firstProjectileId + pattern.projectileCount
+        )
     }
 
     private fun createProjectile(
         pattern: AttackPattern,
         index: Int,
+        projectileId: Long,
         fieldSize: GameFieldSize
     ): Projectile {
         return when (pattern.projectileType) {
-            ProjectileType.BULLET -> createBulletProjectile(pattern, index, fieldSize)
-            ProjectileType.LASER -> createLaserProjectile(pattern, index, fieldSize)
-            ProjectileType.ROCKET -> createRocketProjectile(pattern, index, fieldSize)
+            ProjectileType.BULLET -> createBulletProjectile(
+                pattern = pattern,
+                index = index,
+                projectileId = projectileId,
+                fieldSize = fieldSize
+            )
+
+            ProjectileType.LASER -> createLaserProjectile(
+                pattern = pattern,
+                index = index,
+                projectileId = projectileId,
+                fieldSize = fieldSize
+            )
+
+            ProjectileType.ROCKET -> createRocketProjectile(
+                pattern = pattern,
+                index = index,
+                projectileId = projectileId,
+                fieldSize = fieldSize
+            )
         }
     }
 
     private fun createBulletProjectile(
         pattern: AttackPattern,
         index: Int,
+        projectileId: Long,
         fieldSize: GameFieldSize
     ): BulletProjectile {
         return BulletProjectile(
-            id = generateProjectileId(),
+            id = projectileId,
             damage = pattern.projectileDamage,
             hitRadius = pattern.projectileHitRadius,
             remainingLifetimeMs = pattern.projectileLifetimeMs,
@@ -62,6 +87,7 @@ class ProjectileFactory @Inject constructor() {
     private fun createLaserProjectile(
         pattern: AttackPattern,
         index: Int,
+        projectileId: Long,
         fieldSize: GameFieldSize
     ): LaserProjectile {
         val startPosition = createSpawnPosition(
@@ -78,7 +104,7 @@ class ProjectileFactory @Inject constructor() {
         )
 
         return LaserProjectile(
-            id = generateProjectileId(),
+            id = projectileId,
             damage = pattern.projectileDamage,
             hitRadius = pattern.projectileHitRadius,
             remainingLifetimeMs = pattern.projectileLifetimeMs,
@@ -90,10 +116,11 @@ class ProjectileFactory @Inject constructor() {
     private fun createRocketProjectile(
         pattern: AttackPattern,
         index: Int,
+        projectileId: Long,
         fieldSize: GameFieldSize
     ): RocketProjectile {
         return RocketProjectile(
-            id = generateProjectileId(),
+            id = projectileId,
             damage = pattern.projectileDamage,
             hitRadius = pattern.projectileHitRadius,
             remainingLifetimeMs = pattern.projectileLifetimeMs,
@@ -106,10 +133,6 @@ class ProjectileFactory @Inject constructor() {
             velocity = createVelocity(pattern.spawnZone, pattern.projectileSpeed),
             remainingHomingTimeMs = 1000
         )
-    }
-
-    private fun generateProjectileId(): Long {
-        return nextProjectileId++
     }
 
     private fun createSpawnPosition(

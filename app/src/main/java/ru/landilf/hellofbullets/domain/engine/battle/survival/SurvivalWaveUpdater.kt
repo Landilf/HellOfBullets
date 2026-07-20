@@ -14,22 +14,26 @@ class SurvivalWaveUpdater @Inject constructor(
     fun update(
         waveState: SurvivalWaveState?,
         deltaTimeMs: Int,
+        initialProjectileId: Long,
         fieldSize: GameFieldSize
     ): SurvivalWaveUpdateResult {
         val initialWaveState = waveState ?: return SurvivalWaveUpdateResult(
             waveState = null,
-            spawnedProjectiles = emptyList()
+            spawnedProjectiles = emptyList(),
+            nextProjectileId = initialProjectileId
         )
 
         if (deltaTimeMs <= 0) {
             return SurvivalWaveUpdateResult(
                 waveState = initialWaveState,
-                spawnedProjectiles = emptyList()
+                spawnedProjectiles = emptyList(),
+                nextProjectileId = initialProjectileId
             )
         }
 
         var updatedWaveState = initialWaveState
         var remainingDeltaTimeMs = deltaTimeMs
+        var nextProjectileId = initialProjectileId
         val spawnedProjectiles = mutableListOf<Projectile>()
 
         while (remainingDeltaTimeMs > 0) {
@@ -38,10 +42,12 @@ class SurvivalWaveUpdater @Inject constructor(
                     val updateResult = updateActivePhase(
                         waveState = updatedWaveState,
                         deltaTimeMs = remainingDeltaTimeMs,
+                        firstProjectileId = nextProjectileId,
                         fieldSize = fieldSize
                     )
 
                     updatedWaveState = updateResult.waveState
+                    nextProjectileId = updateResult.nextProjectileId
                     remainingDeltaTimeMs -= updateResult.usedDeltaTimeMs
                     spawnedProjectiles += updateResult.spawnedProjectiles
                 }
@@ -49,10 +55,12 @@ class SurvivalWaveUpdater @Inject constructor(
                 SurvivalWavePhase.BREAK -> {
                     val updateResult = updateBreakPhase(
                         waveState = updatedWaveState,
-                        deltaTimeMs = remainingDeltaTimeMs
+                        deltaTimeMs = remainingDeltaTimeMs,
+                        nextProjectileId = nextProjectileId
                     )
 
                     updatedWaveState = updateResult.waveState
+                    nextProjectileId = updateResult.nextProjectileId
                     remainingDeltaTimeMs -= updateResult.usedDeltaTimeMs
                 }
             }
@@ -60,13 +68,15 @@ class SurvivalWaveUpdater @Inject constructor(
 
         return SurvivalWaveUpdateResult(
             waveState = updatedWaveState,
-            spawnedProjectiles = spawnedProjectiles
+            spawnedProjectiles = spawnedProjectiles,
+            nextProjectileId = nextProjectileId
         )
     }
 
     private fun updateActivePhase(
         waveState: SurvivalWaveState,
         deltaTimeMs: Int,
+        firstProjectileId: Long,
         fieldSize: GameFieldSize
     ): WavePhaseUpdateResult {
         val currentWave = waveState.currentWave
@@ -83,6 +93,7 @@ class SurvivalWaveUpdater @Inject constructor(
                     timeUntilNextVolleyMs = waveState.timeUntilNextVolleyMs - deltaTimeMs
                 ),
                 usedDeltaTimeMs = deltaTimeMs,
+                nextProjectileId = firstProjectileId,
                 spawnedProjectiles = emptyList()
             )
         }
@@ -99,6 +110,7 @@ class SurvivalWaveUpdater @Inject constructor(
                     timeUntilPhaseEndMs = currentWave.breakDurationMs
                 ),
                 usedDeltaTimeMs = timeUntilNextEventMs,
+                nextProjectileId = firstProjectileId,
                 spawnedProjectiles = emptyList()
             )
         }
@@ -107,21 +119,26 @@ class SurvivalWaveUpdater @Inject constructor(
         val nextPatternIndex = (stateAtEvent.currentPatternIndex + 1) % currentWave.patterns.size
         val nextPattern = currentWave.patterns[nextPatternIndex]
 
+        val projectileCreationResult = projectileFactory.createVolley(
+            pattern = currentPattern,
+            firstProjectileId = firstProjectileId,
+            fieldSize = fieldSize
+        )
+
         return WavePhaseUpdateResult(
             waveState = stateAtEvent.copy(
                 currentPatternIndex = nextPatternIndex,
                 timeUntilNextVolleyMs = nextPattern.spawnIntervalMs
             ),
             usedDeltaTimeMs = timeUntilNextEventMs,
-            spawnedProjectiles = projectileFactory.createVolley(
-                pattern = currentPattern,
-                fieldSize = fieldSize
-            )
+            spawnedProjectiles = projectileCreationResult.projectiles,
+            nextProjectileId = projectileCreationResult.nextProjectileId
         )
     }
 
     private fun updateBreakPhase(
         waveState: SurvivalWaveState,
+        nextProjectileId: Long,
         deltaTimeMs: Int
     ): WavePhaseUpdateResult {
         if (deltaTimeMs < waveState.timeUntilPhaseEndMs) {
@@ -130,7 +147,8 @@ class SurvivalWaveUpdater @Inject constructor(
                     timeUntilPhaseEndMs = waveState.timeUntilPhaseEndMs - deltaTimeMs
                 ),
                 usedDeltaTimeMs = deltaTimeMs,
-                spawnedProjectiles = emptyList()
+                spawnedProjectiles = emptyList(),
+                nextProjectileId = nextProjectileId
             )
         }
 
@@ -147,13 +165,15 @@ class SurvivalWaveUpdater @Inject constructor(
                 timeUntilNextVolleyMs = firstPattern.spawnIntervalMs
             ),
             usedDeltaTimeMs = waveState.timeUntilPhaseEndMs,
-            spawnedProjectiles = emptyList()
+            spawnedProjectiles = emptyList(),
+            nextProjectileId = nextProjectileId
         )
     }
 
     private data class WavePhaseUpdateResult(
         val waveState: SurvivalWaveState,
         val usedDeltaTimeMs: Int,
-        val spawnedProjectiles: List<Projectile>
+        val spawnedProjectiles: List<Projectile>,
+        val nextProjectileId: Long
     )
 }

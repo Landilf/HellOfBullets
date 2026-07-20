@@ -31,6 +31,7 @@ class BuildSurvivalGameStateUseCase @Inject constructor() {
             ),
             survivalWaveState = initialWaveState,
             activeProjectiles = emptyList(),
+            nextProjectileId = 0L,
             fieldSize = fieldSize
         )
     }

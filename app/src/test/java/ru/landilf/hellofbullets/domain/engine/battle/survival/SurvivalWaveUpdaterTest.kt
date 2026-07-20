@@ -41,6 +41,7 @@ class SurvivalWaveUpdaterTest {
         val result = createUpdater().update(
             waveState = initialState,
             deltaTimeMs = 400,
+            initialProjectileId = 0L,
             fieldSize = fieldSize
         )
         val updatedState = requireNotNull(result.waveState)
@@ -79,11 +80,16 @@ class SurvivalWaveUpdaterTest {
         val result = createUpdater().update(
             waveState = initialState,
             deltaTimeMs = 500,
+            initialProjectileId = 10L,
             fieldSize = fieldSize
         )
         val updatedState = requireNotNull(result.waveState)
 
         assertEquals(2, result.spawnedProjectiles.size)
+        assertEquals(
+            listOf(10L, 11L),
+            result.spawnedProjectiles.map { it.id }
+        )
         assertEquals(2_500, updatedState.timeUntilPhaseEndMs)
         assertEquals(1, updatedState.currentPatternIndex)
         assertEquals(700, updatedState.timeUntilNextVolleyMs)
@@ -112,6 +118,7 @@ class SurvivalWaveUpdaterTest {
         val result = createUpdater().update(
             waveState = initialState,
             deltaTimeMs = 500,
+            initialProjectileId = 0L,
             fieldSize = fieldSize
         )
         val updatedState = requireNotNull(result.waveState)
@@ -157,6 +164,7 @@ class SurvivalWaveUpdaterTest {
         val result = createUpdater().update(
             waveState = initialState,
             deltaTimeMs = 1_000,
+            initialProjectileId = 0L,
             fieldSize = fieldSize
         )
         val updatedState = requireNotNull(result.waveState)
@@ -205,6 +213,7 @@ class SurvivalWaveUpdaterTest {
         val result = createUpdater().update(
             waveState = initialState,
             deltaTimeMs = 2_000,
+            initialProjectileId = 0L,
             fieldSize = fieldSize
         )
         val updatedState = requireNotNull(result.waveState)
@@ -215,6 +224,41 @@ class SurvivalWaveUpdaterTest {
         assertEquals(3_500, updatedState.timeUntilPhaseEndMs)
         assertEquals(0, updatedState.currentPatternIndex)
         assertEquals(500, updatedState.timeUntilNextVolleyMs)
+    }
+
+    @Test
+    fun `assigns sequential ids to multiple volleys in one update`() {
+        val wave = createWave(
+            id = 1L,
+            durationMs = 3_000,
+            breakDurationMs = 1_000,
+            patterns = listOf(
+                createPattern(
+                    id = 1L,
+                    projectileCount = 2,
+                    spawnIntervalMs = 500
+                )
+            )
+        )
+        val initialState = createWaveState(
+            waves = listOf(wave),
+            phase = SurvivalWavePhase.ACTIVE,
+            timeUntilPhaseEndMs = 3_000,
+            timeUntilNextVolleyMs = 500
+        )
+
+        val result = createUpdater().update(
+            waveState = initialState,
+            deltaTimeMs = 1_000,
+            initialProjectileId = 20L,
+            fieldSize = fieldSize
+        )
+
+        assertEquals(
+            listOf(20L, 21L, 22L, 23L),
+            result.spawnedProjectiles.map { it.id }
+        )
+        assertEquals(24L, result.nextProjectileId)
     }
 
     private fun createUpdater(): SurvivalWaveUpdater {

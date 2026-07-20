@@ -24,7 +24,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
         val waveUpdateResult = survivalWaveUpdater.update(
             waveState = gameState.survivalWaveState,
             deltaTimeMs = deltaTimeMs,
-            fieldSize = gameState.fieldSize
+            fieldSize = gameState.fieldSize,
+            initialProjectileId = gameState.nextProjectileId
         )
 
         val projectilesAfterSpawn =
@@ -55,7 +56,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
             elapsedTimeMs = gameState.elapsedTimeMs + deltaTimeMs,
             playerRuntimeState = updatedPlayerRuntimeState,
             survivalWaveState = waveUpdateResult.waveState,
-            activeProjectiles = updatedProjectiles
+            activeProjectiles = updatedProjectiles,
+            nextProjectileId = waveUpdateResult.nextProjectileId
         )
     }
 }

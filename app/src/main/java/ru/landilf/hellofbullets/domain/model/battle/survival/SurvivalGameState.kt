@@ -12,5 +12,6 @@ data class SurvivalGameState(
     val playerRuntimeState: PlayerRuntimeState,
     val survivalWaveState: SurvivalWaveState?,
     val activeProjectiles: List<Projectile>,
+    val nextProjectileId: Long,
     val fieldSize: GameFieldSize
 )
