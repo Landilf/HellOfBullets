@@ -1,8 +1,12 @@
 package ru.landilf.hellofbullets.domain.engine.battle.survival
 
 import ru.landilf.hellofbullets.domain.engine.battle.common.ProjectileFactory
+import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomGenerator
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackEmitterState
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileGenerationState
+import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
+import ru.landilf.hellofbullets.domain.model.battle.common.random.RandomResult
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWavePhase
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalWaveUpdateResult
@@ -10,7 +14,8 @@ import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import javax.inject.Inject
 
 class SurvivalWaveUpdater @Inject constructor(
-    private val projectileFactory: ProjectileFactory
+    private val projectileFactory: ProjectileFactory,
+    private val randomGenerator: BattleRandomGenerator
 ) {
     fun update(
         waveState: SurvivalWaveState?,
@@ -38,34 +43,25 @@ class SurvivalWaveUpdater @Inject constructor(
         val spawnedProjectiles = mutableListOf<Projectile>()
 
         while (remainingDeltaTimeMs > 0) {
-            when (updatedWaveState.phase) {
-                SurvivalWavePhase.ACTIVE -> {
-                    val updateResult = updateActivePhase(
-                        waveState = updatedWaveState,
-                        deltaTimeMs = remainingDeltaTimeMs,
-                        generationState = generationState,
-                        fieldSize = fieldSize
-                    )
+            val updateResult = when (updatedWaveState.phase) {
+                SurvivalWavePhase.ACTIVE -> updateActivePhase(
+                    waveState = updatedWaveState,
+                    deltaTimeMs = remainingDeltaTimeMs,
+                    generationState = generationState,
+                    fieldSize = fieldSize
+                )
 
-                    updatedWaveState = updateResult.waveState
-                    generationState = updateResult.nextGenerationState
-                    remainingDeltaTimeMs -= updateResult.usedDeltaTimeMs
-                    spawnedProjectiles += updateResult.spawnedProjectiles
-                }
-
-                SurvivalWavePhase.BREAK -> {
-                    val updateResult = updateBreakPhase(
-                        waveState = updatedWaveState,
-                        deltaTimeMs = remainingDeltaTimeMs,
-                        generationState = generationState
-                    )
-
-                    updatedWaveState = updateResult.waveState
-                    generationState = updateResult.nextGenerationState
-                    remainingDeltaTimeMs -= updateResult.usedDeltaTimeMs
-                    spawnedProjectiles += updateResult.spawnedProjectiles
-                }
+                SurvivalWavePhase.BREAK -> updateBreakPhase(
+                    waveState = updatedWaveState,
+                    deltaTimeMs = remainingDeltaTimeMs,
+                    generationState = generationState
+                )
             }
+
+            updatedWaveState = updateResult.waveState
+            generationState = updateResult.nextGenerationState
+            remainingDeltaTimeMs -= updateResult.usedDeltaTimeMs
+            spawnedProjectiles += updateResult.spawnedProjectiles
         }
 
         return SurvivalWaveUpdateResult(
@@ -82,16 +78,22 @@ class SurvivalWaveUpdater @Inject constructor(
         fieldSize: GameFieldSize
     ): WavePhaseUpdateResult {
         val currentWave = waveState.currentWave
+        val timeUntilNextEmitterVolleyMs = waveState.emitterStates.minOf {
+            it.timeUntilNextVolleyMs
+        }
         val timeUntilNextEventMs = minOf(
             a = waveState.timeUntilPhaseEndMs,
-            b = waveState.timeUntilNextVolleyMs
+            b = timeUntilNextEmitterVolleyMs
         )
 
         if (deltaTimeMs < timeUntilNextEventMs) {
             return WavePhaseUpdateResult(
                 waveState = waveState.copy(
                     timeUntilPhaseEndMs = waveState.timeUntilPhaseEndMs - deltaTimeMs,
-                    timeUntilNextVolleyMs = waveState.timeUntilNextVolleyMs - deltaTimeMs
+                    emitterStates = decreaseEmitterTimers(
+                        emitterStates = waveState.emitterStates,
+                        deltaTimeMs = deltaTimeMs
+                    )
                 ),
                 usedDeltaTimeMs = deltaTimeMs,
                 spawnedProjectiles = emptyList(),
@@ -101,7 +103,10 @@ class SurvivalWaveUpdater @Inject constructor(
 
         val stateAtEvent = waveState.copy(
             timeUntilPhaseEndMs = waveState.timeUntilPhaseEndMs - timeUntilNextEventMs,
-            timeUntilNextVolleyMs = waveState.timeUntilNextVolleyMs - timeUntilNextEventMs
+            emitterStates = decreaseEmitterTimers(
+                emitterStates = waveState.emitterStates,
+                deltaTimeMs = timeUntilNextEventMs
+            )
         )
 
         if (stateAtEvent.timeUntilPhaseEndMs == 0) {
@@ -116,24 +121,19 @@ class SurvivalWaveUpdater @Inject constructor(
             )
         }
 
-        val currentPattern = currentWave.patterns[stateAtEvent.currentPatternIndex]
-        val nextPatternIndex = (stateAtEvent.currentPatternIndex + 1) % currentWave.patterns.size
-        val nextPattern = currentWave.patterns[nextPatternIndex]
-
-        val projectileCreationResult = projectileFactory.createVolley(
-            pattern = currentPattern,
+        val volleyResult = createReadyEmitterVolleys(
+            waveState = stateAtEvent,
             generationState = generationState,
             fieldSize = fieldSize
         )
 
         return WavePhaseUpdateResult(
             waveState = stateAtEvent.copy(
-                currentPatternIndex = nextPatternIndex,
-                timeUntilNextVolleyMs = nextPattern.spawnIntervalMs
+                emitterStates = volleyResult.emitterStates
             ),
             usedDeltaTimeMs = timeUntilNextEventMs,
-            spawnedProjectiles = projectileCreationResult.projectiles,
-            nextGenerationState = projectileCreationResult.nextGenerationState
+            spawnedProjectiles = volleyResult.spawnedProjectiles,
+            nextGenerationState = volleyResult.nextGenerationState
         )
     }
 
@@ -153,23 +153,110 @@ class SurvivalWaveUpdater @Inject constructor(
             )
         }
 
-        val nextWaveIndex = (waveState.currentWaveIndex + 1) % waveState.waves.size
-        val nextWave = waveState.waves[nextWaveIndex]
-        val firstPattern = nextWave.patterns.first()
+        val nextWaveIndexResult = selectNextWaveIndex(
+            waveState = waveState,
+            randomState = generationState.randomState
+        )
+        val nextWave = waveState.waves[nextWaveIndexResult.value]
 
         return WavePhaseUpdateResult(
             waveState = waveState.copy(
-                currentWaveIndex = nextWaveIndex,
+                currentWaveIndex = nextWaveIndexResult.value,
                 phase = SurvivalWavePhase.ACTIVE,
                 timeUntilPhaseEndMs = nextWave.durationMs,
-                currentPatternIndex = 0,
-                timeUntilNextVolleyMs = firstPattern.spawnIntervalMs
+                emitterStates = nextWave.emitters.map { emitter ->
+                    AttackEmitterState(
+                        timeUntilNextVolleyMs = emitter.initialDelayMs
+                    )
+                }
             ),
             usedDeltaTimeMs = waveState.timeUntilPhaseEndMs,
             spawnedProjectiles = emptyList(),
-            nextGenerationState = generationState
+            nextGenerationState = generationState.copy(
+                randomState = nextWaveIndexResult.nextState
+            )
         )
     }
+
+    private fun decreaseEmitterTimers(
+        emitterStates: List<AttackEmitterState>,
+        deltaTimeMs: Int
+    ): List<AttackEmitterState> {
+        return emitterStates.map { emitterState ->
+            emitterState.copy(
+                timeUntilNextVolleyMs = emitterState.timeUntilNextVolleyMs - deltaTimeMs
+            )
+        }
+    }
+
+    private fun createReadyEmitterVolleys(
+        waveState: SurvivalWaveState,
+        generationState: ProjectileGenerationState,
+        fieldSize: GameFieldSize
+    ): EmitterVolleyUpdateResult {
+        val updatedEmitterStates = waveState.emitterStates.toMutableList()
+        val spawnedProjectiles = mutableListOf<Projectile>()
+        var updatedGenerationState = generationState
+
+        waveState.currentWave.emitters.forEachIndexed { index, emitter ->
+            if (updatedEmitterStates[index].timeUntilNextVolleyMs != 0) {
+                return@forEachIndexed
+            }
+
+            val patternResult = randomGenerator.pick(
+                randomState = updatedGenerationState.randomState,
+                values = emitter.patternOptions
+            )
+            updatedGenerationState = updatedGenerationState.copy(
+                randomState = patternResult.nextState
+            )
+
+            val projectileCreationResult = projectileFactory.createVolley(
+                pattern = patternResult.value,
+                generationState = updatedGenerationState,
+                fieldSize = fieldSize
+            )
+            updatedGenerationState = projectileCreationResult.nextGenerationState
+            spawnedProjectiles += projectileCreationResult.projectiles
+
+            updatedEmitterStates[index] = AttackEmitterState(
+                timeUntilNextVolleyMs = emitter.volleyIntervalMs
+            )
+        }
+
+        return EmitterVolleyUpdateResult(
+            emitterStates = updatedEmitterStates,
+            spawnedProjectiles = spawnedProjectiles,
+            nextGenerationState = updatedGenerationState
+        )
+    }
+
+    private fun selectNextWaveIndex(
+        waveState: SurvivalWaveState,
+        randomState: BattleRandomState
+    ): RandomResult<Int> {
+        if (waveState.waves.size == 1) {
+            return RandomResult(
+                value = waveState.currentWaveIndex,
+                nextState = randomState
+            )
+        }
+
+        val availableIndices = waveState.waves.indices.filter {
+            it != waveState.currentWaveIndex
+        }
+
+        return randomGenerator.pick(
+            randomState = randomState,
+            values = availableIndices
+        )
+    }
+
+    private data class EmitterVolleyUpdateResult(
+        val emitterStates: List<AttackEmitterState>,
+        val spawnedProjectiles: List<Projectile>,
+        val nextGenerationState: ProjectileGenerationState
+    )
 
     private data class WavePhaseUpdateResult(
         val waveState: SurvivalWaveState,

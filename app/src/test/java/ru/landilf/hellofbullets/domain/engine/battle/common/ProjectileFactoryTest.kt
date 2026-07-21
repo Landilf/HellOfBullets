@@ -129,7 +129,6 @@ class ProjectileFactoryTest {
             spawnSection = spawnSection,
             targetSections = targetSections,
             projectileCount = projectileCount,
-            spawnIntervalMs = 500,
             projectileSpeedRange = speedRange,
             projectileDamage = 1,
             projectileHitRadius = 1f,

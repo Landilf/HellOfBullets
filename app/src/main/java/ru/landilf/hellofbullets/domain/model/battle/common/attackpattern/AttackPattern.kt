@@ -8,7 +8,6 @@ data class AttackPattern(
     val spawnSection: ArenaEdgeSection,
     val targetSections: List<ArenaEdgeSection>,
     val projectileCount: Int,
-    val spawnIntervalMs: Int,
     val projectileSpeedRange: FloatRange,
     val projectileDamage: Int,
     val projectileHitRadius: Float,

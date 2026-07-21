@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.domain.usecase
 
 import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomSeedGenerator
+import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackEmitterState
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackWave
 import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
@@ -49,24 +50,21 @@ class CreateDefaultSurvivalGameStateUseCase @Inject constructor(
         waves: List<AttackWave>
     ): SurvivalWaveState {
         require(waves.isNotEmpty()) {
-            "SurvivalWaveState требует хотя бы один элемент в waves при создании"
+            "SurvivalWaveState требует хотя бы один элемент в waves"
         }
 
         val firstWave = waves.first()
-
-        require(firstWave.patterns.isNotEmpty()) {
-            "AttackWave требует хотя бы один элемент в patterns"
-        }
-
-        val firstPattern = firstWave.patterns.first()
 
         return SurvivalWaveState(
             waves = waves,
             currentWaveIndex = 0,
             phase = SurvivalWavePhase.ACTIVE,
             timeUntilPhaseEndMs = firstWave.durationMs,
-            currentPatternIndex = 0,
-            timeUntilNextVolleyMs = firstPattern.spawnIntervalMs
+            emitterStates = firstWave.emitters.map { emitter ->
+                AttackEmitterState(
+                    timeUntilNextVolleyMs = emitter.initialDelayMs
+                )
+            }
         )
     }
 }
