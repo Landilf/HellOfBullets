@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
@@ -55,8 +56,15 @@ private fun DrawScope.drawPlayer(
 ) {
     drawCircle(
         color = if (isAlive) Color(0xFF7CFFB2) else Color.Red,
-        radius = radius.toCanvasPx(fieldSize, size.width),
-        center = position.toCanvasOffset(fieldSize, size.width, size.height)
+        radius = radius.toCanvasPx(
+            fieldSize,
+            size.width
+        ),
+        center = position.toCanvasOffset(
+            fieldSize,
+            size.width,
+            size.height
+        )
     )
 }
 
@@ -68,25 +76,52 @@ private fun DrawScope.drawProjectile(
         is BulletProjectile -> {
             drawCircle(
                 color = Color(0xFFFFD166),
-                radius = projectile.hitRadius.toCanvasPx(fieldSize, size.width),
-                center = projectile.position.toCanvasOffset(fieldSize, size.width, size.height)
+                radius = projectile.hitRadius.toCanvasPx(
+                    fieldSize,
+                    size.width
+                ),
+                center = projectile.position.toCanvasOffset(
+                    fieldSize,
+                    size.width,
+                    size.height
+                )
             )
         }
 
         is LaserProjectile -> {
+            val isWarning = projectile.phase == LaserPhase.WARNING
+
             drawLine(
-                color = Color(0xFF70D6FF),
-                start = projectile.startPosition.toCanvasOffset(fieldSize, size.width, size.height),
-                end = projectile.endPosition.toCanvasOffset(fieldSize, size.width, size.height),
-                strokeWidth = projectile.hitRadius.toCanvasPx(fieldSize, size.width)
+                color = if (isWarning) Color(0x6670D6FF) else Color(0xFF70D6FF),
+                start = projectile.startPosition.toCanvasOffset(
+                    fieldSize,
+                    size.width,
+                    size.height
+                ),
+                end = projectile.endPosition.toCanvasOffset(
+                    fieldSize,
+                    size.width,
+                    size.height
+                ),
+                strokeWidth = projectile.hitRadius.toCanvasPx(
+                    fieldSize,
+                    size.width
+                ) * if (isWarning) 0.5f else 1f
             )
         }
 
         is RocketProjectile -> {
             drawCircle(
                 color = Color(0xFFFF6B6B),
-                radius = projectile.hitRadius.toCanvasPx(fieldSize, size.width),
-                center = projectile.position.toCanvasOffset(fieldSize, size.width, size.height),
+                radius = projectile.hitRadius.toCanvasPx(
+                    fieldSize,
+                    size.width
+                ),
+                center = projectile.position.toCanvasOffset(
+                    fieldSize,
+                    size.width,
+                    size.height
+                ),
                 style = Stroke(width = 3.dp.toPx())
             )
         }

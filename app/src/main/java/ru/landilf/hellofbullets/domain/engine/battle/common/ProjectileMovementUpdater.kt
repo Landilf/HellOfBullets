@@ -1,25 +1,32 @@
 package ru.landilf.hellofbullets.domain.engine.battle.common
 
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import javax.inject.Inject
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class ProjectileMovementUpdater @Inject constructor() {
 
     fun update(
         projectiles: List<Projectile>,
         deltaTimeMs: Int,
-        fieldSize: GameFieldSize
+        fieldSize: GameFieldSize,
+        playerPosition: Vector2
     ): List<Projectile> {
         return projectiles.mapNotNull { projectile ->
             updateProjectile(
                 projectile = projectile,
                 deltaTimeMs = deltaTimeMs,
-                fieldSize = fieldSize
+                fieldSize = fieldSize,
+                playerPosition = playerPosition
             )
         }
     }
@@ -27,7 +34,8 @@ class ProjectileMovementUpdater @Inject constructor() {
     private fun updateProjectile(
         projectile: Projectile,
         deltaTimeMs: Int,
-        fieldSize: GameFieldSize
+        fieldSize: GameFieldSize,
+        playerPosition: Vector2
     ): Projectile? {
         val updatedLifetimeMs = projectile.remainingLifetimeMs - deltaTimeMs
 
@@ -45,6 +53,7 @@ class ProjectileMovementUpdater @Inject constructor() {
 
             is LaserProjectile -> updateLaserProjectile(
                 projectile = projectile,
+                deltaTimeMs = deltaTimeMs,
                 updatedLifetimeMs = updatedLifetimeMs
             )
 
@@ -52,7 +61,8 @@ class ProjectileMovementUpdater @Inject constructor() {
                 projectile = projectile,
                 deltaTimeMs = deltaTimeMs,
                 updatedLifetimeMs = updatedLifetimeMs,
-                fieldSize = fieldSize
+                fieldSize = fieldSize,
+                playerPosition = playerPosition
             )
         }
     }
@@ -81,10 +91,20 @@ class ProjectileMovementUpdater @Inject constructor() {
 
     private fun updateLaserProjectile(
         projectile: LaserProjectile,
+        deltaTimeMs: Int,
         updatedLifetimeMs: Int
     ): LaserProjectile {
+        val updatedWarningMs = (projectile.remainingWarningMs - deltaTimeMs
+                ).coerceAtLeast(0)
+
         return projectile.copy(
-            remainingLifetimeMs = updatedLifetimeMs
+            remainingLifetimeMs = updatedLifetimeMs,
+            phase = if (updatedWarningMs == 0) {
+                LaserPhase.ACTIVE
+            } else {
+                LaserPhase.WARNING
+            },
+            remainingWarningMs = updatedWarningMs
         )
     }
 
@@ -92,16 +112,37 @@ class ProjectileMovementUpdater @Inject constructor() {
         projectile: RocketProjectile,
         deltaTimeMs: Int,
         updatedLifetimeMs: Int,
-        fieldSize: GameFieldSize
+        fieldSize: GameFieldSize,
+        playerPosition: Vector2
     ): RocketProjectile? {
-        val updatedPosition = movePosition(
-            position = projectile.position,
-            velocity = projectile.velocity,
-            deltaTimeMs = deltaTimeMs
+        val homingDeltaTimeMs = minOf(
+            deltaTimeMs,
+            projectile.remainingHomingTimeMs
         )
 
-        val updatedHomingTimeMs = (projectile.remainingHomingTimeMs - deltaTimeMs)
-            .coerceAtLeast(0)
+        val updatedVelocity = if (homingDeltaTimeMs > 0) {
+            rotateVelocityTowardsTarget(
+                velocity = projectile.velocity,
+                position = projectile.position,
+                targetPosition = playerPosition,
+                maxTurnRateRadiansPerSecond = projectile.maxTurnRateRadiansPerSecond,
+                deltaTimeMs = homingDeltaTimeMs
+            )
+        } else {
+            projectile.velocity
+        }
+
+        val positionAfterHoming = movePosition(
+            position = projectile.position,
+            velocity = updatedVelocity,
+            deltaTimeMs = homingDeltaTimeMs
+        )
+
+        val updatedPosition = movePosition(
+            position = positionAfterHoming,
+            velocity = updatedVelocity,
+            deltaTimeMs = deltaTimeMs - homingDeltaTimeMs
+        )
 
         if (!isInsideGameBounds(updatedPosition, fieldSize)) {
             return null
@@ -109,8 +150,9 @@ class ProjectileMovementUpdater @Inject constructor() {
 
         return projectile.copy(
             position = updatedPosition,
+            velocity = updatedVelocity,
             remainingLifetimeMs = updatedLifetimeMs,
-            remainingHomingTimeMs = updatedHomingTimeMs
+            remainingHomingTimeMs = projectile.remainingHomingTimeMs - homingDeltaTimeMs
         )
     }
 
@@ -133,6 +175,61 @@ class ProjectileMovementUpdater @Inject constructor() {
     ): Boolean {
         return position.x in -BOUNDARY_MARGIN..(fieldSize.width + BOUNDARY_MARGIN) &&
                 position.y in -BOUNDARY_MARGIN..(fieldSize.height + BOUNDARY_MARGIN)
+    }
+
+    private fun rotateVelocityTowardsTarget(
+        velocity: Vector2,
+        position: Vector2,
+        targetPosition: Vector2,
+        maxTurnRateRadiansPerSecond: Float,
+        deltaTimeMs: Int
+    ): Vector2 {
+        val speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
+
+        if (speed == 0f) {
+            return velocity
+        }
+
+        val targetDeltaX = targetPosition.x - position.x
+        val targetDeltaY = targetPosition.y - position.y
+
+        if (targetDeltaX == 0f && targetDeltaY == 0f) {
+            return velocity
+        }
+
+        val currentAngle = atan2(velocity.y, velocity.x)
+        val targetAngle = atan2(targetDeltaY, targetDeltaX)
+        val angleDifference = normalizedAngle(targetAngle - currentAngle)
+
+        val maxTurnAngle = maxTurnRateRadiansPerSecond * deltaTimeMs / 1_000f
+
+        val updatedAngle = currentAngle + angleDifference.coerceIn(
+            -maxTurnAngle,
+            maxTurnAngle
+        )
+
+        return Vector2(
+            x = cos(updatedAngle) * speed,
+            y = sin(updatedAngle) * speed
+        )
+    }
+
+    private fun normalizedAngle(
+        angle: Float
+    ): Float {
+        var normalizedAngle = angle
+        val pi = Math.PI.toFloat()
+        val twoPi = (Math.PI * 2).toFloat()
+
+        while (normalizedAngle > pi) {
+            normalizedAngle -= twoPi
+        }
+
+        while (normalizedAngle < -pi) {
+            normalizedAngle += twoPi
+        }
+
+        return normalizedAngle
     }
 
     private companion object {
