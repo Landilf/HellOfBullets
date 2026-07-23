@@ -33,7 +33,8 @@ class UpdateSurvivalGameStateUseCase @Inject constructor(
         val updatedProjectiles = projectileMovementUpdater.update(
             projectiles = projectilesAfterSpawn,
             deltaTimeMs = deltaTimeMs,
-            fieldSize = gameState.fieldSize
+            fieldSize = gameState.fieldSize,
+            playerPosition = gameState.playerRuntimeState.position
         )
 
         val hasCollision = playerCollisionChecker.hasCollision(

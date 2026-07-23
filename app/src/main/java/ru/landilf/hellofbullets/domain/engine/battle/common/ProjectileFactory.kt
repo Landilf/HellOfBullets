@@ -145,6 +145,10 @@ class ProjectileFactory @Inject constructor(
         generationState: ProjectileGenerationState,
         fieldSize: GameFieldSize
     ): RandomProjectileResult {
+        val homingConfig = requireNotNull(pattern.rocketHomingConfig) {
+            "AttackPattern должен содержать конфигурацию самонаведения для ракеты"
+        }
+
         val pathResult = createProjectilePath(
             pattern = pattern,
             randomState = generationState.randomState,
@@ -166,7 +170,8 @@ class ProjectileFactory @Inject constructor(
                 remainingLifetimeMs = pattern.projectileLifetimeMs,
                 position = pathResult.value.startPosition,
                 velocity = velocityResult.value,
-                remainingHomingTimeMs = 1000
+                remainingHomingTimeMs = homingConfig.durationMs,
+                maxTurnRateRadiansPerSecond = homingConfig.maxTurnRateRadiansPerSecond
             ),
             nextRandomState = velocityResult.nextState
         )

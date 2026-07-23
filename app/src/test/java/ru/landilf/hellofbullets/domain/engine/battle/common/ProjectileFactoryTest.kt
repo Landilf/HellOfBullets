@@ -11,6 +11,8 @@ import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProj
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileGenerationState
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketHomingConfig
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.random.BattleRandomState
 import ru.landilf.hellofbullets.domain.model.common.FloatRange
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
@@ -143,13 +145,43 @@ class ProjectileFactoryTest {
         assertEquals(5_700, laser.remainingLifetimeMs)
     }
 
+    @Test
+    fun `creates rocket with configured homing parameters`() {
+        val homingConfig = RocketHomingConfig(
+            durationMs = 1_000,
+            maxTurnRateRadiansPerSecond = 1.5f
+        )
+        val pattern = createPattern(
+            projectileType = ProjectileType.ROCKET,
+            spawnSection = ArenaEdgeSection.TOP,
+            targetSections = listOf(ArenaEdgeSection.BOTTOM),
+            projectileCount = 1,
+            speedRange = FloatRange(40f, 40f),
+            rocketHomingConfig = homingConfig
+        )
+
+        val result = factory.createVolley(
+            pattern = pattern,
+            generationState = createGenerationState(
+                nextProjectileId = 0L,
+                seed = 456L
+            ),
+            fieldSize = fieldSize
+        )
+        val rocket = result.projectiles.single() as RocketProjectile
+
+        assertEquals(1_000, rocket.remainingHomingTimeMs)
+        assertEquals(1.5f, rocket.maxTurnRateRadiansPerSecond, EPSILON)
+    }
+
     private fun createPattern(
         projectileType: ProjectileType,
         spawnSection: ArenaEdgeSection,
         targetSections: List<ArenaEdgeSection>,
         projectileCount: Int,
         speedRange: FloatRange,
-        warningDurationMs: Int = 0
+        warningDurationMs: Int = 0,
+        rocketHomingConfig: RocketHomingConfig? = null
     ): AttackPattern {
         return AttackPattern(
             id = 1L,
@@ -161,7 +193,8 @@ class ProjectileFactoryTest {
             projectileDamage = 1,
             projectileHitRadius = 1f,
             projectileLifetimeMs = 5_000,
-            warningDurationMs = warningDurationMs
+            warningDurationMs = warningDurationMs,
+            rocketHomingConfig = rocketHomingConfig
         )
     }
 
