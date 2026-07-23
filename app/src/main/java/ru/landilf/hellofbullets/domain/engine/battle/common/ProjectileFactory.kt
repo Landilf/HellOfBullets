@@ -5,6 +5,7 @@ import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ArenaEd
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.ProjectileCreationResult
@@ -118,15 +119,22 @@ class ProjectileFactory @Inject constructor(
             randomState = generationState.randomState,
             fieldSize = fieldSize
         )
+        val warningDurationMs = pattern.warningDurationMs
 
         return RandomProjectileResult(
             projectile = LaserProjectile(
                 id = generationState.nextProjectileId,
                 damage = pattern.projectileDamage,
                 hitRadius = pattern.projectileHitRadius,
-                remainingLifetimeMs = pattern.projectileLifetimeMs,
+                remainingLifetimeMs = pattern.projectileLifetimeMs + warningDurationMs,
                 startPosition = pathResult.value.startPosition,
-                endPosition = pathResult.value.targetPosition
+                endPosition = pathResult.value.targetPosition,
+                phase = if (warningDurationMs > 0) {
+                    LaserPhase.WARNING
+                } else {
+                    LaserPhase.ACTIVE
+                },
+                remainingWarningMs = warningDurationMs
             ),
             nextRandomState = pathResult.nextState
         )

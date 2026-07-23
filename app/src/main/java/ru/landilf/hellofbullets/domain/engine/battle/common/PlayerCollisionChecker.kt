@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.domain.engine.battle.common
 
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
@@ -34,13 +35,15 @@ class PlayerCollisionChecker @Inject constructor() {
                 projectileRadius = projectile.hitRadius
             )
 
-            is LaserProjectile -> hasLaserCollision(
-                playerPosition = player.position,
-                playerRadius = player.hitRadius,
-                laserStart = projectile.startPosition,
-                laserEnd = projectile.endPosition,
-                laserRadius = projectile.hitRadius
-            )
+            is LaserProjectile -> {
+                projectile.phase == LaserPhase.ACTIVE && hasLaserCollision(
+                    playerPosition = player.position,
+                    playerRadius = player.hitRadius,
+                    laserStart = projectile.startPosition,
+                    laserEnd = projectile.endPosition,
+                    laserRadius = projectile.hitRadius
+                )
+            }
 
             is RocketProjectile -> hasCircleCollision(
                 playerPosition = player.position,

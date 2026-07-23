@@ -11,11 +11,16 @@ data class AttackPattern(
     val projectileSpeedRange: FloatRange,
     val projectileDamage: Int,
     val projectileHitRadius: Float,
-    val projectileLifetimeMs: Int
+    val projectileLifetimeMs: Int,
+    val warningDurationMs: Int = 0
 ) {
     init {
         require(targetSections.isNotEmpty()) {
             "AttackPattern требует хотя бы один элемент в targetSections"
+        }
+
+        require(warningDurationMs >= 0) {
+            "Длительность предупреждения в AttackPattern не может быть отрицательной"
         }
     }
 }

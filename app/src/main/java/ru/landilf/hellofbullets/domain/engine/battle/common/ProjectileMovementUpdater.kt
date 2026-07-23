@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.domain.engine.battle.common
 
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.BulletProjectile
+import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.Projectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
@@ -45,6 +46,7 @@ class ProjectileMovementUpdater @Inject constructor() {
 
             is LaserProjectile -> updateLaserProjectile(
                 projectile = projectile,
+                deltaTimeMs = deltaTimeMs,
                 updatedLifetimeMs = updatedLifetimeMs
             )
 
@@ -81,10 +83,20 @@ class ProjectileMovementUpdater @Inject constructor() {
 
     private fun updateLaserProjectile(
         projectile: LaserProjectile,
+        deltaTimeMs: Int,
         updatedLifetimeMs: Int
     ): LaserProjectile {
+        val updatedWarningMs = (projectile.remainingWarningMs - deltaTimeMs
+                ).coerceAtLeast(0)
+
         return projectile.copy(
-            remainingLifetimeMs = updatedLifetimeMs
+            remainingLifetimeMs = updatedLifetimeMs,
+            phase = if (updatedWarningMs == 0) {
+                LaserPhase.ACTIVE
+            } else {
+                LaserPhase.WARNING
+            },
+            remainingWarningMs = updatedWarningMs
         )
     }
 

@@ -81,72 +81,116 @@ class GetDefaultSurvivalGameConfigUseCase @Inject constructor() {
                     durationMs = 20_000,
                     breakDurationMs = 1_500
                 ),
+//                AttackWave(
+//                    id = 3L,
+//                    emitters = listOf(
+//                        AttackEmitter(
+//                            patternOptions = listOf(
+//                                createBulletPattern(
+//                                    id = 4L,
+//                                    spawnSection = ArenaEdgeSection.LEFT_UPPER,
+//                                    targetSections = listOf(
+//                                        ArenaEdgeSection.BOTTOM,
+//                                        ArenaEdgeSection.RIGHT_LOWER
+//                                    ),
+//                                    projectileCount = 2,
+//                                    speedRange = FloatRange(
+//                                        min = 50f,
+//                                        max = 75f
+//                                    )
+//                                ),
+//                                createBulletPattern(
+//                                    id = 5L,
+//                                    spawnSection = ArenaEdgeSection.RIGHT_UPPER,
+//                                    targetSections = listOf(
+//                                        ArenaEdgeSection.BOTTOM,
+//                                        ArenaEdgeSection.LEFT_LOWER
+//                                    ),
+//                                    projectileCount = 2,
+//                                    speedRange = FloatRange(
+//                                        min = 50f,
+//                                        max = 75f
+//                                    )
+//                                )
+//                            ),
+//                            volleyIntervalMs = 750
+//                        ),
+//                        AttackEmitter(
+//                            patternOptions = listOf(
+//                                createBulletPattern(
+//                                    id = 6L,
+//                                    spawnSection = ArenaEdgeSection.TOP,
+//                                    targetSections = listOf(
+//                                        ArenaEdgeSection.BOTTOM
+//                                    ),
+//                                    projectileCount = 3,
+//                                    speedRange = FloatRange(
+//                                        min = 50f,
+//                                        max = 75f
+//                                    )
+//                                ),
+//                                createBulletPattern(
+//                                    id = 7L,
+//                                    spawnSection = ArenaEdgeSection.BOTTOM,
+//                                    targetSections = listOf(
+//                                        ArenaEdgeSection.TOP
+//                                    ),
+//                                    projectileCount = 3,
+//                                    speedRange = FloatRange(
+//                                        min = 50f,
+//                                        max = 75f
+//                                    )
+//                                )
+//                            ),
+//                            volleyIntervalMs = 500
+//                        )
+//                    ),
+//                    durationMs = 25_000,
+//                    breakDurationMs = 1_000
+//                ),
                 AttackWave(
-                    id = 3L,
+                    id = 4L,
                     emitters = listOf(
                         AttackEmitter(
                             patternOptions = listOf(
-                                createBulletPattern(
-                                    id = 4L,
+                                createLaserPattern(
+                                    id = 8L,
+                                    spawnSection = ArenaEdgeSection.TOP,
+                                    targetSections = listOf(ArenaEdgeSection.BOTTOM),
+                                    projectileCount = 7,
+                                    warningDurationMs = 1_000,
+                                    projectileLifetimeMs = 750
+                                ),
+                                createLaserPattern(
+                                    id = 9L,
                                     spawnSection = ArenaEdgeSection.LEFT_UPPER,
                                     targetSections = listOf(
-                                        ArenaEdgeSection.BOTTOM,
-                                        ArenaEdgeSection.RIGHT_LOWER
-                                    ),
-                                    projectileCount = 2,
-                                    speedRange = FloatRange(
-                                        min = 75f,
-                                        max = 105f
-                                    )
-                                ),
-                                createBulletPattern(
-                                    id = 5L,
-                                    spawnSection = ArenaEdgeSection.RIGHT_UPPER,
-                                    targetSections = listOf(
-                                        ArenaEdgeSection.BOTTOM,
-                                        ArenaEdgeSection.LEFT_LOWER
-                                    ),
-                                    projectileCount = 2,
-                                    speedRange = FloatRange(
-                                        min = 75f,
-                                        max = 105f
-                                    )
-                                )
-                            ),
-                            volleyIntervalMs = 750
-                        ),
-                        AttackEmitter(
-                            patternOptions = listOf(
-                                createBulletPattern(
-                                    id = 6L,
-                                    spawnSection = ArenaEdgeSection.TOP,
-                                    targetSections = listOf(
+                                        ArenaEdgeSection.TOP,
+                                        ArenaEdgeSection.RIGHT_LOWER,
                                         ArenaEdgeSection.BOTTOM
                                     ),
                                     projectileCount = 3,
-                                    speedRange = FloatRange(
-                                        min = 75f,
-                                        max = 105f
-                                    )
+                                    warningDurationMs = 1_000,
+                                    projectileLifetimeMs = 750
                                 ),
-                                createBulletPattern(
-                                    id = 7L,
-                                    spawnSection = ArenaEdgeSection.BOTTOM,
+                                createLaserPattern(
+                                    id = 10L,
+                                    spawnSection = ArenaEdgeSection.RIGHT_UPPER,
                                     targetSections = listOf(
-                                        ArenaEdgeSection.TOP
+                                        ArenaEdgeSection.TOP,
+                                        ArenaEdgeSection.LEFT_LOWER,
+                                        ArenaEdgeSection.BOTTOM
                                     ),
                                     projectileCount = 3,
-                                    speedRange = FloatRange(
-                                        min = 75f,
-                                        max = 105f
-                                    )
+                                    warningDurationMs = 1_000,
+                                    projectileLifetimeMs = 750
                                 )
                             ),
-                            volleyIntervalMs = 500
+                            volleyIntervalMs = 800
                         )
                     ),
-                    durationMs = 25_000,
-                    breakDurationMs = 1_000
+                    durationMs = 15_000,
+                    breakDurationMs = 2_000
                 )
             )
         )
@@ -169,6 +213,31 @@ class GetDefaultSurvivalGameConfigUseCase @Inject constructor() {
             projectileDamage = 1,
             projectileHitRadius = 2f,
             projectileLifetimeMs = 5_000
+        )
+    }
+
+    private fun createLaserPattern(
+        id: Long,
+        spawnSection: ArenaEdgeSection,
+        targetSections: List<ArenaEdgeSection>,
+        projectileCount: Int,
+        projectileLifetimeMs: Int,
+        warningDurationMs: Int
+    ): AttackPattern {
+        return AttackPattern(
+            id = id,
+            projectileType = ProjectileType.LASER,
+            spawnSection = spawnSection,
+            targetSections = targetSections,
+            projectileCount = projectileCount,
+            projectileSpeedRange = FloatRange(
+                min = 0f,
+                max = 0f
+            ),
+            projectileDamage = 1,
+            projectileHitRadius = 1.5f,
+            projectileLifetimeMs = projectileLifetimeMs,
+            warningDurationMs = warningDurationMs
         )
     }
 }
