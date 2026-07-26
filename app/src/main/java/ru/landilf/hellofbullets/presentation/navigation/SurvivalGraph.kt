@@ -5,12 +5,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import ru.landilf.hellofbullets.R
-import ru.landilf.hellofbullets.presentation.common.PlaceholderScreen
 import ru.landilf.hellofbullets.presentation.survival.SurvivalHomeScreen
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameAction
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameScreen
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameViewModel
+import ru.landilf.hellofbullets.presentation.survival.records.SurvivalRecordsScreen
+import ru.landilf.hellofbullets.presentation.survival.records.SurvivalRecordsViewModel
 
 fun NavGraphBuilder.survivalGraph(
     navController: NavController
@@ -52,8 +52,11 @@ fun NavGraphBuilder.survivalGraph(
     }
 
     composable(AppDestination.SurvivalRecords.route) {
-        PlaceholderScreen(
-            titleRes = R.string.show_records_button,
+        val viewModel: SurvivalRecordsViewModel = hiltViewModel()
+        val state = viewModel.uiState.collectAsState()
+
+        SurvivalRecordsScreen(
+            state = state.value,
             onBackClick = { navController.popBackStack() }
         )
     }

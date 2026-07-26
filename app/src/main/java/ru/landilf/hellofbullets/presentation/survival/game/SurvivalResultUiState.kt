@@ -4,5 +4,8 @@ import ru.landilf.hellofbullets.domain.model.battle.common.result.RewardInfo
 
 data class SurvivalResultUiState(
     val elapsedTimeMs: Int,
-    val reward: RewardInfo
+    val reward: RewardInfo,
+    val isNewRecord: Boolean,
+    val leaderboardPosition: Int?,
+    val leaderboardCutoffTime: Int?
 )

@@ -28,6 +28,13 @@
     <string name="result_time_value">Время: %1$s</string>
     <string name="result_exp_value">Опыт: %1$d</string>
     <string name="result_silver_value">Серебро: %1$d</string>
+    <string name="result_new_record">Новый рекорд!</string>
+    <string name="result_leaderboard_position">Место в таблице: %1$d</string>
+    <string name="result_leaderboard_cutoff">Время последнего места: %1$s</string>
+
+    <string name="records_empty">Записей пока нет</string>
+    <string name="records_rank">%1$d.</string>
+    <string name="records_time">%1$s</string>
 
     <string name="error_title">Ошибка</string>
     <string name="loading_title">Загрузка</string>
