@@ -37,7 +37,7 @@ class SurvivalRecordsViewModel @Inject constructor(
                 _uiState.value = SurvivalRecordsUiState(
                     isLoading = false,
                     records = records,
-                    playerName = playerState.playerProfile.name
+                    playerId = playerState.playerProfile.id.toString()
                 )
             } catch (exception: CancellationException) {
                 throw exception

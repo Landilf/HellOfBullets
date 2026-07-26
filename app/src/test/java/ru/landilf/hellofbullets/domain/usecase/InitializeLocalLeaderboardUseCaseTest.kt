@@ -12,6 +12,7 @@ class InitializeLocalLeaderboardUseCaseTest {
         val leaderboardRepository = FakeLeaderboardRepository(
             initialRecords = listOf(
                 LeaderboardRecord(
+                    id = "1",
                     playerName = "Player",
                     time = 7
                 )

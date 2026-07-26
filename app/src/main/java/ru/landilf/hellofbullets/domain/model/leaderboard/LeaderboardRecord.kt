@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.domain.model.leaderboard
 
 data class LeaderboardRecord(
+    val id: String,
     val playerName: String,
     val time: Int
 )

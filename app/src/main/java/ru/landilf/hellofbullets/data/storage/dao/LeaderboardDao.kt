@@ -10,12 +10,12 @@ interface LeaderboardDao {
     @Query("SELECT * FROM leaderboard ORDER BY time DESC LIMIT 20")
     suspend fun getLeaderboard(): List<LeaderboardRecordEntity>
 
-    @Query("SELECT * FROM leaderboard WHERE playerName = :playerName LIMIT 1")
-    suspend fun getRecordByPlayerName(playerName: String): LeaderboardRecordEntity?
+    @Query("SELECT * FROM leaderboard WHERE id = :id LIMIT 1")
+    suspend fun getRecordById(id: String): LeaderboardRecordEntity?
 
-    @Query("SELECT playerName FROM leaderboard WHERE playerName IN (:playerNames)")
-    suspend fun getExistingPlayerNames(
-        playerNames: List<String>
+    @Query("SELECT id FROM leaderboard WHERE id IN (:ids)")
+    suspend fun getExistingRecordIds(
+        ids: List<String>
     ): List<String>
 
     @Upsert

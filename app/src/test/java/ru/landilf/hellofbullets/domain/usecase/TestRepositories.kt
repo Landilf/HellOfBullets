@@ -8,44 +8,44 @@ import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 class FakeLeaderboardRepository(
     initialRecords: List<LeaderboardRecord> = emptyList()
 ) : LeaderboardRepository {
-    private val recordsByPlayerName = initialRecords
-        .associateBy { it.playerName }
+    private val recordsById = initialRecords
+        .associateBy { it.id }
         .toMutableMap()
 
     var upsertCallCount = 0
         private set
 
     override suspend fun getLeaderboard(): List<LeaderboardRecord> {
-        return recordsByPlayerName.values
+        return recordsById.values
             .sortedByDescending { it.time }
             .take(MAX_LEADERBOARD_SIZE)
     }
 
-    override suspend fun getRecordByPlayerName(
-        playerName: String
+    override suspend fun getRecordById(
+        id: String
     ): LeaderboardRecord? {
-        return recordsByPlayerName[playerName]
+        return recordsById[id]
     }
 
-    override suspend fun getExistingPlayerNames(
-        playerNames: List<String>
+    override suspend fun getExistingRecordIds(
+        ids: List<String>
     ): Set<String> {
-        return recordsByPlayerName.keys.intersect(playerNames.toSet())
+        return recordsById.keys.intersect(ids.toSet())
     }
 
     override suspend fun upsertRecord(
         record: LeaderboardRecord
     ) {
-        recordsByPlayerName[record.playerName] = record
+        recordsById[record.id] = record
         upsertCallCount++
     }
 
     override suspend fun clearLeaderboard() {
-        recordsByPlayerName.clear()
+        recordsById.clear()
     }
 
     fun getAllRecords(): List<LeaderboardRecord> {
-        return recordsByPlayerName.values.toList()
+        return recordsById.values.toList()
     }
 
     private companion object {

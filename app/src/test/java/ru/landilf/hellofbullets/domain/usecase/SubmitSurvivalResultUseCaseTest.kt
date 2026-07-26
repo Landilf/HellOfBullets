@@ -20,7 +20,7 @@ class SubmitSurvivalResultUseCaseTest {
         val result = useCase(time = 25)
 
         val playerState = requireNotNull(playerRepository.state)
-        val playerRecord = leaderboardRepository.getRecordByPlayerName("Player")
+        val playerRecord = leaderboardRepository.getRecordById("1")
 
         assertTrue(result.isNewRecord)
         assertEquals(19, result.leaderboardPosition)
@@ -43,7 +43,7 @@ class SubmitSurvivalResultUseCaseTest {
         val result = useCase(time = 20)
 
         val playerState = requireNotNull(playerRepository.state)
-        val playerRecord = leaderboardRepository.getRecordByPlayerName("Player")
+        val playerRecord = leaderboardRepository.getRecordById("1")
 
         assertFalse(result.isNewRecord)
         assertEquals(50, playerRecord?.time)

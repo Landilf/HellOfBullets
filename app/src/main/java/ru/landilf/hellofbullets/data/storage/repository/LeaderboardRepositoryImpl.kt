@@ -16,12 +16,12 @@ class LeaderboardRepositoryImpl @Inject constructor(
         return leaderboardDao.getLeaderboard().map(entityToDomainMapper::invoke)
     }
 
-    override suspend fun getRecordByPlayerName(playerName: String): LeaderboardRecord? {
-        return leaderboardDao.getRecordByPlayerName(playerName)?.let(entityToDomainMapper::invoke)
+    override suspend fun getRecordById(id: String): LeaderboardRecord? {
+        return leaderboardDao.getRecordById(id)?.let(entityToDomainMapper::invoke)
     }
 
-    override suspend fun getExistingPlayerNames(playerNames: List<String>): Set<String> {
-        return leaderboardDao.getExistingPlayerNames(playerNames).toSet()
+    override suspend fun getExistingRecordIds(ids: List<String>): Set<String> {
+        return leaderboardDao.getExistingRecordIds(ids).toSet()
     }
 
     override suspend fun upsertRecord(record: LeaderboardRecord) {

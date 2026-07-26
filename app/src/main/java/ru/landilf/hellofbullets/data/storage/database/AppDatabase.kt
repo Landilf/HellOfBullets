@@ -12,7 +12,7 @@ import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
         PlayerProfileEntity::class,
         LeaderboardRecordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
