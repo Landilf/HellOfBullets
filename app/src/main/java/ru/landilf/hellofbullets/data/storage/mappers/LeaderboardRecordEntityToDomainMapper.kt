@@ -7,6 +7,7 @@ import javax.inject.Inject
 class LeaderboardRecordEntityToDomainMapper @Inject constructor() {
     operator fun invoke(entity: LeaderboardRecordEntity): LeaderboardRecord {
         return LeaderboardRecord(
+            id = entity.id,
             playerName = entity.playerName,
             time = entity.time
         )

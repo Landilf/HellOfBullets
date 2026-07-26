@@ -89,12 +89,12 @@ fun SurvivalRecordsScreen(
                 ) {
                     itemsIndexed(
                         items = state.records,
-                        key = { _, record -> record.playerName }
+                        key = { _, record -> record.id }
                     ) { index, record ->
                         LeaderboardRecordRow(
                             position = index + 1,
                             record = record,
-                            isCurrentPlayer = record.playerName == state.playerName
+                            isCurrentPlayer = record.id == state.playerId
                         )
                     }
                 }

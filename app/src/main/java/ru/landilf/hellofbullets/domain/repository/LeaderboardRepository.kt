@@ -4,8 +4,9 @@ import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 
 interface LeaderboardRepository {
     suspend fun getLeaderboard(): List<LeaderboardRecord>
-    suspend fun getRecordByPlayerName(playerName: String): LeaderboardRecord?
-    suspend fun getExistingPlayerNames(playerNames: List<String>): Set<String>
+    suspend fun getRecordById(id: String): LeaderboardRecord?
+    suspend fun getExistingRecordIds(ids: List<String>): Set<String>
     suspend fun upsertRecord(record: LeaderboardRecord)
+    suspend fun replaceLeaderboard(records: List<LeaderboardRecord>)
     suspend fun clearLeaderboard()
 }

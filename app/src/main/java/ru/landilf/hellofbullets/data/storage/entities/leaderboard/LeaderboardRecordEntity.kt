@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "leaderboard")
 data class LeaderboardRecordEntity(
     @PrimaryKey
+    val id: String,
     val playerName: String,
     val time: Int
 )

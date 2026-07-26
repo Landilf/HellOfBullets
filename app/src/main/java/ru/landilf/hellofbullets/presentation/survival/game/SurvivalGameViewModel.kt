@@ -18,6 +18,7 @@ import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.SubmitSurvivalResultUseCase
+import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
 import javax.inject.Inject
 import kotlin.time.TimeSource
@@ -26,7 +27,8 @@ import kotlin.time.TimeSource
 class SurvivalGameViewModel @Inject constructor(
     private val createDefaultSurvivalGameStateUseCase: CreateDefaultSurvivalGameStateUseCase,
     private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase,
-    private val submitSurvivalResultUseCase: SubmitSurvivalResultUseCase
+    private val submitSurvivalResultUseCase: SubmitSurvivalResultUseCase,
+    private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalGameUiState())
     val uiState: StateFlow<SurvivalGameUiState> = _uiState.asStateFlow()
@@ -254,6 +256,7 @@ class SurvivalGameViewModel @Inject constructor(
                         errorMessage = null
                     )
                 }
+                syncLeaderboard()
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
@@ -277,6 +280,18 @@ class SurvivalGameViewModel @Inject constructor(
             leaderboardPosition = domainResult.leaderboardPosition,
             leaderboardCutoffTime = domainResult.leaderboardCutoffTime
         )
+    }
+
+    private fun syncLeaderboard() {
+        viewModelScope.launch {
+            try {
+                syncSurvivalLeaderboardUseCase()
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (_: Exception) {
+                // Локальный результат уже сохранён, синхронизация повторится позже
+            }
+        }
     }
 
     private companion object {

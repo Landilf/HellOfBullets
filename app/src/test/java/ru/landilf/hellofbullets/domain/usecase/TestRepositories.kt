@@ -3,49 +3,60 @@ package ru.landilf.hellofbullets.domain.usecase
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
+import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 
 class FakeLeaderboardRepository(
     initialRecords: List<LeaderboardRecord> = emptyList()
 ) : LeaderboardRepository {
-    private val recordsByPlayerName = initialRecords
-        .associateBy { it.playerName }
+    private val recordsById = initialRecords
+        .associateBy { it.id }
         .toMutableMap()
 
     var upsertCallCount = 0
         private set
 
     override suspend fun getLeaderboard(): List<LeaderboardRecord> {
-        return recordsByPlayerName.values
+        return recordsById.values
             .sortedByDescending { it.time }
             .take(MAX_LEADERBOARD_SIZE)
     }
 
-    override suspend fun getRecordByPlayerName(
-        playerName: String
+    override suspend fun getRecordById(
+        id: String
     ): LeaderboardRecord? {
-        return recordsByPlayerName[playerName]
+        return recordsById[id]
     }
 
-    override suspend fun getExistingPlayerNames(
-        playerNames: List<String>
+    override suspend fun getExistingRecordIds(
+        ids: List<String>
     ): Set<String> {
-        return recordsByPlayerName.keys.intersect(playerNames.toSet())
+        return recordsById.keys.intersect(ids.toSet())
     }
 
     override suspend fun upsertRecord(
         record: LeaderboardRecord
     ) {
-        recordsByPlayerName[record.playerName] = record
+        recordsById[record.id] = record
         upsertCallCount++
     }
 
+    override suspend fun replaceLeaderboard(
+        records: List<LeaderboardRecord>
+    ) {
+        recordsById.clear()
+
+        for (record in records) {
+            recordsById[record.id] = record
+        }
+    }
+
     override suspend fun clearLeaderboard() {
-        recordsByPlayerName.clear()
+        recordsById.clear()
     }
 
     fun getAllRecords(): List<LeaderboardRecord> {
-        return recordsByPlayerName.values.toList()
+        return recordsById.values.toList()
     }
 
     private companion object {
@@ -70,6 +81,47 @@ class FakePlayerRepository(
     override suspend fun clearPlayerState() {
         state = null
     }
+}
 
+class FakeOnlineLeaderboardRepository(
+    private val playerId: String = "online-player",
+    initialRecords: List<LeaderboardRecord> = emptyList()
+) : OnlineLeaderboardRepository {
+    private val recordsById = initialRecords
+        .associateBy { it.id }
+        .toMutableMap()
 
+    var lastSubmittedRecord: LeaderboardRecord? = null
+        private set
+
+    override suspend fun getOrCreatePlayerId(): String {
+        return playerId
+    }
+
+    override suspend fun getTopSurvivalRecords(
+        limit: Int
+    ): List<LeaderboardRecord> {
+        return recordsById.values
+            .sortedByDescending { it.time }
+            .take(limit)
+    }
+
+    override suspend fun submitSurvivalRecord(
+        playerId: String,
+        playerName: String,
+        time: Int
+    ) {
+        val currentRecord = recordsById[playerId]
+
+        if (currentRecord == null || time > currentRecord.time) {
+            val record = LeaderboardRecord(
+                id = playerId,
+                playerName = playerName,
+                time = time
+            )
+
+            recordsById[playerId] = record
+            lastSubmittedRecord = record
+        }
+    }
 }

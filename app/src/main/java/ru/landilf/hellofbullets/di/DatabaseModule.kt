@@ -25,7 +25,8 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "hell_of_bullets.db"
-        ).build()
+        ).fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @Provides

@@ -8,14 +8,15 @@ class InitializeLocalLeaderboardUseCase @Inject constructor(
     private val leaderboardRepository: LeaderboardRepository
 ) {
     suspend operator fun invoke() {
-        val mockPlayerNames = mockRecords.map { it.playerName }
+        val mockRecordIds = mockRecords.map { it.id }
 
-        val existingPlayerNames = leaderboardRepository.getExistingPlayerNames(
-            playerNames = mockPlayerNames
+        val existingRecordIds = leaderboardRepository.getExistingRecordIds(
+            ids = mockRecordIds
         )
 
-        val recordsToAdd = mockRecords
-            .filter { it.playerName !in existingPlayerNames }
+        val recordsToAdd = mockRecords.filter { record ->
+            record.id !in existingRecordIds
+        }
 
         for (record in recordsToAdd) {
             leaderboardRepository.upsertRecord(record)
@@ -27,6 +28,7 @@ class InitializeLocalLeaderboardUseCase @Inject constructor(
 
         val mockRecords = List(MAX_RECORDS) { index ->
             LeaderboardRecord(
+                id = "mock-rival-${index + 1}",
                 playerName = "Rival ${index + 1}",
                 time = (MAX_RECORDS - index) * 10
             )
