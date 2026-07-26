@@ -13,6 +13,11 @@ interface LeaderboardDao {
     @Query("SELECT * FROM leaderboard WHERE playerName = :playerName LIMIT 1")
     suspend fun getRecordByPlayerName(playerName: String): LeaderboardRecordEntity?
 
+    @Query("SELECT playerName FROM leaderboard WHERE playerName IN (:playerNames)")
+    suspend fun getExistingPlayerNames(
+        playerNames: List<String>
+    ): List<String>
+
     @Upsert
     suspend fun upsert(record: LeaderboardRecordEntity)
 

@@ -4,17 +4,23 @@ import ru.landilf.hellofbullets.domain.model.battle.common.result.SurvivalResult
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
-import ru.landilf.hellofbullets.domain.repository.PlayerRepository
+import javax.inject.Inject
 
-class SubmitSurvivalResultUseCase(
-    private val playerRepository: PlayerRepository,
+class SubmitSurvivalResultUseCase @Inject constructor(
+    private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val leaderboardRepository: LeaderboardRepository,
-    private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase
+    private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase,
+    private val savePlayerStateUseCase: SavePlayerStateUseCase,
+    private val initializeLocalLeaderboardUseCase: InitializeLocalLeaderboardUseCase
 ) {
-    suspend operator fun invoke(time: Int, playerLevel: Int): SurvivalResult {
-        val playerState = playerRepository.getPlayerState()
-            ?: error("Player state is not initialized")
-        val reward = calculateSurvivalRewardUseCase(time, playerLevel)
+    suspend operator fun invoke(time: Int): SurvivalResult {
+        initializeLocalLeaderboardUseCase()
+
+        val playerState = getOrCreatePlayerStateUseCase()
+        val reward = calculateSurvivalRewardUseCase(
+            time = time,
+            playerLevel = playerState.playerProfile.level
+        )
         val currentRecord =
             leaderboardRepository.getRecordByPlayerName(playerState.playerProfile.name)
         val isNewRecord = currentRecord == null || time > currentRecord.time
@@ -32,6 +38,7 @@ class SubmitSurvivalResultUseCase(
         val position = leaderboard.indexOfFirst { it.playerName == playerState.playerProfile.name }
             .takeIf { it >= 0 }
             ?.plus(1)
+        val leaderboardCutoffTime = leaderboard.lastOrNull()?.time
         val updatedState = PlayerState(
             playerProfile = playerState.playerProfile.copy(
                 expAmount = playerState.playerProfile.expAmount + reward.exp,
@@ -41,14 +48,14 @@ class SubmitSurvivalResultUseCase(
             inventory = playerState.inventory
         )
 
-        playerRepository.savePlayerState(updatedState)
+        savePlayerStateUseCase(updatedState)
 
         return SurvivalResult(
             time = time,
             reward = reward,
             isNewRecord = isNewRecord,
             leaderboardPosition = position,
-            leaderboard = leaderboard
+            leaderboardCutoffTime = leaderboardCutoffTime
         )
     }
 }

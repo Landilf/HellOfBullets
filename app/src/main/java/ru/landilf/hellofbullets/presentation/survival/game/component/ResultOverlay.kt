@@ -2,7 +2,6 @@ package ru.landilf.hellofbullets.presentation.survival.game.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +49,33 @@ fun ResultOverlay(
                 ),
                 color = Color.White
             )
+
+            if (result.isNewRecord) {
+                Text(
+                    text = stringResource(R.string.result_new_record),
+                    color = Color(0xFFFFD166)
+                )
+            }
+
+            if (result.leaderboardPosition != null) {
+                Text(
+                    text = stringResource(
+                        R.string.result_leaderboard_position,
+                        result.leaderboardPosition
+                    ),
+                    color = Color.White
+                )
+            } else {
+                result.leaderboardCutoffTime?.let { cutoffTime ->
+                    Text(
+                        text = stringResource(
+                            R.string.result_leaderboard_cutoff,
+                            formatElapsedTime(cutoffTime * 1_000)
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
 
             Text(
                 text = stringResource(

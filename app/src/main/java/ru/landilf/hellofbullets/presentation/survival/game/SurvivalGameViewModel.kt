@@ -3,6 +3,7 @@ package ru.landilf.hellofbullets.presentation.survival.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,11 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import ru.landilf.hellofbullets.domain.model.battle.common.result.SurvivalResult as DomainResultSurvival
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
-import ru.landilf.hellofbullets.domain.usecase.CalculateSurvivalRewardUseCase
 import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.SubmitSurvivalResultUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
 import javax.inject.Inject
 import kotlin.time.TimeSource
@@ -24,7 +26,7 @@ import kotlin.time.TimeSource
 class SurvivalGameViewModel @Inject constructor(
     private val createDefaultSurvivalGameStateUseCase: CreateDefaultSurvivalGameStateUseCase,
     private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase,
-    private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase
+    private val submitSurvivalResultUseCase: SubmitSurvivalResultUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalGameUiState())
     val uiState: StateFlow<SurvivalGameUiState> = _uiState.asStateFlow()
@@ -83,18 +85,14 @@ class SurvivalGameViewModel @Inject constructor(
                     .coerceAtMost(MAX_DELTA_TIME_MS)
                     .toInt()
 
+                var finishedAttemptTimeMs: Int? = null
+
                 _uiState.update { currentState ->
                     val currentGameState = currentState.gameState ?: return@update currentState
 
                     when (currentGameState.phase) {
                         SurvivalPhase.PAUSED -> return@update currentState
-
-                        SurvivalPhase.FINISHED -> {
-                            return@update currentState.copy(
-                                isResultVisible = true
-                            )
-                        }
-
+                        SurvivalPhase.FINISHED -> return@update currentState
                         SurvivalPhase.ACTIVE -> Unit
                     }
 
@@ -104,12 +102,10 @@ class SurvivalGameViewModel @Inject constructor(
                     )
 
                     if (updatedGameState.phase == SurvivalPhase.FINISHED) {
-                        val result = createResult(updatedGameState.elapsedTimeMs)
+                        finishedAttemptTimeMs = updatedGameState.elapsedTimeMs
 
                         return@update currentState.copy(
-                            gameState = updatedGameState,
-                            isResultVisible = true,
-                            result = result
+                            gameState = updatedGameState
                         )
                     }
 
@@ -117,6 +113,8 @@ class SurvivalGameViewModel @Inject constructor(
                         gameState = updatedGameState
                     )
                 }
+
+                finishedAttemptTimeMs?.let(::submitResult)
             }
         }
     }
@@ -237,23 +235,52 @@ class SurvivalGameViewModel @Inject constructor(
         )
     }
 
-    private fun createResult(
+    private fun submitResult(
         elapsedTimeMs: Int
-    ): SurvivalResultUiState {
-        val reward = calculateSurvivalRewardUseCase(
-            time = elapsedTimeMs / 1000,
-            playerLevel = DEFAULT_PLAYER_LEVEL
-        )
+    ) {
+        viewModelScope.launch {
+            try {
+                val domainResult = submitSurvivalResultUseCase(
+                    time = elapsedTimeMs / 1_000
+                )
 
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isResultVisible = true,
+                        result = createResult(
+                            elapsedTimeMs = elapsedTimeMs,
+                            domainResult = domainResult
+                        ),
+                        errorMessage = null
+                    )
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        errorMessage = exception.message ?: "Не удалось сохранить результат попытки"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createResult(
+        elapsedTimeMs: Int,
+        domainResult: DomainResultSurvival
+    ): SurvivalResultUiState {
         return SurvivalResultUiState(
             elapsedTimeMs = elapsedTimeMs,
-            reward = reward
+            reward = domainResult.reward,
+            isNewRecord = domainResult.isNewRecord,
+            leaderboardPosition = domainResult.leaderboardPosition,
+            leaderboardCutoffTime = domainResult.leaderboardCutoffTime
         )
     }
 
     private companion object {
         const val FRAME_DELAY_MS = 16L
         const val MAX_DELTA_TIME_MS = 100L
-        const val DEFAULT_PLAYER_LEVEL = 1
     }
 }
