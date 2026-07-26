@@ -2,6 +2,7 @@ package ru.landilf.hellofbullets.data.storage.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import ru.landilf.hellofbullets.data.storage.entities.leaderboard.LeaderboardRecordEntity
 
@@ -20,6 +21,22 @@ interface LeaderboardDao {
 
     @Upsert
     suspend fun upsert(record: LeaderboardRecordEntity)
+
+    @Upsert
+    suspend fun upsertAll(
+        records: List<LeaderboardRecordEntity>
+    ) {
+        clearLeaderboard()
+        upsertAll(records)
+    }
+
+    @Transaction
+    suspend fun replaceLeaderboard(
+        records: List<LeaderboardRecordEntity>
+    ) {
+        clearLeaderboard()
+        upsertAll(records)
+    }
 
     @Query("DELETE FROM leaderboard")
     suspend fun clearLeaderboard()

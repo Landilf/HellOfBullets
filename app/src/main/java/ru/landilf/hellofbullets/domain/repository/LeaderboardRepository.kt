@@ -7,5 +7,6 @@ interface LeaderboardRepository {
     suspend fun getRecordById(id: String): LeaderboardRecord?
     suspend fun getExistingRecordIds(ids: List<String>): Set<String>
     suspend fun upsertRecord(record: LeaderboardRecord)
+    suspend fun replaceLeaderboard(records: List<LeaderboardRecord>)
     suspend fun clearLeaderboard()
 }

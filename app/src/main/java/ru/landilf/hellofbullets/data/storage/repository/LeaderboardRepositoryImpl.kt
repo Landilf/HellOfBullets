@@ -28,6 +28,10 @@ class LeaderboardRepositoryImpl @Inject constructor(
         leaderboardDao.upsert(domainToEntityMapper(record))
     }
 
+    override suspend fun replaceLeaderboard(records: List<LeaderboardRecord>) {
+        leaderboardDao.replaceLeaderboard(records.map(domainToEntityMapper::invoke))
+    }
+
     override suspend fun clearLeaderboard() {
         leaderboardDao.clearLeaderboard()
     }

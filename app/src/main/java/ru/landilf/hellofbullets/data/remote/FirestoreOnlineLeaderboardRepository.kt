@@ -18,6 +18,10 @@ class FirestoreOnlineLeaderboardRepository @Inject constructor(
         .document(DOCUMENT_SURVIVAL)
         .collection(COLLECTION_RECORDS)
 
+    override suspend fun getOrCreatePlayerId(): String {
+        return firebaseAuthDataSource.getOrCreateUserId()
+    }
+
     override suspend fun getTopSurvivalRecords(
         limit: Int
     ): List<LeaderboardRecord> {
@@ -47,14 +51,16 @@ class FirestoreOnlineLeaderboardRepository @Inject constructor(
     }
 
     override suspend fun submitSurvivalRecord(
-        playerName: String, time: Int
+        playerId: String,
+        playerName: String,
+        time: Int
     ) {
         require(time >= 0) {
             "Время рекорда не может быть отрицательным"
         }
 
-        val userId = firebaseAuthDataSource.getOrCreateUserId()
-        val recordDocument = survivalRecordsCollection.document(userId)
+        val recordDocument = survivalRecordsCollection
+            .document(playerId)
 
         firestore.runTransaction { transaction ->
             val currentTime = transaction
@@ -66,7 +72,7 @@ class FirestoreOnlineLeaderboardRepository @Inject constructor(
                 transaction.set(
                     recordDocument,
                     mapOf(
-                        FIELD_USER_ID to userId,
+                        FIELD_USER_ID to playerId,
                         FIELD_PLAYER_NAME to playerName,
                         FIELD_TIME to time,
                         FIELD_UPDATED_AT to FieldValue.serverTimestamp()

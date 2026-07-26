@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.usecase.GetLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.InitializeLocalLeaderboardUseCase
+import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -17,7 +18,8 @@ import kotlin.coroutines.cancellation.CancellationException
 class SurvivalRecordsViewModel @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val initializeLocalLeaderboardUseCase: InitializeLocalLeaderboardUseCase,
-    private val getLeaderboardUseCase: GetLeaderboardUseCase
+    private val getLeaderboardUseCase: GetLeaderboardUseCase,
+    private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalRecordsUiState())
     val uiState: StateFlow<SurvivalRecordsUiState> = _uiState.asStateFlow()
@@ -30,6 +32,14 @@ class SurvivalRecordsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 initializeLocalLeaderboardUseCase()
+
+                try {
+                    syncSurvivalLeaderboardUseCase()
+                } catch (exception: CancellationException) {
+                    throw exception
+                } catch (_: Exception) {
+                    // При отсутствии сети используется локальный кэш Room
+                }
 
                 val playerState = getOrCreatePlayerStateUseCase()
                 val records = getLeaderboardUseCase()
