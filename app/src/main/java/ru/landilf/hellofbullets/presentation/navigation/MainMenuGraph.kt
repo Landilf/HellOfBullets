@@ -45,8 +45,7 @@ fun NavGraphBuilder.mainMenuGraph(
     composable(AppDestination.SelectMode.route) {
         SelectModeScreen(
             onSurvivalClick = { navController.navigate(AppDestination.SurvivalHome.route) },
-            onDuelClick = { navController.navigate(AppDestination.Duel.route) },
-            onBackClick = { navController.popBackStack() }
+            onDuelClick = { navController.navigate(AppDestination.Duel.route) }
         )
     }
 

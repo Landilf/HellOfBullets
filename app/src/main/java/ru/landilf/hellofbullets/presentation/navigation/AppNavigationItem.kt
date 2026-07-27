@@ -5,6 +5,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 data class AppNavigationItem(
     val destination: AppDestination,
-    @StringRes val labelRes: Int,
+    @field:StringRes val labelRes: Int,
     val icon: ImageVector
 )

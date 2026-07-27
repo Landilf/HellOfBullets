@@ -58,7 +58,15 @@ fun AppBottomNavigation(
     NavigationBar {
         navigationItems.forEach { item ->
             NavigationBarItem(
-                selected = currentRoute == item.destination.route,
+                selected = when (currentRoute) {
+                    AppDestination.SelectMode.route,
+                    AppDestination.SurvivalHome.route,
+                    AppDestination.Duel.route -> {
+                        item.destination == AppDestination.SelectMode
+                    }
+
+                    else -> currentRoute == item.destination.route
+                },
                 onClick = {
                     navController.navigate(item.destination.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
