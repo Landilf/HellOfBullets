@@ -11,11 +11,8 @@ class SubmitSurvivalResultUseCase @Inject constructor(
     private val leaderboardRepository: LeaderboardRepository,
     private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase,
     private val savePlayerStateUseCase: SavePlayerStateUseCase,
-    private val initializeLocalLeaderboardUseCase: InitializeLocalLeaderboardUseCase
 ) {
     suspend operator fun invoke(time: Int): SurvivalResult {
-        initializeLocalLeaderboardUseCase()
-
         val playerState = getOrCreatePlayerStateUseCase()
         val playerRecordId = playerState.playerProfile.id.toString()
 

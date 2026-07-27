@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.usecase.GetLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.GetOrCreatePlayerStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.InitializeLocalLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -17,7 +16,6 @@ import kotlin.coroutines.cancellation.CancellationException
 @HiltViewModel
 class SurvivalRecordsViewModel @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
-    private val initializeLocalLeaderboardUseCase: InitializeLocalLeaderboardUseCase,
     private val getLeaderboardUseCase: GetLeaderboardUseCase,
     private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase
 ) : ViewModel() {
@@ -31,8 +29,6 @@ class SurvivalRecordsViewModel @Inject constructor(
     private fun loadRecords() {
         viewModelScope.launch {
             try {
-                initializeLocalLeaderboardUseCase()
-
                 try {
                     syncSurvivalLeaderboardUseCase()
                 } catch (exception: CancellationException) {

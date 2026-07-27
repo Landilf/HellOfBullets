@@ -14,21 +14,13 @@ interface LeaderboardDao {
     @Query("SELECT * FROM leaderboard WHERE id = :id LIMIT 1")
     suspend fun getRecordById(id: String): LeaderboardRecordEntity?
 
-    @Query("SELECT id FROM leaderboard WHERE id IN (:ids)")
-    suspend fun getExistingRecordIds(
-        ids: List<String>
-    ): List<String>
-
     @Upsert
     suspend fun upsert(record: LeaderboardRecordEntity)
 
     @Upsert
     suspend fun upsertAll(
         records: List<LeaderboardRecordEntity>
-    ) {
-        clearLeaderboard()
-        upsertAll(records)
-    }
+    )
 
     @Transaction
     suspend fun replaceLeaderboard(
