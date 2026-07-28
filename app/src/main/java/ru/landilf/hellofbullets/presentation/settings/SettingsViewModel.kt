@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.landilf.hellofbullets.domain.usecase.GetOrCreatePlayerStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.ObserveGameSettingsUseCase
-import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
-import ru.landilf.hellofbullets.domain.usecase.UpdateInputSensitivityUseCase
-import ru.landilf.hellofbullets.domain.usecase.UpdatePlayerNameUseCase
+import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.settings.ObserveGameSettingsUseCase
+import ru.landilf.hellofbullets.domain.usecase.leaderboard.SyncSurvivalLeaderboardUseCase
+import ru.landilf.hellofbullets.domain.usecase.settings.UpdateInputSensitivityUseCase
+import ru.landilf.hellofbullets.domain.usecase.player.UpdatePlayerNameUseCase
 import javax.inject.Inject
 
 @HiltViewModel

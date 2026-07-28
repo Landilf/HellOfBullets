@@ -9,8 +9,8 @@ import ru.landilf.hellofbullets.presentation.survival.SurvivalHomeScreen
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameAction
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameScreen
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalGameViewModel
-import ru.landilf.hellofbullets.presentation.survival.records.SurvivalRecordsScreen
-import ru.landilf.hellofbullets.presentation.survival.records.SurvivalRecordsViewModel
+import ru.landilf.hellofbullets.presentation.survival.leaderboard.SurvivalLeaderboardScreen
+import ru.landilf.hellofbullets.presentation.survival.leaderboard.SurvivalLeaderboardViewModel
 
 fun NavGraphBuilder.survivalGraph(
     navController: NavController
@@ -18,7 +18,7 @@ fun NavGraphBuilder.survivalGraph(
     composable(AppDestination.SurvivalHome.route) {
         SurvivalHomeScreen(
             onStartGameClick = { navController.navigate(AppDestination.SurvivalGame.route) },
-            onShowRecordsClick = { navController.navigate(AppDestination.SurvivalRecords.route) },
+            onShowLeaderboardClick = { navController.navigate(AppDestination.SurvivalLeaderboard.route) },
             onBackClick = { navController.popBackStack() }
         )
     }
@@ -51,11 +51,11 @@ fun NavGraphBuilder.survivalGraph(
         )
     }
 
-    composable(AppDestination.SurvivalRecords.route) {
-        val viewModel: SurvivalRecordsViewModel = hiltViewModel()
+    composable(AppDestination.SurvivalLeaderboard.route) {
+        val viewModel: SurvivalLeaderboardViewModel = hiltViewModel()
         val state = viewModel.uiState.collectAsState()
 
-        SurvivalRecordsScreen(
+        SurvivalLeaderboardScreen(
             state = state.value,
             onBackClick = { navController.popBackStack() }
         )

@@ -7,45 +7,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.presentation.common.PlaceholderScreen
-import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuAction
-import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuScreen
-import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
 import ru.landilf.hellofbullets.presentation.settings.SettingsScreen
 import ru.landilf.hellofbullets.presentation.settings.SettingsViewModel
 
 fun NavGraphBuilder.mainMenuGraph(
-    navController: NavController,
-    mainMenuUiState: MainMenuUiState,
-    onExit: () -> Unit
+    navController: NavController
 ) {
-    composable(AppDestination.MainMenu.route) {
-        MainMenuScreen(
-            state = mainMenuUiState,
-            onClickAction = { action ->
-                when (action) {
-                    MainMenuAction.SelectMode ->
-                        navController.navigate(AppDestination.SelectMode.route)
-
-                    MainMenuAction.Skills ->
-                        navController.navigate(AppDestination.Skills.route)
-
-                    MainMenuAction.Equipment ->
-                        navController.navigate(AppDestination.Equipment.route)
-
-                    MainMenuAction.Shop ->
-                        navController.navigate(AppDestination.Shop.route)
-
-                    MainMenuAction.Settings ->
-                        navController.navigate(AppDestination.Settings.route)
-
-                    MainMenuAction.Exit ->
-                        onExit()
-                }
-            }
-        )
-    }
-
     composable(AppDestination.SelectMode.route) {
         SelectModeScreen(
             onSurvivalClick = { navController.navigate(AppDestination.SurvivalHome.route) },

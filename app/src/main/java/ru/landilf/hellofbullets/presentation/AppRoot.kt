@@ -2,19 +2,13 @@ package ru.landilf.hellofbullets.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
-import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.navigation.AppNavHost
 
 @Composable
-fun AppRoot(
-    mainMenuState: MainMenuUiState,
-    onExit: () -> Unit
-) {
+fun AppRoot() {
     val navController = rememberNavController()
 
     AppNavHost(
-        navController = navController,
-        mainMenuUiState = mainMenuState,
-        onExit = onExit
+        navController = navController
     )
 }

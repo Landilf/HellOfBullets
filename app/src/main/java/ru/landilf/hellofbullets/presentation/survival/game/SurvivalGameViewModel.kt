@@ -16,11 +16,11 @@ import ru.landilf.hellofbullets.domain.model.battle.common.result.SurvivalResult
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
-import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.ObserveGameSettingsUseCase
-import ru.landilf.hellofbullets.domain.usecase.SubmitSurvivalResultUseCase
-import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
-import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.survival.CreateDefaultSurvivalGameStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.settings.ObserveGameSettingsUseCase
+import ru.landilf.hellofbullets.domain.usecase.leaderboard.SubmitSurvivalResultUseCase
+import ru.landilf.hellofbullets.domain.usecase.leaderboard.SyncSurvivalLeaderboardUseCase
+import ru.landilf.hellofbullets.domain.usecase.survival.UpdateSurvivalGameStateUseCase
 import javax.inject.Inject
 import kotlin.time.TimeSource
 
