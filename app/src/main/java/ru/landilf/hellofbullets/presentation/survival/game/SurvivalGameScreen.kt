@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +21,7 @@ import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalGameState
 import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.Vector2
+import ru.landilf.hellofbullets.presentation.common.CenteredMessage
 import ru.landilf.hellofbullets.presentation.survival.game.component.PauseMenuOverlay
 import ru.landilf.hellofbullets.presentation.survival.game.component.ResultOverlay
 import ru.landilf.hellofbullets.presentation.survival.game.component.SurvivalGameCanvas
@@ -49,21 +49,17 @@ fun SurvivalGameScreen(
     ) {
         when {
             state.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.loading_title))
-                }
+                CenteredMessage(
+                    message = stringResource(R.string.loading_title),
+                    color = Color.White
+                )
             }
 
             state.errorMessage != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(state.errorMessage)
-                }
+                CenteredMessage(
+                    message = state.errorMessage,
+                    color = Color.White
+                )
             }
 
             state.gameState != null -> {
@@ -76,12 +72,10 @@ fun SurvivalGameScreen(
             }
 
             else -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.page_game_unavailable))
-                }
+                CenteredMessage(
+                    message = stringResource(R.string.page_game_unavailable),
+                    color = Color.White
+                )
             }
         }
     }

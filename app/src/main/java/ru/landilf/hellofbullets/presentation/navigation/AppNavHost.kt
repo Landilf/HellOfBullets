@@ -15,13 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 
 @Composable
 fun AppNavHost(
-    navController: NavHostController,
-    mainMenuUiState: MainMenuUiState,
-    onExit: () -> Unit
+    navController: NavHostController
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -59,9 +56,7 @@ fun AppNavHost(
             modifier = Modifier.padding(innerPadding)
         ) {
             mainMenuGraph(
-                navController = navController,
-                mainMenuUiState = mainMenuUiState,
-                onExit = onExit
+                navController = navController
             )
 
             survivalGraph(

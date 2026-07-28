@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.domain.model.settings.GameSettings
+import ru.landilf.hellofbullets.presentation.common.CenteredMessage
 
 @Composable
 fun SettingsScreen(
@@ -49,12 +50,9 @@ fun SettingsScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(stringResource(R.string.loading_title))
-            }
+            CenteredMessage(
+                message = stringResource(R.string.loading_title)
+            )
         } else {
             Column(
                 modifier = Modifier

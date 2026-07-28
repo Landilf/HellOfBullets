@@ -16,7 +16,7 @@ import ru.landilf.hellofbullets.R
 @Composable
 fun SurvivalHomeScreen(
     onStartGameClick: () -> Unit,
-    onShowRecordsClick: () -> Unit,
+    onShowLeaderboardClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     Column(
@@ -38,7 +38,7 @@ fun SurvivalHomeScreen(
 
         Button(
             modifier = Modifier.padding(24.dp),
-            onClick = onShowRecordsClick
+            onClick = onShowLeaderboardClick
         ) {
             Text(stringResource(R.string.show_records_button))
         }

@@ -212,95 +212,59 @@ class ProjectileFactory @Inject constructor(
         fieldSize: GameFieldSize
     ): RandomResult<Vector2> {
         return when (section) {
-            ArenaEdgeSection.TOP -> {
-                val xResult = randomGenerator.nextFloat(
+            ArenaEdgeSection.TOP ->
+                createHorizontalEdgePosition(
+                    y = 0f,
                     randomState = randomState,
-                    range = FloatRange(0f, fieldSize.width)
+                    fieldSize = fieldSize
                 )
 
-                RandomResult(
-                    value = Vector2(
-                        x = xResult.value,
-                        y = 0f
-                    ),
-                    nextState = xResult.nextState
-                )
-            }
-
-            ArenaEdgeSection.BOTTOM -> {
-                val xResult = randomGenerator.nextFloat(
+            ArenaEdgeSection.BOTTOM ->
+                createHorizontalEdgePosition(
+                    y = fieldSize.height,
                     randomState = randomState,
-                    range = FloatRange(0f, fieldSize.width)
+                    fieldSize = fieldSize
                 )
 
-                RandomResult(
-                    value = Vector2(
-                        x = xResult.value,
-                        y = fieldSize.height
+            ArenaEdgeSection.LEFT_UPPER ->
+                createVerticalEdgePosition(
+                    x = 0f,
+                    yRange = FloatRange(
+                        min = 0f,
+                        max = fieldSize.height / 2f
                     ),
-                    nextState = xResult.nextState
-                )
-            }
-
-            ArenaEdgeSection.LEFT_UPPER -> {
-                val yResult = randomGenerator.nextFloat(
-                    randomState = randomState,
-                    range = FloatRange(0f, fieldSize.height / 2f)
+                    randomState = randomState
                 )
 
-                RandomResult(
-                    value = Vector2(
-                        x = 0f,
-                        y = yResult.value
+            ArenaEdgeSection.LEFT_LOWER ->
+                createVerticalEdgePosition(
+                    x = 0f,
+                    yRange = FloatRange(
+                        min = fieldSize.height / 2f,
+                        max = fieldSize.height
                     ),
-                    nextState = yResult.nextState
-                )
-            }
-
-            ArenaEdgeSection.LEFT_LOWER -> {
-                val yResult = randomGenerator.nextFloat(
-                    randomState = randomState,
-                    range = FloatRange(fieldSize.height / 2f, fieldSize.height)
+                    randomState = randomState
                 )
 
-                RandomResult(
-                    value = Vector2(
-                        x = 0f,
-                        y = yResult.value
+            ArenaEdgeSection.RIGHT_UPPER ->
+                createVerticalEdgePosition(
+                    x = fieldSize.width,
+                    yRange = FloatRange(
+                        min = 0f,
+                        max = fieldSize.height / 2f
                     ),
-                    nextState = yResult.nextState
-                )
-            }
-
-            ArenaEdgeSection.RIGHT_UPPER -> {
-                val yResult = randomGenerator.nextFloat(
-                    randomState = randomState,
-                    range = FloatRange(0f, fieldSize.height / 2f)
+                    randomState = randomState
                 )
 
-                RandomResult(
-                    value = Vector2(
-                        x = fieldSize.width,
-                        y = yResult.value
+            ArenaEdgeSection.RIGHT_LOWER ->
+                createVerticalEdgePosition(
+                    x = fieldSize.width,
+                    yRange = FloatRange(
+                        min = fieldSize.height / 2f,
+                        max = fieldSize.height
                     ),
-                    nextState = yResult.nextState
+                    randomState = randomState
                 )
-            }
-
-            ArenaEdgeSection.RIGHT_LOWER -> {
-                val yResult = randomGenerator.nextFloat(
-                    randomState = randomState,
-                    range = FloatRange(fieldSize.height / 2f, fieldSize.height)
-                )
-
-                RandomResult(
-                    value = Vector2(
-                        x = fieldSize.width,
-                        y = yResult.value
-                    ),
-                    nextState = yResult.nextState
-                )
-            }
         }
     }
 
@@ -350,6 +314,47 @@ class ProjectileFactory @Inject constructor(
             ArenaEdgeSection.RIGHT_UPPER,
             ArenaEdgeSection.RIGHT_LOWER -> Vector2(-1f, 0f)
         }
+    }
+
+    private fun createHorizontalEdgePosition(
+        y: Float,
+        randomState: BattleRandomState,
+        fieldSize: GameFieldSize
+    ): RandomResult<Vector2> {
+        val xResult = randomGenerator.nextFloat(
+            randomState = randomState,
+            range = FloatRange(
+                min = 0f,
+                max = fieldSize.width
+            )
+        )
+
+        return RandomResult(
+            value = Vector2(
+                x = xResult.value,
+                y = y
+            ),
+            nextState = xResult.nextState
+        )
+    }
+
+    private fun createVerticalEdgePosition(
+        x: Float,
+        yRange: FloatRange,
+        randomState: BattleRandomState
+    ): RandomResult<Vector2> {
+        val yResult = randomGenerator.nextFloat(
+            randomState = randomState,
+            range = yRange
+        )
+
+        return RandomResult(
+            value = Vector2(
+                x = x,
+                y = yResult.value
+            ),
+            nextState = yResult.nextState
+        )
     }
 
     private data class ProjectilePath(

@@ -37,9 +37,9 @@
     <string name="result_leaderboard_position">Место в таблице: %1$d</string>
     <string name="result_leaderboard_cutoff">Время последнего места: %1$s</string>
 
-    <string name="records_empty">Записей пока нет</string>
-    <string name="records_rank">%1$d.</string>
-    <string name="records_time">%1$s</string>
+    <string name="leaderboard_empty">Записей пока нет</string>
+    <string name="leaderboard_rank">%1$d.</string>
+    <string name="leaderboard_time">%1$s</string>
 
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
