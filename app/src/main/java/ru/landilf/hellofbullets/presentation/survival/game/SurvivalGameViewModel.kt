@@ -17,6 +17,7 @@ import ru.landilf.hellofbullets.domain.model.battle.survival.SurvivalPhase
 import ru.landilf.hellofbullets.domain.model.common.GameFieldSize
 import ru.landilf.hellofbullets.domain.model.common.Vector2
 import ru.landilf.hellofbullets.domain.usecase.CreateDefaultSurvivalGameStateUseCase
+import ru.landilf.hellofbullets.domain.usecase.ObserveGameSettingsUseCase
 import ru.landilf.hellofbullets.domain.usecase.SubmitSurvivalResultUseCase
 import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateSurvivalGameStateUseCase
@@ -28,7 +29,8 @@ class SurvivalGameViewModel @Inject constructor(
     private val createDefaultSurvivalGameStateUseCase: CreateDefaultSurvivalGameStateUseCase,
     private val updateSurvivalGameStateUseCase: UpdateSurvivalGameStateUseCase,
     private val submitSurvivalResultUseCase: SubmitSurvivalResultUseCase,
-    private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase
+    private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase,
+    private val observeGameSettingsUseCase: ObserveGameSettingsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SurvivalGameUiState())
     val uiState: StateFlow<SurvivalGameUiState> = _uiState.asStateFlow()
@@ -36,6 +38,7 @@ class SurvivalGameViewModel @Inject constructor(
     private var gameLoopJob: Job? = null
 
     init {
+        observeGameSettings()
         startGameLoop()
     }
 
@@ -66,6 +69,18 @@ class SurvivalGameViewModel @Inject constructor(
                     widthPx = action.widthPx,
                     heightPx = action.heightPx
                 )
+            }
+        }
+    }
+
+    private fun observeGameSettings() {
+        viewModelScope.launch {
+            observeGameSettingsUseCase().collect { settings ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        inputSensitivity = settings.inputSensitivity
+                    )
+                }
             }
         }
     }
@@ -228,13 +243,15 @@ class SurvivalGameViewModel @Inject constructor(
     ) {
         val initialGameState = createDefaultSurvivalGameStateUseCase(fieldSize)
 
-        _uiState.value = SurvivalGameUiState(
-            isLoading = false,
-            gameState = initialGameState,
-            errorMessage = null,
-            isResultVisible = false,
-            result = null
-        )
+        _uiState.update { currentState ->
+            currentState.copy(
+                isLoading = false,
+                gameState = initialGameState,
+                errorMessage = null,
+                isResultVisible = false,
+                result = null
+            )
+        }
     }
 
     private fun submitResult(

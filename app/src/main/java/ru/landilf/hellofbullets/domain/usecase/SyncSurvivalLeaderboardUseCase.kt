@@ -30,10 +30,6 @@ class SyncSurvivalLeaderboardUseCase @Inject constructor(
             limit = MAX_RECORDS
         )
 
-        if (onlineRecords.size < MAX_RECORDS) {
-            return
-        }
-
         val cachedOnlineRecords = onlineRecords.map { record ->
             if (record.id == onlinePlayerId) {
                 record.copy(

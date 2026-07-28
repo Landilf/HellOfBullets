@@ -6,6 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 
 class SubmitSurvivalResultUseCaseTest {
     @Test
@@ -23,8 +24,8 @@ class SubmitSurvivalResultUseCaseTest {
         val playerRecord = leaderboardRepository.getRecordById("1")
 
         assertTrue(result.isNewRecord)
-        assertEquals(19, result.leaderboardPosition)
-        assertEquals(20, result.leaderboardCutoffTime)
+        assertEquals(1, result.leaderboardPosition)
+        assertEquals(25, result.leaderboardCutoffTime)
         assertEquals(2, playerState.playerProfile.expAmount)
         assertEquals(1, playerState.playerProfile.silverAmount)
         assertEquals(25, playerRecord?.time)
@@ -54,7 +55,15 @@ class SubmitSurvivalResultUseCaseTest {
     @Test
     fun `returns leaderboard cutoff when player result does not enter top`() = runBlocking {
         val playerRepository = FakePlayerRepository()
-        val leaderboardRepository = FakeLeaderboardRepository()
+        val leaderboardRepository = FakeLeaderboardRepository(
+            initialRecords = List(20) { index ->
+                LeaderboardRecord(
+                    id = "rival-$index",
+                    playerName = "Rival $index",
+                    time = 29 - index
+                )
+            }
+        )
         val useCase = createUseCase(
             playerRepository = playerRepository,
             leaderboardRepository = leaderboardRepository
@@ -80,10 +89,7 @@ class SubmitSurvivalResultUseCaseTest {
             ),
             leaderboardRepository = leaderboardRepository,
             calculateSurvivalRewardUseCase = CalculateSurvivalRewardUseCase(),
-            savePlayerStateUseCase = savePlayerStateUseCase,
-            initializeLocalLeaderboardUseCase = InitializeLocalLeaderboardUseCase(
-                leaderboardRepository = leaderboardRepository
-            )
+            savePlayerStateUseCase = savePlayerStateUseCase
         )
     }
 }

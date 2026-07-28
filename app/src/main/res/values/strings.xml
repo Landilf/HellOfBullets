@@ -12,6 +12,11 @@
     <string name="select_mode_title">Выбор режима</string>
     <string name="select_mode_survival">Выживание</string>
     <string name="select_mode_duel">Дуэль</string>
+    <string name="select_mode_survival_description">Продержитесь как можно дольше</string>
+    <string name="select_mode_duel_description">Сразитесь с боссом</string>
+    <string name="select_mode_previous">Предыдущий режим</string>
+    <string name="select_mode_next">Следующий режим</string>
+    <string name="select_mode_start_hint">Нажмите, чтобы начать</string>
 
     <string name="survival_title">Выживание</string>
     <string name="show_records_button">Таблица рекордов</string>
@@ -35,6 +40,12 @@
     <string name="records_empty">Записей пока нет</string>
     <string name="records_rank">%1$d.</string>
     <string name="records_time">%1$s</string>
+
+    <string name="settings_player_name_label">Имя игрока</string>
+    <string name="settings_save_name">Сохранить имя</string>
+    <string name="settings_input_sensitivity">Чувствительность управления</string>
+    <string name="settings_input_sensitivity_value">%1$.1fx</string>
+    <string name="settings_name_saved">Имя успешно сохранено</string>
 
     <string name="error_title">Ошибка</string>
     <string name="loading_title">Загрузка</string>

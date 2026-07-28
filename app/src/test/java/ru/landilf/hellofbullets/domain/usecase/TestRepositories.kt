@@ -28,12 +28,6 @@ class FakeLeaderboardRepository(
         return recordsById[id]
     }
 
-    override suspend fun getExistingRecordIds(
-        ids: List<String>
-    ): Set<String> {
-        return recordsById.keys.intersect(ids.toSet())
-    }
-
     override suspend fun upsertRecord(
         record: LeaderboardRecord
     ) {
@@ -113,7 +107,10 @@ class FakeOnlineLeaderboardRepository(
     ) {
         val currentRecord = recordsById[playerId]
 
-        if (currentRecord == null || time > currentRecord.time) {
+        if (currentRecord == null ||
+            time > currentRecord.time ||
+            playerName != currentRecord.playerName
+        ) {
             val record = LeaderboardRecord(
                 id = playerId,
                 playerName = playerName,
