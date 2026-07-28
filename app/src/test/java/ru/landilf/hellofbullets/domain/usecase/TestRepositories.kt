@@ -107,7 +107,10 @@ class FakeOnlineLeaderboardRepository(
     ) {
         val currentRecord = recordsById[playerId]
 
-        if (currentRecord == null || time > currentRecord.time) {
+        if (currentRecord == null ||
+            time > currentRecord.time ||
+            playerName != currentRecord.playerName
+        ) {
             val record = LeaderboardRecord(
                 id = playerId,
                 playerName = playerName,

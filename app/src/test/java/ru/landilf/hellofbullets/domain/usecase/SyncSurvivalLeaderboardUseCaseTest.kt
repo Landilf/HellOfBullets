@@ -83,6 +83,47 @@ class SyncSurvivalLeaderboardUseCaseTest {
         )
     }
 
+    @Test
+    fun `updates online player name when record time is unchanged`() = runBlocking {
+        val playerRepository = FakePlayerRepository()
+        val leaderboardRepository = FakeLeaderboardRepository(
+            initialRecords = listOf(
+                LeaderboardRecord(
+                    id = LOCAL_PLAYER_RECORD_ID,
+                    playerName = "New Player",
+                    time = 25
+                )
+            )
+        )
+        val onlineLeaderboardRepository = FakeOnlineLeaderboardRepository(
+            initialRecords = listOf(
+                LeaderboardRecord(
+                    id = ONLINE_PLAYER_RECORD_ID,
+                    playerName = "Player",
+                    time = 25
+                )
+            )
+        )
+        val useCase = createUseCase(
+            playerRepository = playerRepository,
+            leaderboardRepository = leaderboardRepository,
+            onlineLeaderboardRepository = onlineLeaderboardRepository
+        )
+
+        useCase()
+
+        assertEquals(
+            "New Player",
+            onlineLeaderboardRepository.lastSubmittedRecord?.playerName
+        )
+        assertEquals(
+            "New Player",
+            leaderboardRepository
+                .getRecordById(LOCAL_PLAYER_RECORD_ID)
+                ?.playerName
+        )
+    }
+
     private fun createUseCase(
         playerRepository: FakePlayerRepository,
         leaderboardRepository: FakeLeaderboardRepository,
