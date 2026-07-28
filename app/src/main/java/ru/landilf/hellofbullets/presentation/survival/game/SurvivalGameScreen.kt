@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,6 +96,8 @@ private fun SurvivalGameContent(
 ) {
     val isPaused = gameState.phase == SurvivalPhase.PAUSED
 
+    val currentPhase by rememberUpdatedState(gameState.phase)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -106,7 +109,7 @@ private fun SurvivalGameContent(
                 detectDragGestures { change, dragAmount ->
                     change.consume()
 
-                    if (isPaused) {
+                    if (currentPhase != SurvivalPhase.ACTIVE) {
                         return@detectDragGestures
                     }
 
