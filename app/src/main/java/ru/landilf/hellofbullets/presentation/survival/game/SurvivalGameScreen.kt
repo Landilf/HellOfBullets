@@ -99,7 +99,10 @@ private fun SurvivalGameContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF101820))
-            .pointerInput(gameFieldSize) {
+            .pointerInput(
+                gameFieldSize,
+                state.inputSensitivity
+            ) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
 
@@ -112,8 +115,8 @@ private fun SurvivalGameContent(
                     }
 
                     val worldDelta = Vector2(
-                        x = dragAmount.x / gameFieldSize.width * gameState.fieldSize.width,
-                        y = dragAmount.y / gameFieldSize.height * gameState.fieldSize.height
+                        x = dragAmount.x / gameFieldSize.width * gameState.fieldSize.width * state.inputSensitivity,
+                        y = dragAmount.y / gameFieldSize.height * gameState.fieldSize.height * state.inputSensitivity
                     )
 
                     onAction(SurvivalGameAction.OnPlayerDrag(worldDelta))

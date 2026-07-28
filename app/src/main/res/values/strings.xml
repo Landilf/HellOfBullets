@@ -41,6 +41,11 @@
     <string name="records_rank">%1$d.</string>
     <string name="records_time">%1$s</string>
 
+    <string name="settings_player_name_label">Имя игрока</string>
+    <string name="settings_save_name">Сохранить имя</string>
+    <string name="settings_input_sensitivity">Чувствительность управления</string>
+    <string name="settings_input_sensitivity_value">%1$.1fx</string>
+
     <string name="error_title">Ошибка</string>
     <string name="loading_title">Загрузка</string>
     <string name="loading_message">Игра загружается</string>

@@ -1,5 +1,7 @@
 package ru.landilf.hellofbullets.presentation.navigation
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -9,6 +11,8 @@ import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuAction
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuScreen
 import ru.landilf.hellofbullets.presentation.mainmenu.MainMenuUiState
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
+import ru.landilf.hellofbullets.presentation.settings.SettingsScreen
+import ru.landilf.hellofbullets.presentation.settings.SettingsViewModel
 
 fun NavGraphBuilder.mainMenuGraph(
     navController: NavController,
@@ -71,9 +75,12 @@ fun NavGraphBuilder.mainMenuGraph(
     }
 
     composable(AppDestination.Settings.route) {
-        PlaceholderScreen(
-            titleRes = R.string.main_menu_settings,
-            onBackClick = { navController.popBackStack() }
+        val viewModel: SettingsViewModel = hiltViewModel()
+        val state = viewModel.uiState.collectAsStateWithLifecycle()
+
+        SettingsScreen(
+            state = state.value,
+            onAction = viewModel::onAction
         )
     }
 
