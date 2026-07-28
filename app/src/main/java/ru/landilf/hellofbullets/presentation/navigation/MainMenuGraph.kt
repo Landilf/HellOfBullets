@@ -80,6 +80,7 @@ fun NavGraphBuilder.mainMenuGraph(
 
         SettingsScreen(
             state = state.value,
+            events = viewModel.events,
             onAction = viewModel::onAction
         )
     }

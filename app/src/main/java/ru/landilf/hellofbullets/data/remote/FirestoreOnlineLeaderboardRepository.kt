@@ -63,12 +63,16 @@ class FirestoreOnlineLeaderboardRepository @Inject constructor(
             .document(playerId)
 
         firestore.runTransaction { transaction ->
-            val currentTime = transaction
-                .get(recordDocument)
+            val currentRecord = transaction.get(recordDocument)
+            val currentTime = currentRecord
                 .getLong(FIELD_TIME)
                 ?.toInt()
+            val currentPlayerName = currentRecord.getString(FIELD_PLAYER_NAME)
 
-            if (currentTime == null || time > currentTime) {
+            if (currentTime == null ||
+                time > currentTime ||
+                playerName != currentPlayerName
+            ) {
                 transaction.set(
                     recordDocument,
                     mapOf(

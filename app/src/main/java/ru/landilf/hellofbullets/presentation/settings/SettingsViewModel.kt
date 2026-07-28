@@ -4,13 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.usecase.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.ObserveGameSettingsUseCase
+import ru.landilf.hellofbullets.domain.usecase.SyncSurvivalLeaderboardUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdateInputSensitivityUseCase
 import ru.landilf.hellofbullets.domain.usecase.UpdatePlayerNameUseCase
 import javax.inject.Inject
@@ -20,10 +24,14 @@ class SettingsViewModel @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val observeGameSettingsUseCase: ObserveGameSettingsUseCase,
     private val updateInputSensitivityUseCase: UpdateInputSensitivityUseCase,
-    private val updatePlayerNameUseCase: UpdatePlayerNameUseCase
+    private val updatePlayerNameUseCase: UpdatePlayerNameUseCase,
+    private val syncSurvivalLeaderboardUseCase: SyncSurvivalLeaderboardUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<SettingsEvent>()
+    val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
 
     init {
         loadSettings()
@@ -121,6 +129,8 @@ class SettingsViewModel @Inject constructor(
                 updatePlayerNameUseCase(
                     name = playerName
                 )
+                _events.emit(SettingsEvent.PlayerNameSaved)
+                syncLeaderboard()
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
@@ -129,6 +139,18 @@ class SettingsViewModel @Inject constructor(
                         errorMessage = exception.message ?: "Не удалось сохранить имя"
                     )
                 }
+            }
+        }
+    }
+
+    private fun syncLeaderboard() {
+        viewModelScope.launch {
+            try {
+                syncSurvivalLeaderboardUseCase()
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (_: Exception) {
+                // Локальное имя уже сохранено, синхронизация повторится позже
             }
         }
     }

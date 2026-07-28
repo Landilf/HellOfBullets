@@ -45,6 +45,7 @@
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>
     <string name="settings_input_sensitivity_value">%1$.1fx</string>
+    <string name="settings_name_saved">Имя успешно сохранено</string>
 
     <string name="error_title">Ошибка</string>
     <string name="loading_title">Загрузка</string>
