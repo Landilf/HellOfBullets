@@ -1,7 +1,9 @@
 package ru.landilf.hellofbullets.domain.usecase
 
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
+import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
@@ -61,8 +63,13 @@ class FakeLeaderboardRepository(
 class FakePlayerRepository(
     initialState: PlayerState? = null
 ) : PlayerRepository {
-    var state: PlayerState? = initialState
-        private set
+    private val stateFlow = MutableStateFlow(initialState)
+
+    var state: PlayerState?
+        get() = stateFlow.value
+        private set(value) {
+            stateFlow.value = value
+        }
 
     override suspend fun getPlayerState(): PlayerState? {
         return state
@@ -74,6 +81,10 @@ class FakePlayerRepository(
 
     override suspend fun clearPlayerState() {
         state = null
+    }
+
+    override fun observePlayerState(): Flow<PlayerState?> {
+        return stateFlow
     }
 }
 

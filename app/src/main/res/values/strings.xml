@@ -9,6 +9,15 @@
     <string name="main_menu_settings">Настройки</string>
     <string name="main_menu_exit">Выход</string>
 
+    <string name="profile_open">Открыть профиль</string>
+    <string name="profile_title">Профиль</string>
+    <string name="player_level">Ур. %1$d</string>
+    <string name="player_experience">%1$d / %2$d</string>
+    <string name="player_profile_experience">Опыт: %1$d/%2$d</string>
+    <string name="player_silver">%1$d</string>
+    <string name="player_silver_icon_description">Серебро</string>
+    <string name="player_experience_icon_description">Опыт</string>
+
     <string name="select_mode_title">Выбор режима</string>
     <string name="select_mode_survival">Выживание</string>
     <string name="select_mode_duel">Дуэль</string>
@@ -23,6 +32,7 @@
 
     <string name="start_game_button">Играть</string>
     <string name="back_button">Назад</string>
+    <string name="close_button">Закрыть</string>
 
     <string name="pause_title">Пауза</string>
     <string name="game_resume_button">Продолжить</string>

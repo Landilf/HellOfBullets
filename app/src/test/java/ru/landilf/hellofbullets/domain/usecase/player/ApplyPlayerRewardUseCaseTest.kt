@@ -1,16 +1,15 @@
-package ru.landilf.hellofbullets.domain.engine.player
+package ru.landilf.hellofbullets.domain.usecase.player
 
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.engine.player.PlayerProgressionCalculator
 import ru.landilf.hellofbullets.domain.model.battle.common.result.RewardInfo
 import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
-import ru.landilf.hellofbullets.domain.usecase.player.ApplyPlayerRewardUseCase
-import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
 
 class ApplyPlayerRewardUseCaseTest {
     @Test
@@ -32,10 +31,10 @@ class ApplyPlayerRewardUseCaseTest {
             )
         )
 
-        assertEquals(1, updatedState.playerProfile.level)
-        assertEquals(20, updatedState.playerProfile.totalExperience)
-        assertEquals(8, updatedState.playerProfile.silverAmount)
-        assertEquals(0, updatedState.playerProfile.skillPointAmount)
+        Assert.assertEquals(1, updatedState.playerProfile.level)
+        Assert.assertEquals(20, updatedState.playerProfile.totalExperience)
+        Assert.assertEquals(8, updatedState.playerProfile.silverAmount)
+        Assert.assertEquals(0, updatedState.playerProfile.skillPointAmount)
     }
 
     @Test
@@ -57,10 +56,10 @@ class ApplyPlayerRewardUseCaseTest {
             )
         )
 
-        assertEquals(2, updatedState.playerProfile.level)
-        assertEquals(25, updatedState.playerProfile.totalExperience)
-        assertEquals(2, updatedState.playerProfile.silverAmount)
-        assertEquals(1, updatedState.playerProfile.skillPointAmount)
+        Assert.assertEquals(2, updatedState.playerProfile.level)
+        Assert.assertEquals(25, updatedState.playerProfile.totalExperience)
+        Assert.assertEquals(2, updatedState.playerProfile.silverAmount)
+        Assert.assertEquals(1, updatedState.playerProfile.skillPointAmount)
     }
 
     @Test
@@ -82,9 +81,9 @@ class ApplyPlayerRewardUseCaseTest {
             )
         )
 
-        assertEquals(4, updatedState.playerProfile.level)
-        assertEquals(150, updatedState.playerProfile.totalExperience)
-        assertEquals(5, updatedState.playerProfile.skillPointAmount)
+        Assert.assertEquals(4, updatedState.playerProfile.level)
+        Assert.assertEquals(150, updatedState.playerProfile.totalExperience)
+        Assert.assertEquals(5, updatedState.playerProfile.skillPointAmount)
     }
 
     private fun createUseCase(

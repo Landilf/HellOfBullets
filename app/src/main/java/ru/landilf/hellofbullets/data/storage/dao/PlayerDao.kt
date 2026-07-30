@@ -3,6 +3,7 @@ package ru.landilf.hellofbullets.data.storage.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
 
 @Dao
@@ -15,4 +16,8 @@ interface PlayerDao {
 
     @Query("DELETE FROM player_profile")
     suspend fun clearPlayerProfile()
+
+    @Query("SELECT * FROM player_profile LIMIT 1")
+    fun observePlayerProfile(): Flow<PlayerProfileEntity?>
+
 }
