@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import ru.landilf.hellofbullets.data.storage.dao.LeaderboardDao
 import ru.landilf.hellofbullets.data.storage.dao.PlayerDao
 import ru.landilf.hellofbullets.data.storage.database.AppDatabase
+import ru.landilf.hellofbullets.data.storage.database.DatabaseMigrations
 import javax.inject.Singleton
 
 @Module
@@ -25,7 +26,8 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "hell_of_bullets.db"
-        ).fallbackToDestructiveMigration(true)
+        ).addMigrations(DatabaseMigrations.MIGRATION_2_3)
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

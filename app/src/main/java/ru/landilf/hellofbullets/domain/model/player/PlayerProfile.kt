@@ -4,6 +4,7 @@ data class PlayerProfile(
     val id: Long,
     val name: String,
     val level: Int,
-    val expAmount: Int,
+    val totalExperience: Int,
     val silverAmount: Int,
+    val skillPointAmount: Int
 )

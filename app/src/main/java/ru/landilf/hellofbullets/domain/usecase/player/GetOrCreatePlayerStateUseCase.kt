@@ -22,8 +22,9 @@ class GetOrCreatePlayerStateUseCase @Inject constructor(
                 id = 1L,
                 name = "Player",
                 level = 1,
-                expAmount = 0,
-                silverAmount = 0
+                totalExperience = 0,
+                silverAmount = 0,
+                skillPointAmount = 0
             ),
             playerBuild = PlayerBuild(
                 equippedWeaponItem = null,

@@ -1,5 +1,6 @@
 package ru.landilf.hellofbullets.data.storage.entities.player
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,6 +10,8 @@ data class PlayerProfileEntity(
     val id: Long,
     val name: String,
     val level: Int,
-    val expAmount: Int,
+    @field:ColumnInfo(name = "expAmount")
+    val totalExperience: Int,
     val silverAmount: Int,
+    val skillPointAmount: Int
 )
