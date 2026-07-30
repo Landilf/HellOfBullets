@@ -6,9 +6,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.engine.player.PlayerProgressionCalculator
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.usecase.FakeLeaderboardRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
+import ru.landilf.hellofbullets.domain.usecase.player.ApplyPlayerRewardUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.LoadPlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
@@ -32,7 +34,7 @@ class SubmitSurvivalResultUseCaseTest {
         assertTrue(result.isNewRecord)
         assertEquals(1, result.leaderboardPosition)
         assertEquals(25, result.leaderboardCutoffTime)
-        assertEquals(2, playerState.playerProfile.expAmount)
+        assertEquals(2, playerState.playerProfile.totalExperience)
         assertEquals(1, playerState.playerProfile.silverAmount)
         assertEquals(25, playerRecord?.time)
     }
@@ -54,7 +56,7 @@ class SubmitSurvivalResultUseCaseTest {
 
         assertFalse(result.isNewRecord)
         assertEquals(50, playerRecord?.time)
-        assertEquals(7, playerState.playerProfile.expAmount)
+        assertEquals(7, playerState.playerProfile.totalExperience)
         assertEquals(4, playerState.playerProfile.silverAmount)
     }
 
@@ -95,7 +97,10 @@ class SubmitSurvivalResultUseCaseTest {
             ),
             leaderboardRepository = leaderboardRepository,
             calculateSurvivalRewardUseCase = CalculateSurvivalRewardUseCase(),
-            savePlayerStateUseCase = savePlayerStateUseCase
+            applyPlayerRewardUseCase = ApplyPlayerRewardUseCase(
+                playerProgressionCalculator = PlayerProgressionCalculator(),
+                savePlayerStateUseCase = savePlayerStateUseCase
+            )
         )
     }
 }

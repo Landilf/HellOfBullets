@@ -2,10 +2,9 @@ package ru.landilf.hellofbullets.domain.usecase.leaderboard
 
 import ru.landilf.hellofbullets.domain.model.battle.common.result.SurvivalResult
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
+import ru.landilf.hellofbullets.domain.usecase.player.ApplyPlayerRewardUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.survival.CalculateSurvivalRewardUseCase
 import javax.inject.Inject
 
@@ -13,7 +12,7 @@ class SubmitSurvivalResultUseCase @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val leaderboardRepository: LeaderboardRepository,
     private val calculateSurvivalRewardUseCase: CalculateSurvivalRewardUseCase,
-    private val savePlayerStateUseCase: SavePlayerStateUseCase,
+    private val applyPlayerRewardUseCase: ApplyPlayerRewardUseCase
 ) {
     suspend operator fun invoke(time: Int): SurvivalResult {
         val playerState = getOrCreatePlayerStateUseCase()
@@ -45,16 +44,10 @@ class SubmitSurvivalResultUseCase @Inject constructor(
             ?.plus(1)
         val leaderboardCutoffTime = leaderboard.lastOrNull()?.time
 
-        val updatedState = PlayerState(
-            playerProfile = playerState.playerProfile.copy(
-                expAmount = playerState.playerProfile.expAmount + reward.exp,
-                silverAmount = playerState.playerProfile.silverAmount + reward.silver
-            ),
-            playerBuild = playerState.playerBuild,
-            inventory = playerState.inventory
+        applyPlayerRewardUseCase(
+            playerState = playerState,
+            reward = reward
         )
-
-        savePlayerStateUseCase(updatedState)
 
         return SurvivalResult(
             time = time,

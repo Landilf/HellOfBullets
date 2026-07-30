@@ -10,8 +10,9 @@ class PlayerProfileDomainToEntityMapper @Inject constructor() {
             id = domain.id,
             name = domain.name,
             level = domain.level,
-            expAmount = domain.expAmount,
-            silverAmount = domain.silverAmount
+            totalExperience = domain.totalExperience,
+            silverAmount = domain.silverAmount,
+            skillPointAmount = domain.skillPointAmount
         )
     }
 }
