@@ -21,7 +21,8 @@ fun PauseMenuOverlay(
         modifier = modifier,
     ) {
         OverlayContentColumn(
-            spacing = 32.dp
+            spacing = 32.dp,
+            modifier = Modifier.weight(1f)
         ) {
             Button(
                 onClick = onResumeClick,

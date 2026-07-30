@@ -20,7 +20,7 @@ fun OverlayContentColumn(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 84.dp),
+            .padding(horizontal = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(
             space = spacing,

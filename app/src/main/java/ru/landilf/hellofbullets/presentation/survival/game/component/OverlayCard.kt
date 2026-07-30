@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.sp
 fun OverlayCard(
     title: String,
     modifier: Modifier = Modifier,
+    cardHeightFraction: Float = 0.6f,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
@@ -35,7 +35,7 @@ fun OverlayCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
-                .fillMaxHeight(0.6f),
+                .fillMaxHeight(cardHeightFraction),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xCC1A1A1A)
@@ -44,9 +44,7 @@ fun OverlayCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        top = 96.dp
-                    ),
+                    .padding(vertical = 64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(

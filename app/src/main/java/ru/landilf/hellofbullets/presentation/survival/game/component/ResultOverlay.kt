@@ -2,7 +2,6 @@ package ru.landilf.hellofbullets.presentation.survival.game.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,11 +22,15 @@ fun ResultOverlay(
 ) {
     OverlayCard(
         title = stringResource(R.string.result_title),
-        modifier = modifier
+        modifier = modifier,
+        cardHeightFraction = 0.7f
     ) {
         OverlayContentColumn(
-            spacing = 24.dp
+            spacing = 16.dp,
+            modifier = Modifier.weight(1f)
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = stringResource(
                     R.string.result_time_value,
@@ -77,7 +80,7 @@ fun ResultOverlay(
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = onRestartClick,
