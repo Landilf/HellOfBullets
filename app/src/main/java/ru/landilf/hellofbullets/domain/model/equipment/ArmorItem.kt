@@ -2,9 +2,11 @@ package ru.landilf.hellofbullets.domain.model.equipment
 
 data class ArmorItem(
     override val id: Long,
-    override val name: String,
+    override val definitionId: Long,
     override val level: Int,
-    override val maxLevel: Int,
-    val hp: Int,
-    val defense: Int
+    override val quality: EquipmentQuality,
+    override val additionalStatType: EquipmentStatType,
+    override val additionalStatValue: Float,
+    val hp: Float,
+    val defense: Float
 ) : Item()
