@@ -39,5 +39,8 @@ enum class EquipmentQuality(
         qualityLevel = 7,
         maxLevel = 50,
         materialsRequiredForUpgrade = null
-    )
+    );
+
+    val nextQuality: EquipmentQuality?
+        get() = entries.getOrNull(ordinal + 1)
 }
