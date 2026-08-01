@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.data.storage.mappers
+package ru.landilf.hellofbullets.data.storage.mappers.leaderboard
 
 import ru.landilf.hellofbullets.data.storage.entities.leaderboard.LeaderboardRecordEntity
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord

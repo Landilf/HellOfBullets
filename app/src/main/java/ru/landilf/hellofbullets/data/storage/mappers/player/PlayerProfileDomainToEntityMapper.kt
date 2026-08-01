@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.data.storage.mappers
+package ru.landilf.hellofbullets.data.storage.mappers.player
 
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
