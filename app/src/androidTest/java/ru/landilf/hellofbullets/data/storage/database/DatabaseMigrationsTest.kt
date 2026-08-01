@@ -31,7 +31,7 @@ class DatabaseMigrationsTest {
     }
 
     @Test
-    fun migrateFromVersion3ToVersion4AndPreservesPlayerProfile() = runBlocking {
+    fun migratesFromVersion3ToVersion4AndPreservesPlayerProfile() = runBlocking {
         createVersion3Database()
 
         val migratedDatabase = Room.databaseBuilder(

@@ -4,12 +4,14 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.data.remote.FirestoreOnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 import ru.landilf.hellofbullets.data.storage.repository.LeaderboardRepositoryImpl
 import ru.landilf.hellofbullets.data.storage.repository.PlayerRepositoryImpl
 import ru.landilf.hellofbullets.data.storage.repository.SettingsRepositoryImpl
+import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.SettingsRepository
 
@@ -21,6 +23,11 @@ abstract class RepositoryModule {
     abstract fun bindPlayerRepository(
         impl: PlayerRepositoryImpl
     ): PlayerRepository
+
+    @Binds
+    abstract fun bindEquipmentDefinitionRepository(
+        impl: StaticEquipmentDefinitionRepository
+    ): EquipmentDefinitionRepository
 
     @Binds
     abstract fun bindLeaderRepository(

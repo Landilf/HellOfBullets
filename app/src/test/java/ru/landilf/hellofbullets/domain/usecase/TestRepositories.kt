@@ -2,8 +2,10 @@ package ru.landilf.hellofbullets.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
@@ -131,5 +133,19 @@ class FakeOnlineLeaderboardRepository(
             recordsById[playerId] = record
             lastSubmittedRecord = record
         }
+    }
+}
+
+class FakeEquipmentDefinitionRepository(
+    initialDefinitions: List<EquipmentDefinition> = emptyList()
+) : EquipmentDefinitionRepository {
+    private val definitionsById = initialDefinitions.associateBy { it.id }
+
+    override fun getDefinitions(): List<EquipmentDefinition> {
+        return definitionsById.values.toList()
+    }
+
+    override fun getDefinitionById(id: Long): EquipmentDefinition? {
+        return definitionsById[id]
     }
 }
