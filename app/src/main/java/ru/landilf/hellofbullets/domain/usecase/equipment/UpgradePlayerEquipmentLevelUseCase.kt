@@ -1,5 +1,6 @@
 package ru.landilf.hellofbullets.domain.usecase.equipment
 
+import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCostCalculator
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
@@ -10,6 +11,7 @@ class UpgradePlayerEquipmentLevelUseCase @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val savePlayerStateUseCase: SavePlayerStateUseCase,
     private val equipmentDefinitionRepository: EquipmentDefinitionRepository,
+    private val equipmentLevelUpgradeCostCalculator: EquipmentLevelUpgradeCostCalculator,
     private val upgradeEquipmentLevelUseCase: UpgradeEquipmentLevelUseCase
 ) {
     suspend operator fun invoke(
@@ -33,7 +35,23 @@ class UpgradePlayerEquipmentLevelUseCase @Inject constructor(
             definition = definition,
             fifthLevelUpgradeTarget = fifthLevelUpgradeTarget
         )
-        val updatedPlayerState = playerState.replaceItem(updatedItem)
+
+        val upgradeCost = equipmentLevelUpgradeCostCalculator(
+            baseCost = definition.baseLevelUpgradeCost,
+            targetLevel = updatedItem.level
+        )
+
+        require(playerState.playerProfile.silverAmount >= upgradeCost) {
+            "Недостаточно серебра для улучшения предмета"
+        }
+
+        val updatedPlayerState = playerState
+            .copy(
+                playerProfile = playerState.playerProfile.copy(
+                    silverAmount = playerState.playerProfile.silverAmount - upgradeCost
+                )
+            )
+            .replaceItem(updatedItem)
 
         savePlayerStateUseCase(updatedPlayerState)
 

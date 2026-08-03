@@ -21,7 +21,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         primarySecondGrowthMultiplier = 2f,
         baseDamage = 10f,
         baseAttackSpeed = 5f,
-        attackRange = 50f
+        attackRange = 50f,
+        baseLevelUpgradeCost = 10
     )
 
     private val armorDefinition = ArmorDefinition(
@@ -30,7 +31,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         primaryFirstGrowthMultiplier = 2f,
         primarySecondGrowthMultiplier = 1.5f,
         baseHp = 20f,
-        baseDefense = 4f
+        baseDefense = 4f,
+        baseLevelUpgradeCost = 15
     )
 
     private val artifactDefinition = ArtifactDefinition(
@@ -39,7 +41,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         primaryFirstGrowthMultiplier = 1.25f,
         primarySecondGrowthMultiplier = 2f,
         baseCooldownReductionPercent = 6f,
-        baseDurationBonusPercent = 8f
+        baseDurationBonusPercent = 8f,
+        baseLevelUpgradeCost = 12
     )
 
     @Test

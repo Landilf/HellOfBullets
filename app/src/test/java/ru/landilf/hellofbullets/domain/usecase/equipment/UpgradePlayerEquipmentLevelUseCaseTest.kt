@@ -2,7 +2,9 @@ package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCostCalculator
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
@@ -34,6 +36,10 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
         ) as WeaponItem
 
+        assertEquals(
+            80,
+            playerRepository.state?.playerProfile?.silverAmount
+        )
         assertEquals(2, updatedItem.level)
         assertEquals(11.5f, updatedItem.damage, EPSILON)
         assertEquals(
@@ -82,6 +88,40 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
         )
     }
 
+    @Test
+    fun `throws when player does not have enough silver`(): Unit = runBlocking {
+        val weapon = createWeapon()
+        val playerRepository = FakePlayerRepository(
+            initialState = createPlayerState(weapon).copy(
+                playerProfile = PlayerProfile(
+                    id = 1L,
+                    name = "Player",
+                    level = 1,
+                    totalExperience = 0,
+                    silverAmount = 19,
+                    skillPointAmount = 0
+                )
+            )
+        )
+        val useCase = createUseCase(
+            playerRepository = playerRepository,
+            definitions = listOf(weaponDefinition)
+        )
+
+        val initialState = playerRepository.state
+
+        val exception = runCatching {
+            useCase(
+                itemId = weapon.id,
+                fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
+            )
+        }.exceptionOrNull()
+
+        assertTrue(exception is IllegalArgumentException)
+        assertEquals(initialState, playerRepository.state)
+
+    }
+
     private fun createUseCase(
         playerRepository: FakePlayerRepository,
         definitions: List<WeaponDefinition>
@@ -97,6 +137,7 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             equipmentDefinitionRepository = FakeEquipmentDefinitionRepository(
                 initialDefinitions = definitions
             ),
+            equipmentLevelUpgradeCostCalculator = EquipmentLevelUpgradeCostCalculator(),
             upgradeEquipmentLevelUseCase = UpgradeEquipmentLevelUseCase()
         )
     }
@@ -110,7 +151,7 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
                 name = "Player",
                 level = 1,
                 totalExperience = 0,
-                silverAmount = 0,
+                silverAmount = 100,
                 skillPointAmount = 0
             ),
             playerBuild = PlayerBuild(
@@ -145,7 +186,8 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             primarySecondGrowthMultiplier = 0.25f,
             baseDamage = 10f,
             baseAttackSpeed = 2f,
-            attackRange = 500f
+            attackRange = 500f,
+            baseLevelUpgradeCost = 10
         )
 
         const val EPSILON = 0.0001f

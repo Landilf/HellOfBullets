@@ -18,7 +18,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             primarySecondGrowthMultiplier = 0.25f,
             baseDamage = 10f,
             baseAttackSpeed = 2f,
-            attackRange = 500f
+            attackRange = 500f,
+            baseLevelUpgradeCost = 10
         ),
         ArmorDefinition(
             id = 2L,
@@ -26,7 +27,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             primaryFirstGrowthMultiplier = 10f,
             primarySecondGrowthMultiplier = 1f,
             baseHp = 100f,
-            baseDefense = 5f
+            baseDefense = 5f,
+            baseLevelUpgradeCost = 15
         ),
         ArtifactDefinition(
             id = 3L,
@@ -34,7 +36,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             primaryFirstGrowthMultiplier = 2.5f,
             primarySecondGrowthMultiplier = 2.5f,
             baseCooldownReductionPercent = 5f,
-            baseDurationBonusPercent = 5f
+            baseDurationBonusPercent = 5f,
+            baseLevelUpgradeCost = 12
         )
     )
 

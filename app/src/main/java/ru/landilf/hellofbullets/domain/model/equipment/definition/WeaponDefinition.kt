@@ -7,6 +7,7 @@ data class WeaponDefinition(
     override val name: String,
     override val primaryFirstGrowthMultiplier: Float,
     override val primarySecondGrowthMultiplier: Float,
+    override val baseLevelUpgradeCost: Int,
     val baseDamage: Float,
     val baseAttackSpeed: Float,
     val attackRange: Float

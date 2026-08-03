@@ -127,7 +127,8 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
             primarySecondGrowthMultiplier = 0.25f,
             baseDamage = 10f,
             baseAttackSpeed = 2f,
-            attackRange = 500f
+            attackRange = 500f,
+            baseLevelUpgradeCost = 10
         )
 
         const val EPSILON = 0.0001f

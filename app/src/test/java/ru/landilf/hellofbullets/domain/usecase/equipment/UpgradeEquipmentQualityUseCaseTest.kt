@@ -18,7 +18,8 @@ class UpgradeEquipmentQualityUseCaseTest {
         primarySecondGrowthMultiplier = 2f,
         baseDamage = 10f,
         baseAttackSpeed = 5f,
-        attackRange = 50f
+        attackRange = 50f,
+        baseLevelUpgradeCost = 10
     )
 
     @Test

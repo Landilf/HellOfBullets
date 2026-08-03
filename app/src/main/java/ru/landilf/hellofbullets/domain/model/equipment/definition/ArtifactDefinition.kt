@@ -7,6 +7,7 @@ data class ArtifactDefinition(
     override val name: String,
     override val primaryFirstGrowthMultiplier: Float,
     override val primarySecondGrowthMultiplier: Float,
+    override val baseLevelUpgradeCost: Int,
     val baseCooldownReductionPercent: Float,
     val baseDurationBonusPercent: Float
 ) : EquipmentDefinition() {
