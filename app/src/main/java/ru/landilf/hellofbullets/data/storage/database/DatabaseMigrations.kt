@@ -102,4 +102,36 @@ object DatabaseMigrations {
             )
         }
     }
+
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `equipment_item_id_counter` (
+                        `counterId` INTEGER NOT NULL,
+                        `nextItemId` INTEGER NOT NULL,
+                        PRIMARY KEY(`counterId`)
+                    )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    INSERT INTO `equipment_item_id_counter` (
+                        `counterId`,
+                        `nextItemId`
+                    )
+                    SELECT
+                        0,
+                        COALESCE(MAX(`id`), 0) + 1
+                    FROM (
+                        SELECT `id` FROM `weapon_items`
+                        UNION ALL
+                        SELECT `id` FROM `armor_items`
+                        UNION ALL
+                        SELECT `id` FROM `artifact_items`
+                    )
+                """.trimIndent()
+            )
+        }
+    }
 }

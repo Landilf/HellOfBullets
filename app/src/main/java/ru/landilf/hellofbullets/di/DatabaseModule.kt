@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.landilf.hellofbullets.data.storage.dao.EquipmentDao
+import ru.landilf.hellofbullets.data.storage.dao.EquipmentItemIdDao
 import ru.landilf.hellofbullets.data.storage.dao.LeaderboardDao
 import ru.landilf.hellofbullets.data.storage.dao.PlayerDao
 import ru.landilf.hellofbullets.data.storage.database.AppDatabase
@@ -30,7 +31,8 @@ object DatabaseModule {
         )
             .addMigrations(
                 DatabaseMigrations.MIGRATION_2_3,
-                DatabaseMigrations.MIGRATION_3_4
+                DatabaseMigrations.MIGRATION_3_4,
+                DatabaseMigrations.MIGRATION_4_5
             )
             .fallbackToDestructiveMigration(true)
             .build()
@@ -44,6 +46,11 @@ object DatabaseModule {
     @Provides
     fun provideEquipmentDao(database: AppDatabase): EquipmentDao {
         return database.equipmentDao()
+    }
+
+    @Provides
+    fun provideEquipmentItemIdDao(database: AppDatabase): EquipmentItemIdDao {
+        return database.equipmentItemIdDao()
     }
 
     @Provides
