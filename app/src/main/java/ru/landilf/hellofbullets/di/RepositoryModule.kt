@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentDefinitionRepository
+import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentStatConfigRepository
 import ru.landilf.hellofbullets.data.remote.FirestoreOnlineLeaderboardRepository
 import ru.landilf.hellofbullets.data.storage.generator.RoomEquipmentItemIdGenerator
@@ -15,6 +16,7 @@ import ru.landilf.hellofbullets.data.storage.repository.PlayerRepositoryImpl
 import ru.landilf.hellofbullets.data.storage.repository.SettingsRepositoryImpl
 import ru.landilf.hellofbullets.domain.generator.EquipmentItemIdGenerator
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
+import ru.landilf.hellofbullets.domain.repository.EquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.SettingsRepository
@@ -42,6 +44,11 @@ abstract class RepositoryModule {
     abstract fun bindEquipmentItemIdGenerator(
         impl: RoomEquipmentItemIdGenerator
     ): EquipmentItemIdGenerator
+
+    @Binds
+    abstract fun bindEquipmentQualityDistributionRepository(
+        impl: StaticEquipmentQualityDistributionRepository
+    ): EquipmentQualityDistributionRepository
 
     @Binds
     abstract fun bindLeaderRepository(

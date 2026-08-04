@@ -24,10 +24,11 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Pistol",
         primaryFirstGrowthMultiplier = 1.5f,
         primarySecondGrowthMultiplier = 2f,
+        basePurchasePrice = 100,
+        baseLevelUpgradeCost = 10,
         damageRange = StatRange(9f, 11f),
         attackSpeedRange = StatRange(1.8f, 2.2f),
-        attackRange = 50f,
-        baseLevelUpgradeCost = 10
+        attackRange = 50f
     )
 
     private val armorDefinition = ArmorDefinition(
@@ -35,9 +36,10 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Light armor",
         primaryFirstGrowthMultiplier = 2f,
         primarySecondGrowthMultiplier = 1.5f,
+        basePurchasePrice = 150,
+        baseLevelUpgradeCost = 15,
         hpRange = StatRange(80f, 120f),
-        defenseRange = StatRange(3f, 7f),
-        baseLevelUpgradeCost = 15
+        defenseRange = StatRange(3f, 7f)
     )
 
     private val artifactDefinition = ArtifactDefinition(
@@ -45,9 +47,10 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Hourglass",
         primaryFirstGrowthMultiplier = 1.25f,
         primarySecondGrowthMultiplier = 2f,
+        basePurchasePrice = 120,
+        baseLevelUpgradeCost = 12,
         cooldownReductionPercentRange = StatRange(3f, 7f),
-        durationBonusPercentRange = StatRange(3f, 7f),
-        baseLevelUpgradeCost = 12
+        durationBonusPercentRange = StatRange(3f, 7f)
     )
 
     @Test

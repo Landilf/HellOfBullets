@@ -7,6 +7,7 @@ data class ArmorDefinition(
     override val name: String,
     override val primaryFirstGrowthMultiplier: Float,
     override val primarySecondGrowthMultiplier: Float,
+    override val basePurchasePrice: Int,
     override val baseLevelUpgradeCost: Int,
     val hpRange: StatRange,
     val defenseRange: StatRange

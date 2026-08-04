@@ -15,7 +15,7 @@ import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 
 class EquipmentItemFactoryTest {
     @Test
-    fun `creates specialized weapon with mathcing additional stat`() = runBlocking {
+    fun `creates specialized weapon with matching additional stat`() = runBlocking {
         val factory = createFactory(
             floatValues = listOf(1f, 0f),
             intValues = listOf(indexOf(EquipmentStatType.DAMAGE))
@@ -106,6 +106,7 @@ class EquipmentItemFactoryTest {
             name = "Pistol",
             primaryFirstGrowthMultiplier = 1.5f,
             primarySecondGrowthMultiplier = 0.25f,
+            basePurchasePrice = 100,
             baseLevelUpgradeCost = 10,
             damageRange = StatRange(9f, 11f),
             attackSpeedRange = StatRange(1.8f, 2.2f),

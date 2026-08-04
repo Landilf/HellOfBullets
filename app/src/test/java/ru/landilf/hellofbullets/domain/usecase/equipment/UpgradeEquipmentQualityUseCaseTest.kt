@@ -17,10 +17,11 @@ class UpgradeEquipmentQualityUseCaseTest {
         name = "Pistol",
         primaryFirstGrowthMultiplier = 1.5f,
         primarySecondGrowthMultiplier = 2f,
+        basePurchasePrice = 100,
+        baseLevelUpgradeCost = 10,
         damageRange = StatRange(9f, 11f),
         attackSpeedRange = StatRange(1.8f, 2.2f),
-        attackRange = 50f,
-        baseLevelUpgradeCost = 10
+        attackRange = 50f
     )
 
     @Test

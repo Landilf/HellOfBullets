@@ -200,10 +200,11 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             name = "Pistol",
             primaryFirstGrowthMultiplier = 1.5f,
             primarySecondGrowthMultiplier = 0.25f,
+            basePurchasePrice = 100,
+            baseLevelUpgradeCost = 10,
             damageRange = StatRange(9f, 11f),
             attackSpeedRange = StatRange(1.8f, 2.2f),
-            attackRange = 500f,
-            baseLevelUpgradeCost = 10
+            attackRange = 500f
         )
 
         const val EPSILON = 0.0001f

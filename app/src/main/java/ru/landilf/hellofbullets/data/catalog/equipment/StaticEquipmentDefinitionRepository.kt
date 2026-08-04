@@ -20,6 +20,7 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             damageRange = StatRange(9f, 11f),
             attackSpeedRange = StatRange(1.8f, 2.2f),
             attackRange = 500f,
+            basePurchasePrice = 100,
             baseLevelUpgradeCost = 10
         ),
         ArmorDefinition(
@@ -29,6 +30,7 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             primarySecondGrowthMultiplier = 1f,
             hpRange = StatRange(80f, 120f),
             defenseRange = StatRange(3f, 7f),
+            basePurchasePrice = 150,
             baseLevelUpgradeCost = 15
         ),
         ArtifactDefinition(
@@ -38,6 +40,7 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             primarySecondGrowthMultiplier = 2.5f,
             cooldownReductionPercentRange = StatRange(3f, 7f),
             durationBonusPercentRange = StatRange(3f, 7f),
+            basePurchasePrice = 120,
             baseLevelUpgradeCost = 12
         )
     )

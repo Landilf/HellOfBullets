@@ -11,6 +11,7 @@ sealed class EquipmentDefinition {
     abstract val primarySecondStatRange: StatRange
     abstract val primaryFirstGrowthMultiplier: Float
     abstract val primarySecondGrowthMultiplier: Float
+    abstract val basePurchasePrice: Int
     abstract val baseLevelUpgradeCost: Int
 
     fun primaryStatRangeFor(
