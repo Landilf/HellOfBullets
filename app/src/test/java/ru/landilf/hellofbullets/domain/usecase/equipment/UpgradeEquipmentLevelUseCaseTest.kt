@@ -7,13 +7,17 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
+import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 
 class UpgradeEquipmentLevelUseCaseTest {
-    private val useCase = UpgradeEquipmentLevelUseCase()
+    private val useCase = UpgradeEquipmentLevelUseCase(
+        equipmentStatConfigRepository = FakeEquipmentStatConfigRepository()
+    )
 
     private val weaponDefinition = WeaponDefinition(
         id = 1L,
@@ -105,7 +109,7 @@ class UpgradeEquipmentLevelUseCaseTest {
     }
 
     @Test
-    fun `uses foreign stat multiplier for additional armor stat`() {
+    fun `uses configured multiplier for foreign additional armor stat`() {
         val updatedItem = useCase(
             item = createArmor(),
             definition = armorDefinition,
@@ -115,11 +119,11 @@ class UpgradeEquipmentLevelUseCaseTest {
         assertEquals(5, updatedItem.level)
         assertEquals(22f, updatedItem.hp, EPSILON)
         assertEquals(4f, updatedItem.defense, EPSILON)
-        assertEquals(3.5f, updatedItem.additionalStatValue, EPSILON)
+        assertEquals(3.3f, updatedItem.additionalStatValue, EPSILON)
     }
 
     @Test
-    fun `uses matching primary multiplier for additional stat`() {
+    fun `uses configured multiplier for matching additional stat`() {
         val updatedItem = useCase(
             item = createWeapon(
                 level = 4,
@@ -132,7 +136,7 @@ class UpgradeEquipmentLevelUseCaseTest {
         assertEquals(5, updatedItem.level)
         assertEquals(11.5f, updatedItem.damage, EPSILON)
         assertEquals(5f, updatedItem.attackSpeed, EPSILON)
-        assertEquals(4.5f, updatedItem.additionalStatValue, EPSILON)
+        assertEquals(3.3f, updatedItem.additionalStatValue, EPSILON)
     }
 
     @Test
@@ -231,7 +235,44 @@ class UpgradeEquipmentLevelUseCaseTest {
         )
     }
 
+    private class FakeEquipmentStatConfigRepository : EquipmentStatConfigRepository {
+        override fun getReferenceRange(statType: EquipmentStatType): StatRange {
+            error("Диапазоны характеристик не используются в тестах улучшения снаряжения")
+        }
+
+        override fun getAdditionalStatConfig(statType: EquipmentStatType): AdditionalStatConfig {
+            return configs.getValue(statType)
+        }
+    }
+
     private companion object {
         const val EPSILON = 0.0001f
+
+        val configs = mapOf(
+            EquipmentStatType.DAMAGE to AdditionalStatConfig(
+                initialValueCoef = 0.5f,
+                levelGrowthMultiplier = 0.3f
+            ),
+            EquipmentStatType.ATTACK_SPEED to AdditionalStatConfig(
+                initialValueCoef = 0.5f,
+                levelGrowthMultiplier = 0.05f
+            ),
+            EquipmentStatType.HP to AdditionalStatConfig(
+                initialValueCoef = 0.25f,
+                levelGrowthMultiplier = 0.5f
+            ),
+            EquipmentStatType.DEFENSE to AdditionalStatConfig(
+                initialValueCoef = 0.25f,
+                levelGrowthMultiplier = 0.1f
+            ),
+            EquipmentStatType.COOLDOWN_REDUCTION to AdditionalStatConfig(
+                initialValueCoef = 0.25f,
+                levelGrowthMultiplier = 0.05f
+            ),
+            EquipmentStatType.DURATION to AdditionalStatConfig(
+                initialValueCoef = 0.25f,
+                levelGrowthMultiplier = 0.05f
+            )
+        )
     }
 }

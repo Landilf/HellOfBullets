@@ -2,15 +2,19 @@ package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
+import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
+import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import javax.inject.Inject
 
-class UpgradeEquipmentLevelUseCase @Inject constructor() {
+class UpgradeEquipmentLevelUseCase @Inject constructor(
+    private val equipmentStatConfigRepository: EquipmentStatConfigRepository
+) {
     operator fun invoke(
         item: Item,
         definition: EquipmentDefinition,
@@ -71,6 +75,17 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
         }
     }
 
+    private fun baseIncrementFor(level: Int): Float {
+        return when (level) {
+            in 1..10 -> 1f
+            in 11..20 -> 5f
+            in 21..30 -> 10f
+            in 31..40 -> 15f
+            in 41..50 -> 20f
+            else -> error("Не определён базовый прирост для уровня $level")
+        }
+    }
+
     private fun upgradeWeapon(
         item: WeaponItem,
         definition: WeaponDefinition,
@@ -102,8 +117,10 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                 item.copy(
                     level = nextLevel,
                     damage = item.damage + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + baseIncrement *
-                            definition.growthMultiplierFor(item.additionalStatType)
+                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                        statType = item.additionalStatType,
+                        baseIncrement = baseIncrement
+                    )
                 )
             }
         }
@@ -140,8 +157,10 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                 item.copy(
                     level = nextLevel,
                     hp = item.hp + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + baseIncrement *
-                            definition.growthMultiplierFor(item.additionalStatType)
+                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                        statType = item.additionalStatType,
+                        baseIncrement = baseIncrement
+                    )
                 )
             }
         }
@@ -178,22 +197,23 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                 item.copy(
                     level = nextLevel,
                     cooldownReductionPercent = item.cooldownReductionPercent + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + baseIncrement *
-                            definition.growthMultiplierFor(item.additionalStatType)
+                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                        statType = item.additionalStatType,
+                        baseIncrement = baseIncrement
+                    )
                 )
             }
         }
     }
 
-    private fun baseIncrementFor(level: Int): Float {
-        return when (level) {
-            in 1..10 -> 1f
-            in 11..20 -> 5f
-            in 21..30 -> 10f
-            in 31..40 -> 15f
-            in 41..50 -> 20f
-            else -> error("Не определён базовый прирост для уровня $level")
-        }
+    private fun additionalStatIncrement(
+        statType: EquipmentStatType,
+        baseIncrement: Float
+    ): Float {
+        return baseIncrement *
+                equipmentStatConfigRepository
+                    .getAdditionalStatConfig(statType)
+                    .levelGrowthMultiplier
     }
 
     private companion object {

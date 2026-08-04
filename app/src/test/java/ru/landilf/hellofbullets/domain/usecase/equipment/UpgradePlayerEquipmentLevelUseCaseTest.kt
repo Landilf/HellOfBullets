@@ -8,12 +8,14 @@ import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCos
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
@@ -139,7 +141,17 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
                 initialDefinitions = definitions
             ),
             equipmentLevelUpgradeCostCalculator = EquipmentLevelUpgradeCostCalculator(),
-            upgradeEquipmentLevelUseCase = UpgradeEquipmentLevelUseCase()
+            upgradeEquipmentLevelUseCase = UpgradeEquipmentLevelUseCase(
+                equipmentStatConfigRepository = object : EquipmentStatConfigRepository {
+                    override fun getReferenceRange(statType: EquipmentStatType): StatRange {
+                        error("Диапазон характеристики не должен использоваться в этом тесте")
+                    }
+
+                    override fun getAdditionalStatConfig(statType: EquipmentStatType): AdditionalStatConfig {
+                        error("Конфиг дополнительной характеристики не должен использоваться в этом тесте")
+                    }
+                }
+            )
         )
     }
 

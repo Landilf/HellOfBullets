@@ -13,6 +13,16 @@ sealed class EquipmentDefinition {
     abstract val primarySecondGrowthMultiplier: Float
     abstract val baseLevelUpgradeCost: Int
 
+    fun primaryStatRangeFor(
+        statType: EquipmentStatType
+    ): StatRange? {
+        return when (statType) {
+            primaryFirstStatType -> primaryFirstStatRange
+            primarySecondStatType -> primarySecondStatRange
+            else -> null
+        }
+    }
+
     fun primaryFirstGrowthMultiplierFor(
         specializationCoef: Float
     ): Float {
@@ -25,16 +35,6 @@ sealed class EquipmentDefinition {
     ): Float {
         return primarySecondGrowthMultiplier *
                 primarySecondStatRange.growthMultiplierFor(-specializationCoef)
-    }
-
-    fun growthMultiplierFor(
-        statType: EquipmentStatType
-    ): Float {
-        return when (statType) {
-            primaryFirstStatType -> primaryFirstGrowthMultiplier
-            primarySecondStatType -> primarySecondGrowthMultiplier
-            else -> FOREIGN_STAT_GROWTH_MULTIPLIER
-        }
     }
 
     private companion object {
