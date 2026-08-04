@@ -78,7 +78,8 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
         baseIncrement: Float,
         fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
     ): WeaponItem {
-        val primaryFirstIncrement = baseIncrement * definition.primaryFirstGrowthMultiplier
+        val primaryFirstIncrement =
+            baseIncrement * definition.primaryFirstGrowthMultiplierFor(item.specializationCoef)
 
         if (nextLevel % LEVEL_STEP != 0) {
             return item.copy(
@@ -93,7 +94,7 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                     level = nextLevel,
                     damage = item.damage + primaryFirstIncrement,
                     attackSpeed = item.attackSpeed + baseIncrement *
-                            definition.primarySecondGrowthMultiplier
+                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
                 )
             }
 
@@ -115,7 +116,8 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
         baseIncrement: Float,
         fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
     ): ArmorItem {
-        val primaryFirstIncrement = baseIncrement * definition.primaryFirstGrowthMultiplier
+        val primaryFirstIncrement =
+            baseIncrement * definition.primaryFirstGrowthMultiplierFor(item.specializationCoef)
 
         if (nextLevel % LEVEL_STEP != 0) {
             return item.copy(
@@ -130,7 +132,7 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                     level = nextLevel,
                     hp = item.hp + primaryFirstIncrement,
                     defense = item.defense + baseIncrement *
-                            definition.primarySecondGrowthMultiplier
+                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
                 )
             }
 
@@ -152,7 +154,8 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
         baseIncrement: Float,
         fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
     ): ArtifactItem {
-        val primaryFirstIncrement = baseIncrement * definition.primaryFirstGrowthMultiplier
+        val primaryFirstIncrement =
+            baseIncrement * definition.primaryFirstGrowthMultiplierFor(item.specializationCoef)
 
         if (nextLevel % LEVEL_STEP != 0) {
             return item.copy(
@@ -167,7 +170,7 @@ class UpgradeEquipmentLevelUseCase @Inject constructor() {
                     level = nextLevel,
                     cooldownReductionPercent = item.cooldownReductionPercent + primaryFirstIncrement,
                     durationBonusPercent = item.durationBonusPercent + baseIncrement *
-                            definition.primarySecondGrowthMultiplier
+                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
                 )
             }
 

@@ -3,6 +3,7 @@ package ru.landilf.hellofbullets.data.catalog.equipment
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
+import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import javax.inject.Inject
@@ -16,8 +17,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             name = "Pistol",
             primaryFirstGrowthMultiplier = 1.5f,
             primarySecondGrowthMultiplier = 0.25f,
-            baseDamage = 10f,
-            baseAttackSpeed = 2f,
+            damageRange = StatRange(9f, 11f),
+            attackSpeedRange = StatRange(1.8f, 2.2f),
             attackRange = 500f,
             baseLevelUpgradeCost = 10
         ),
@@ -26,8 +27,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             name = "Training armor",
             primaryFirstGrowthMultiplier = 10f,
             primarySecondGrowthMultiplier = 1f,
-            baseHp = 100f,
-            baseDefense = 5f,
+            hpRange = StatRange(80f, 120f),
+            defenseRange = StatRange(3f, 7f),
             baseLevelUpgradeCost = 15
         ),
         ArtifactDefinition(
@@ -35,8 +36,8 @@ class StaticEquipmentDefinitionRepository @Inject constructor() : EquipmentDefin
             name = "Hourglass",
             primaryFirstGrowthMultiplier = 2.5f,
             primarySecondGrowthMultiplier = 2.5f,
-            baseCooldownReductionPercent = 5f,
-            baseDurationBonusPercent = 5f,
+            cooldownReductionPercentRange = StatRange(3f, 7f),
+            durationBonusPercentRange = StatRange(3f, 7f),
             baseLevelUpgradeCost = 12
         )
     )

@@ -18,7 +18,8 @@ class WeaponItemEntityToDomainMapper @Inject constructor() :
             additionalStatType = EquipmentStatType.valueOf(entity.additionalStatTypeName),
             additionalStatValue = entity.additionalStatValue,
             damage = entity.damage,
-            attackSpeed = entity.attackSpeed
+            attackSpeed = entity.attackSpeed,
+            specializationCoef = entity.specializationCoef
         )
     }
 }

@@ -8,9 +8,13 @@ data class ArtifactDefinition(
     override val primaryFirstGrowthMultiplier: Float,
     override val primarySecondGrowthMultiplier: Float,
     override val baseLevelUpgradeCost: Int,
-    val baseCooldownReductionPercent: Float,
-    val baseDurationBonusPercent: Float
+    val cooldownReductionPercentRange: StatRange,
+    val durationBonusPercentRange: StatRange
 ) : EquipmentDefinition() {
     override val primaryFirstStatType = EquipmentStatType.COOLDOWN_REDUCTION
     override val primarySecondStatType = EquipmentStatType.DURATION
+    override val primaryFirstStatRange: StatRange
+        get() = cooldownReductionPercentRange
+    override val primarySecondStatRange: StatRange
+        get() = durationBonusPercentRange
 }

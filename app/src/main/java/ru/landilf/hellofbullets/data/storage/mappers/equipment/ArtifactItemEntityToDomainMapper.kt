@@ -18,7 +18,8 @@ class ArtifactItemEntityToDomainMapper @Inject constructor() :
             additionalStatType = EquipmentStatType.valueOf(entity.additionalStatTypeName),
             additionalStatValue = entity.additionalStatValue,
             cooldownReductionPercent = entity.cooldownReductionPercent,
-            durationBonusPercent = entity.durationBonusPercent
+            durationBonusPercent = entity.durationBonusPercent,
+            specializationCoef = entity.specializationCoef
         )
     }
 }

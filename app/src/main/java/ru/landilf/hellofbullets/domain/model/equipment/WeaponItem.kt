@@ -8,5 +8,6 @@ data class WeaponItem(
     override val additionalStatType: EquipmentStatType,
     override val additionalStatValue: Float,
     val damage: Float,
-    val attackSpeed: Float
-) : Item()
+    val attackSpeed: Float,
+    override val specializationCoef: Float
+) : Item(specializationCoef)

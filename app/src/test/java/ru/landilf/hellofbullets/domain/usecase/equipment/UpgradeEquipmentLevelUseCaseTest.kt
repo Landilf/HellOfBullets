@@ -9,6 +9,7 @@ import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
+import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 
 class UpgradeEquipmentLevelUseCaseTest {
@@ -19,8 +20,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Pistol",
         primaryFirstGrowthMultiplier = 1.5f,
         primarySecondGrowthMultiplier = 2f,
-        baseDamage = 10f,
-        baseAttackSpeed = 5f,
+        damageRange = StatRange(9f, 11f),
+        attackSpeedRange = StatRange(1.8f, 2.2f),
         attackRange = 50f,
         baseLevelUpgradeCost = 10
     )
@@ -30,8 +31,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Light armor",
         primaryFirstGrowthMultiplier = 2f,
         primarySecondGrowthMultiplier = 1.5f,
-        baseHp = 20f,
-        baseDefense = 4f,
+        hpRange = StatRange(80f, 120f),
+        defenseRange = StatRange(3f, 7f),
         baseLevelUpgradeCost = 15
     )
 
@@ -40,8 +41,8 @@ class UpgradeEquipmentLevelUseCaseTest {
         name = "Hourglass",
         primaryFirstGrowthMultiplier = 1.25f,
         primarySecondGrowthMultiplier = 2f,
-        baseCooldownReductionPercent = 6f,
-        baseDurationBonusPercent = 8f,
+        cooldownReductionPercentRange = StatRange(3f, 7f),
+        durationBonusPercentRange = StatRange(3f, 7f),
         baseLevelUpgradeCost = 12
     )
 
@@ -71,6 +72,36 @@ class UpgradeEquipmentLevelUseCaseTest {
         assertEquals(11.5f, updatedItem.damage, EPSILON)
         assertEquals(7f, updatedItem.attackSpeed, EPSILON)
         assertEquals(3f, updatedItem.additionalStatValue, EPSILON)
+    }
+
+    @Test
+    fun `increases first stat growth and decreases second stat growth for positive specialization`() {
+        val updatedItem = useCase(
+            item = createWeapon(
+                level = 4,
+                specializationCoef = 1f
+            ),
+            definition = weaponDefinition,
+            fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
+        ) as WeaponItem
+
+        assertEquals(11.65f, updatedItem.damage, EPSILON)
+        assertEquals(6.8f, updatedItem.attackSpeed, EPSILON)
+    }
+
+    @Test
+    fun `decreases first stat growth and increases second stat growth for negative specialization`() {
+        val updatedItem = useCase(
+            item = createWeapon(
+                level = 4,
+                specializationCoef = -1f
+            ),
+            definition = weaponDefinition,
+            fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
+        ) as WeaponItem
+
+        assertEquals(11.35f, updatedItem.damage, EPSILON)
+        assertEquals(7.2f, updatedItem.attackSpeed, EPSILON)
     }
 
     @Test
@@ -152,7 +183,8 @@ class UpgradeEquipmentLevelUseCaseTest {
 
     private fun createWeapon(
         level: Int,
-        additionalStatType: EquipmentStatType = EquipmentStatType.HP
+        additionalStatType: EquipmentStatType = EquipmentStatType.HP,
+        specializationCoef: Float = 0f
     ): WeaponItem {
         return WeaponItem(
             id = 1L,
@@ -162,11 +194,14 @@ class UpgradeEquipmentLevelUseCaseTest {
             additionalStatType = additionalStatType,
             additionalStatValue = 3f,
             damage = 10f,
-            attackSpeed = 5f
+            attackSpeed = 5f,
+            specializationCoef = specializationCoef
         )
     }
 
-    private fun createArmor(): ArmorItem {
+    private fun createArmor(
+        specializationCoef: Float = 0f
+    ): ArmorItem {
         return ArmorItem(
             id = 2L,
             definitionId = armorDefinition.id,
@@ -175,11 +210,14 @@ class UpgradeEquipmentLevelUseCaseTest {
             additionalStatType = EquipmentStatType.DAMAGE,
             additionalStatValue = 3f,
             hp = 20f,
-            defense = 4f
+            defense = 4f,
+            specializationCoef = specializationCoef
         )
     }
 
-    private fun createArtifact(): ArtifactItem {
+    private fun createArtifact(
+        specializationCoef: Float = 0f
+    ): ArtifactItem {
         return ArtifactItem(
             id = 3L,
             definitionId = artifactDefinition.id,
@@ -188,7 +226,8 @@ class UpgradeEquipmentLevelUseCaseTest {
             additionalStatType = EquipmentStatType.DEFENSE,
             additionalStatValue = 3f,
             cooldownReductionPercent = 6f,
-            durationBonusPercent = 8f
+            durationBonusPercent = 8f,
+            specializationCoef = specializationCoef
         )
     }
 

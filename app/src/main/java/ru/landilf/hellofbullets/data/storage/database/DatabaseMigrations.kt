@@ -134,4 +134,27 @@ object DatabaseMigrations {
             )
         }
     }
+
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                    ALTER TABLE `weapon_items`
+                    ADD COLUMN `specializationCoef` REAL NOT NULL DEFAULT 0.0
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    ALTER TABLE `armor_items`
+                    ADD COLUMN `specializationCoef` REAL NOT NULL DEFAULT 0.0
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    ALTER TABLE `artifact_items`
+                    ADD COLUMN `specializationCoef` REAL NOT NULL DEFAULT 0.0
+                """.trimIndent()
+            )
+        }
+    }
 }

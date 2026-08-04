@@ -8,5 +8,6 @@ data class ArtifactItem(
     override val additionalStatType: EquipmentStatType,
     override val additionalStatValue: Float,
     val cooldownReductionPercent: Float,
-    val durationBonusPercent: Float
-) : Item()
+    val durationBonusPercent: Float,
+    override val specializationCoef: Float
+) : Item(specializationCoef)

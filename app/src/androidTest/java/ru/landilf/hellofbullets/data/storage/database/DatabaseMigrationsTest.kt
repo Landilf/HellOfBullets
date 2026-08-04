@@ -48,7 +48,8 @@ class DatabaseMigrationsTest {
         )
             .addMigrations(
                 DatabaseMigrations.MIGRATION_3_4,
-                DatabaseMigrations.MIGRATION_4_5
+                DatabaseMigrations.MIGRATION_4_5,
+                DatabaseMigrations.MIGRATION_5_6
             )
             .allowMainThreadQueries()
             .build()
@@ -110,6 +111,65 @@ class DatabaseMigrationsTest {
         ).use { cursor ->
             assertTrue(cursor.moveToFirst())
             assertEquals(8L, cursor.getLong(0))
+        }
+
+        migratedDatabase.close()
+    }
+
+    @Test
+    fun migratesFromVersion5ToVersion6AndAddsNeutralSpecializationCoef() {
+        val database = migrationTestHelper.createDatabase(databaseName, 5)
+
+        database.execSQL(
+            """
+                INSERT INTO `player_profile` (
+                    `id`, `name`, `level`, `expAmount`, `silverAmount`, `skillPointAmount`
+                ) VALUES (1, 'Player', 1, 0, 0, 0)
+            """.trimIndent()
+        )
+        database.execSQL(
+            """
+                INSERT INTO `weapon_items` (
+                    `id`, `ownerId`, `definitionId`, `level`, `qualityName`,
+                    `additionalStatTypeName`, `additionalStatValue`,
+                    `damage`, `attackSpeed`
+                ) VALUES (3, 1, 1, 1, 'NORMAL', 'DAMAGE', 0.0, 10.0, 1.0)
+            """.trimIndent()
+        )
+        database.execSQL(
+            """
+                INSERT INTO `armor_items` (
+                    `id`, `ownerId`, `definitionId`, `level`, `qualityName`,
+                    `additionalStatTypeName`, `additionalStatValue`,
+                    `hp`, `defense`
+                ) VALUES (5, 1, 1, 1, 'NORMAL', 'DAMAGE', 0.0, 100.0, 5.0)
+            """.trimIndent()
+        )
+        database.execSQL(
+            """
+                INSERT INTO `artifact_items` (
+                    `id`, `ownerId`, `definitionId`, `level`, `qualityName`,
+                    `additionalStatTypeName`, `additionalStatValue`,
+                    `cooldownReductionPercent`, `durationBonusPercent`
+                ) VALUES (7, 1, 3, 1, 'NORMAL', 'DURATION', 0.0, 5.0, 10.0)
+            """.trimIndent()
+        )
+        database.close()
+
+        val migratedDatabase = migrationTestHelper.runMigrationsAndValidate(
+            databaseName,
+            6,
+            true,
+            DatabaseMigrations.MIGRATION_5_6
+        )
+
+        listOf("weapon_items", "armor_items", "artifact_items").forEach { tableName ->
+            migratedDatabase.query(
+                "SELECT `specializationCoef` FROM `$tableName`"
+            ).use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals(0f, cursor.getFloat(0))
+            }
         }
 
         migratedDatabase.close()

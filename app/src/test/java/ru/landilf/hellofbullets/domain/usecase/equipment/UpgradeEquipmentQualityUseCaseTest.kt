@@ -6,6 +6,7 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 
 class UpgradeEquipmentQualityUseCaseTest {
@@ -16,8 +17,8 @@ class UpgradeEquipmentQualityUseCaseTest {
         name = "Pistol",
         primaryFirstGrowthMultiplier = 1.5f,
         primarySecondGrowthMultiplier = 2f,
-        baseDamage = 10f,
-        baseAttackSpeed = 5f,
+        damageRange = StatRange(9f, 11f),
+        attackSpeedRange = StatRange(1.8f, 2.2f),
         attackRange = 50f,
         baseLevelUpgradeCost = 10
     )
@@ -174,7 +175,8 @@ class UpgradeEquipmentQualityUseCaseTest {
         definitionId: Long = weaponDefinition.id,
         quality: EquipmentQuality = EquipmentQuality.NORMAL,
         level: Int = 1,
-        damage: Float = 10f
+        damage: Float = 10f,
+        specializationCoef: Float = 0f
     ): WeaponItem {
         return WeaponItem(
             id = id,
@@ -184,7 +186,8 @@ class UpgradeEquipmentQualityUseCaseTest {
             additionalStatType = EquipmentStatType.HP,
             additionalStatValue = 3f,
             damage = damage,
-            attackSpeed = 5f
+            attackSpeed = 5f,
+            specializationCoef = specializationCoef
         )
     }
 
@@ -200,7 +203,9 @@ class UpgradeEquipmentQualityUseCaseTest {
         }
     }
 
-    private fun createArmor(): ArmorItem {
+    private fun createArmor(
+        specializationCoef: Float = 0f
+    ): ArmorItem {
         return ArmorItem(
             id = 7L,
             definitionId = 2L,
@@ -209,7 +214,8 @@ class UpgradeEquipmentQualityUseCaseTest {
             additionalStatType = EquipmentStatType.DAMAGE,
             additionalStatValue = 3f,
             hp = 20f,
-            defense = 4f
+            defense = 4f,
+            specializationCoef = specializationCoef
         )
     }
 

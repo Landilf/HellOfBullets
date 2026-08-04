@@ -8,6 +8,7 @@ import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCos
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
@@ -165,7 +166,9 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
         )
     }
 
-    private fun createWeapon(): WeaponItem {
+    private fun createWeapon(
+        specializationCoef: Float = 0f
+    ): WeaponItem {
         return WeaponItem(
             id = 1L,
             definitionId = weaponDefinition.id,
@@ -174,7 +177,8 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             additionalStatType = EquipmentStatType.HP,
             additionalStatValue = 0f,
             damage = 10f,
-            attackSpeed = 2f
+            attackSpeed = 2f,
+            specializationCoef = specializationCoef
         )
     }
 
@@ -184,8 +188,8 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             name = "Pistol",
             primaryFirstGrowthMultiplier = 1.5f,
             primarySecondGrowthMultiplier = 0.25f,
-            baseDamage = 10f,
-            baseAttackSpeed = 2f,
+            damageRange = StatRange(9f, 11f),
+            attackSpeedRange = StatRange(1.8f, 2.2f),
             attackRange = 500f,
             baseLevelUpgradeCost = 10
         )

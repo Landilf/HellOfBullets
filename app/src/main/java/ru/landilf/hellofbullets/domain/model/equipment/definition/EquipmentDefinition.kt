@@ -7,9 +7,25 @@ sealed class EquipmentDefinition {
     abstract val name: String
     abstract val primaryFirstStatType: EquipmentStatType
     abstract val primarySecondStatType: EquipmentStatType
+    abstract val primaryFirstStatRange: StatRange
+    abstract val primarySecondStatRange: StatRange
     abstract val primaryFirstGrowthMultiplier: Float
     abstract val primarySecondGrowthMultiplier: Float
     abstract val baseLevelUpgradeCost: Int
+
+    fun primaryFirstGrowthMultiplierFor(
+        specializationCoef: Float
+    ): Float {
+        return primaryFirstGrowthMultiplier *
+                primaryFirstStatRange.growthMultiplierFor(specializationCoef)
+    }
+
+    fun primarySecondGrowthMultiplierFor(
+        specializationCoef: Float
+    ): Float {
+        return primarySecondGrowthMultiplier *
+                primarySecondStatRange.growthMultiplierFor(-specializationCoef)
+    }
 
     fun growthMultiplierFor(
         statType: EquipmentStatType

@@ -1,5 +1,6 @@
 package ru.landilf.hellofbullets.data.storage.entities.equipment
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -28,5 +29,7 @@ data class ArmorItemEntity(
     val additionalStatTypeName: String,
     val additionalStatValue: Float,
     val hp: Float,
-    val defense: Float
+    val defense: Float,
+    @ColumnInfo(defaultValue = "0.0")
+    val specializationCoef: Float
 )

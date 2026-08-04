@@ -8,10 +8,14 @@ data class WeaponDefinition(
     override val primaryFirstGrowthMultiplier: Float,
     override val primarySecondGrowthMultiplier: Float,
     override val baseLevelUpgradeCost: Int,
-    val baseDamage: Float,
-    val baseAttackSpeed: Float,
+    val damageRange: StatRange,
+    val attackSpeedRange: StatRange,
     val attackRange: Float
 ) : EquipmentDefinition() {
     override val primaryFirstStatType = EquipmentStatType.DAMAGE
     override val primarySecondStatType = EquipmentStatType.ATTACK_SPEED
+    override val primaryFirstStatRange: StatRange
+        get() = damageRange
+    override val primarySecondStatRange: StatRange
+        get() = attackSpeedRange
 }

@@ -143,7 +143,8 @@ class PlayerStateTest {
 
     private fun createWeapon(
         id: Long,
-        damage: Float = 10f
+        damage: Float = 10f,
+        specializationCoef: Float = 0f
     ): WeaponItem {
         return WeaponItem(
             id = id,
@@ -153,7 +154,8 @@ class PlayerStateTest {
             additionalStatType = EquipmentStatType.HP,
             additionalStatValue = 0f,
             damage = damage,
-            attackSpeed = 2f
+            attackSpeed = 2f,
+            specializationCoef = specializationCoef
         )
     }
 }

@@ -24,7 +24,7 @@ import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
         EquipmentItemIdCounterEntity::class,
         LeaderboardRecordEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

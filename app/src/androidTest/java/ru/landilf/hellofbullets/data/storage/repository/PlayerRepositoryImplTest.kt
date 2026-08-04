@@ -88,7 +88,8 @@ class PlayerRepositoryImplTest {
             additionalStatType = EquipmentStatType.DAMAGE,
             additionalStatValue = 3f,
             damage = 10f,
-            attackSpeed = 1.5f
+            attackSpeed = 1.5f,
+            specializationCoef = 0f
         )
         val updatedState = PlayerState(
             playerProfile = PlayerProfile(
@@ -196,7 +197,9 @@ class PlayerRepositoryImplTest {
         )
     }
 
-    private fun createPlayerState(): PlayerState {
+    private fun createPlayerState(
+        specializationCoef: Float = 0f
+    ): PlayerState {
         val weapon = WeaponItem(
             id = 1L,
             definitionId = 10L,
@@ -205,7 +208,8 @@ class PlayerRepositoryImplTest {
             additionalStatType = EquipmentStatType.HP,
             additionalStatValue = 12f,
             damage = 18f,
-            attackSpeed = 2.5f
+            attackSpeed = 2.5f,
+            specializationCoef = specializationCoef
         )
         val armor = ArmorItem(
             id = 2L,
@@ -215,7 +219,8 @@ class PlayerRepositoryImplTest {
             additionalStatType = EquipmentStatType.DAMAGE,
             additionalStatValue = 4f,
             hp = 80f,
-            defense = 15f
+            defense = 15f,
+            specializationCoef = specializationCoef
         )
         val artifact = ArtifactItem(
             id = 3L,
@@ -225,7 +230,8 @@ class PlayerRepositoryImplTest {
             additionalStatType = EquipmentStatType.DURATION,
             additionalStatValue = 5f,
             cooldownReductionPercent = 10f,
-            durationBonusPercent = 20f
+            durationBonusPercent = 20f,
+            specializationCoef = specializationCoef
         )
 
         return PlayerState(

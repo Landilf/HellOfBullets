@@ -18,7 +18,8 @@ class ArmorItemDomainToEntityMapper @Inject constructor() {
             additionalStatTypeName = item.additionalStatType.name,
             additionalStatValue = item.additionalStatValue,
             hp = item.hp,
-            defense = item.defense
+            defense = item.defense,
+            specializationCoef = item.specializationCoef
         )
     }
 }

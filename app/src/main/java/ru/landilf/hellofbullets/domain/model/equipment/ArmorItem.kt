@@ -8,5 +8,6 @@ data class ArmorItem(
     override val additionalStatType: EquipmentStatType,
     override val additionalStatValue: Float,
     val hp: Float,
-    val defense: Float
-) : Item()
+    val defense: Float,
+    override val specializationCoef: Float
+) : Item(specializationCoef)
