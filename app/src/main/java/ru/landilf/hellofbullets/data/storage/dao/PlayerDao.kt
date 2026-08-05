@@ -15,6 +15,18 @@ interface PlayerDao {
     @Query("SELECT * FROM player_build WHERE playerId = :playerId LIMIT 1")
     suspend fun getPlayerBuild(playerId: Long): PlayerBuildEntity?
 
+    @Query(
+        """
+            UPDATE player_profile
+            SET silverAmount = :silverAmount
+            WHERE id = :playerId
+        """
+    )
+    suspend fun updateSilverAmount(
+        playerId: Long,
+        silverAmount: Int
+    ): Int
+
     @Upsert
     suspend fun upsertPlayerProfile(profile: PlayerProfileEntity)
 

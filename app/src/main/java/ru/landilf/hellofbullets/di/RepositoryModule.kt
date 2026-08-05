@@ -14,12 +14,14 @@ import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 import ru.landilf.hellofbullets.data.storage.repository.LeaderboardRepositoryImpl
 import ru.landilf.hellofbullets.data.storage.repository.PlayerRepositoryImpl
 import ru.landilf.hellofbullets.data.storage.repository.SettingsRepositoryImpl
+import ru.landilf.hellofbullets.data.storage.repository.ShopRepositoryImpl
 import ru.landilf.hellofbullets.domain.generator.EquipmentItemIdGenerator
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.SettingsRepository
+import ru.landilf.hellofbullets.domain.repository.ShopRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -59,6 +61,11 @@ abstract class RepositoryModule {
     abstract fun bindOnlineLeaderboardRepository(
         impl: FirestoreOnlineLeaderboardRepository
     ): OnlineLeaderboardRepository
+
+    @Binds
+    abstract fun bindShopRepository(
+        impl: ShopRepositoryImpl
+    ): ShopRepository
 
     @Binds
     abstract fun bindSettingsRepository(

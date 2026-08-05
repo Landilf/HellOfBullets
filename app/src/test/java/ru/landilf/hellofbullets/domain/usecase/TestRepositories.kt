@@ -5,10 +5,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
+import ru.landilf.hellofbullets.domain.repository.ShopRepository
 
 class FakeLeaderboardRepository(
     initialRecords: List<LeaderboardRecord> = emptyList()
@@ -147,5 +149,53 @@ class FakeEquipmentDefinitionRepository(
 
     override fun getDefinitionById(id: Long): EquipmentDefinition? {
         return definitionsById[id]
+    }
+}
+
+class FakeShopRepository(
+    initialState: ShopState? = null
+) : ShopRepository {
+    private val stateFlow = MutableStateFlow(initialState)
+
+    var state: ShopState?
+        get() = stateFlow.value
+        private set(value) {
+            stateFlow.value = value
+        }
+
+    var saveCallCount = 0
+        private set
+
+    var lastManualRefreshPlayerId: Long? = null
+        private set
+
+    var lastUpdatedSilverAmount: Int? = null
+        private set
+
+    var manualRefreshCallCount = 0
+        private set
+
+    override suspend fun getShopState(): ShopState? {
+        return state
+    }
+
+    override suspend fun saveShopState(shopState: ShopState) {
+        state = shopState
+        saveCallCount++
+    }
+
+    override suspend fun applyManualRefresh(
+        playerId: Long,
+        updatedSilverAmount: Int,
+        refreshedShopState: ShopState
+    ) {
+        lastManualRefreshPlayerId = playerId
+        lastUpdatedSilverAmount = updatedSilverAmount
+        state = refreshedShopState
+        manualRefreshCallCount++
+    }
+
+    override fun observeShopState(): Flow<ShopState?> {
+        return stateFlow
     }
 }

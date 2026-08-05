@@ -38,7 +38,7 @@ class DatabaseMigrationsTest {
     }
 
     @Test
-    fun migratesFromVersion3ToVersion5AndPreservesPlayerProfile() = runBlocking {
+    fun migratesFromVersion3ToVersion8AndPreservesPlayerProfile() = runBlocking {
         createVersion3Database()
 
         val migratedDatabase = Room.databaseBuilder(
@@ -49,7 +49,9 @@ class DatabaseMigrationsTest {
             .addMigrations(
                 DatabaseMigrations.MIGRATION_3_4,
                 DatabaseMigrations.MIGRATION_4_5,
-                DatabaseMigrations.MIGRATION_5_6
+                DatabaseMigrations.MIGRATION_5_6,
+                DatabaseMigrations.MIGRATION_6_7,
+                DatabaseMigrations.MIGRATION_7_8
             )
             .allowMainThreadQueries()
             .build()
@@ -170,6 +172,80 @@ class DatabaseMigrationsTest {
                 assertTrue(cursor.moveToFirst())
                 assertEquals(0f, cursor.getFloat(0))
             }
+        }
+
+        migratedDatabase.close()
+    }
+
+    @Test
+    fun migratesFromVersion6ToVersion7AndCreatesShopTables() {
+        val database = migrationTestHelper.createDatabase(databaseName, 6)
+
+        database.execSQL(
+            """
+                INSERT INTO `player_profile` (
+                    `id`, `name`, `level`, `expAmount`, `silverAmount`, `skillPointAmount`
+                ) VALUES (1, 'Player', 1, 0, 0, 0)
+            """.trimIndent()
+        )
+        database.close()
+
+        val migratedDatabase = migrationTestHelper.runMigrationsAndValidate(
+            databaseName,
+            7,
+            true,
+            DatabaseMigrations.MIGRATION_6_7
+        )
+
+        listOf(
+            "shop_state",
+            "shop_weapon_offers",
+            "shop_armor_offers",
+            "shop_artifact_offers"
+        ).forEach { tableName ->
+            migratedDatabase.query(
+                "SELECT COUNT(*) FROM `$tableName`"
+            ).use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals(0, cursor.getInt(0))
+            }
+        }
+
+        migratedDatabase.query(
+            "SELECT `name` FROM `player_profile` WHERE `id` = 1"
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals("Player", cursor.getString(0))
+        }
+
+        migratedDatabase.close()
+    }
+
+    @Test
+    fun migratesFromVersion7ToVersion8AndInitializesManualRefreshCount() {
+        val database = migrationTestHelper.createDatabase(databaseName, 7)
+
+        database.execSQL(
+            """
+                INSERT INTO `shop_state` (
+                    `id`, `lastAutomaticRefreshEpochDay`
+                ) VALUES (0, 20670)
+            """.trimIndent()
+        )
+        database.close()
+
+        val migratedDatabase = migrationTestHelper.runMigrationsAndValidate(
+            databaseName,
+            8,
+            true,
+            DatabaseMigrations.MIGRATION_7_8
+        )
+
+        migratedDatabase.query(
+            "SELECT `manualRefreshCount` FROM `shop_state` WHERE `id` = 0"
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals(0, cursor.getInt(0))
         }
 
         migratedDatabase.close()

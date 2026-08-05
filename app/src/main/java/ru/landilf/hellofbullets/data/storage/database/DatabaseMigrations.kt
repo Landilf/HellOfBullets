@@ -157,4 +157,83 @@ object DatabaseMigrations {
             )
         }
     }
+
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `shop_state` (
+                        `id` INTEGER NOT NULL,
+                        `lastAutomaticRefreshEpochDay` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `shop_weapon_offers` (
+                        `itemId` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        `definitionId` INTEGER NOT NULL,
+                        `level` INTEGER NOT NULL,
+                        `qualityName` TEXT NOT NULL,
+                        `additionalStatTypeName` TEXT NOT NULL,
+                        `additionalStatValue` REAL NOT NULL,
+                        `damage` REAL NOT NULL,
+                        `attackSpeed` REAL NOT NULL,
+                        `specializationCoef` REAL NOT NULL,
+                        `purchasePrice` INTEGER NOT NULL,
+                        PRIMARY KEY(`itemId`)
+                    )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `shop_armor_offers` (
+                        `itemId` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        `definitionId` INTEGER NOT NULL,
+                        `level` INTEGER NOT NULL,
+                        `qualityName` TEXT NOT NULL,
+                        `additionalStatTypeName` TEXT NOT NULL,
+                        `additionalStatValue` REAL NOT NULL,
+                        `hp` REAL NOT NULL,
+                        `defense` REAL NOT NULL,
+                        `specializationCoef` REAL NOT NULL,
+                        `purchasePrice` INTEGER NOT NULL,
+                        PRIMARY KEY(`itemId`)
+                    )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `shop_artifact_offers` (
+                        `itemId` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        `definitionId` INTEGER NOT NULL,
+                        `level` INTEGER NOT NULL,
+                        `qualityName` TEXT NOT NULL,
+                        `additionalStatTypeName` TEXT NOT NULL,
+                        `additionalStatValue` REAL NOT NULL,
+                        `cooldownReductionPercent` REAL NOT NULL,
+                        `durationBonusPercent` REAL NOT NULL,
+                        `specializationCoef` REAL NOT NULL,
+                        `purchasePrice` INTEGER NOT NULL,
+                        PRIMARY KEY(`itemId`)
+                    )
+                """.trimIndent()
+            )
+        }
+    }
+
+    val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                    ALTER TABLE `shop_state`
+                    ADD COLUMN `manualRefreshCount` INTEGER NOT NULL DEFAULT 0
+                """.trimIndent()
+            )
+        }
+    }
 }
