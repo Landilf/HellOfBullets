@@ -38,7 +38,7 @@ class DatabaseMigrationsTest {
     }
 
     @Test
-    fun migratesFromVersion3ToVersion8AndPreservesPlayerProfile() = runBlocking {
+    fun migratesFromVersion3ToVersion9AndPreservesPlayerProfile() = runBlocking {
         createVersion3Database()
 
         val migratedDatabase = Room.databaseBuilder(
@@ -51,7 +51,8 @@ class DatabaseMigrationsTest {
                 DatabaseMigrations.MIGRATION_4_5,
                 DatabaseMigrations.MIGRATION_5_6,
                 DatabaseMigrations.MIGRATION_6_7,
-                DatabaseMigrations.MIGRATION_7_8
+                DatabaseMigrations.MIGRATION_7_8,
+                DatabaseMigrations.MIGRATION_8_9
             )
             .allowMainThreadQueries()
             .build()
@@ -243,6 +244,40 @@ class DatabaseMigrationsTest {
 
         migratedDatabase.query(
             "SELECT `manualRefreshCount` FROM `shop_state` WHERE `id` = 0"
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals(0, cursor.getInt(0))
+        }
+
+        migratedDatabase.close()
+    }
+
+    @Test
+    fun migratesFromVersion8ToVersion9AndAddsFalseIsSoldFlag() {
+        val database = migrationTestHelper.createDatabase(databaseName, 8)
+
+        database.execSQL(
+            """
+                INSERT INTO `shop_weapon_offers` (
+                    `itemId`, `position`, `definitionId`,
+                    `level`, `qualityName`,
+                    `additionalStatTypeName`, `additionalStatValue`,
+                    `damage`, `attackSpeed`,
+                    `specializationCoef`, `purchasePrice`
+                ) VALUES (1, 1, 1, 1, 'NORMAL', 'HP', 0.0, 10.0, 1.0, 0.0, 100)
+            """.trimIndent()
+        )
+        database.close()
+
+        val migratedDatabase = migrationTestHelper.runMigrationsAndValidate(
+            databaseName,
+            9,
+            true,
+            DatabaseMigrations.MIGRATION_8_9
+        )
+
+        migratedDatabase.query(
+            "SELECT `isSold` FROM `shop_weapon_offers`"
         ).use { cursor ->
             assertTrue(cursor.moveToFirst())
             assertEquals(0, cursor.getInt(0))

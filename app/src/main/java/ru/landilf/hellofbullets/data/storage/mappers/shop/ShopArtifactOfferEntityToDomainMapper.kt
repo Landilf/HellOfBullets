@@ -23,7 +23,8 @@ class ShopArtifactOfferEntityToDomainMapper @Inject constructor() {
                 durationBonusPercent = entity.durationBonusPercent,
                 specializationCoef = entity.specializationCoef
             ),
-            purchasePrice = entity.purchasePrice
+            purchasePrice = entity.purchasePrice,
+            isSold = entity.isSold
         )
     }
 }

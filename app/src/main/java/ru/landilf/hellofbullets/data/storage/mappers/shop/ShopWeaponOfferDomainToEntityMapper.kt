@@ -23,7 +23,8 @@ class ShopWeaponOfferDomainToEntityMapper @Inject constructor() {
             damage = item.damage,
             attackSpeed = item.attackSpeed,
             specializationCoef = item.specializationCoef,
-            purchasePrice = offer.purchasePrice
+            purchasePrice = offer.purchasePrice,
+            isSold = offer.isSold
         )
     }
 }

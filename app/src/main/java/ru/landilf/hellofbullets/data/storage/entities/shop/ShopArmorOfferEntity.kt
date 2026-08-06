@@ -16,5 +16,6 @@ data class ShopArmorOfferEntity(
     val hp: Float,
     val defense: Float,
     val specializationCoef: Float,
-    val purchasePrice: Int
+    val purchasePrice: Int,
+    val isSold: Boolean
 )

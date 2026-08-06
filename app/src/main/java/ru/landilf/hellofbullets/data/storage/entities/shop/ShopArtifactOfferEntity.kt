@@ -16,5 +16,6 @@ data class ShopArtifactOfferEntity(
     val cooldownReductionPercent: Float,
     val durationBonusPercent: Float,
     val specializationCoef: Float,
-    val purchasePrice: Int
+    val purchasePrice: Int,
+    val isSold: Boolean
 )

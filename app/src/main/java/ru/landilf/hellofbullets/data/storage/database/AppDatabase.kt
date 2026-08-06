@@ -33,7 +33,7 @@ import ru.landilf.hellofbullets.data.storage.entities.shop.ShopWeaponOfferEntity
         ShopArmorOfferEntity::class,
         ShopArtifactOfferEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

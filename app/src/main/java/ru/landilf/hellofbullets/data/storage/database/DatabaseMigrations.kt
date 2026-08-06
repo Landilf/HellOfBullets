@@ -236,4 +236,21 @@ object DatabaseMigrations {
             )
         }
     }
+
+    val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            listOf(
+                "shop_weapon_offers",
+                "shop_armor_offers",
+                "shop_artifact_offers"
+            ).forEach { tableName ->
+                db.execSQL(
+                    """
+                        ALTER TABLE `$tableName`
+                        ADD COLUMN `isSold` INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+            }
+        }
+    }
 }

@@ -16,5 +16,6 @@ data class ShopWeaponOfferEntity(
     val damage: Float,
     val attackSpeed: Float,
     val specializationCoef: Float,
-    val purchasePrice: Int
+    val purchasePrice: Int,
+    val isSold: Boolean
 )

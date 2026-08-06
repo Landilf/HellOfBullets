@@ -4,7 +4,8 @@ import ru.landilf.hellofbullets.domain.model.equipment.Item
 
 data class ShopOffer(
     val item: Item,
-    val purchasePrice: Int
+    val purchasePrice: Int,
+    val isSold: Boolean = false
 ) {
     init {
         require(purchasePrice > 0) {
