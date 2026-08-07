@@ -134,7 +134,7 @@ class RefreshShopManuallyUseCaseTest {
                 shopRepository = shopRepository,
                 getOrCreatePlayerStateUseCase = getOrCreatePlayerStateUseCase,
                 generateShopOffersUseCase = generateShopOffersUseCase,
-                clock = createClock()
+                clock = ShopTestFixtures.createClock(TEST_DATE)
             ),
             getOrCreatePlayerStateUseCase = getOrCreatePlayerStateUseCase,
             generateShopOffersUseCase = generateShopOffersUseCase,
@@ -173,13 +173,6 @@ class RefreshShopManuallyUseCaseTest {
             offers = emptyList(),
             lastAutomaticRefreshDate = TEST_DATE,
             manualRefreshCount = manualRefreshCount
-        )
-    }
-
-    private fun createClock(): Clock {
-        return Clock.fixed(
-            TEST_DATE.atStartOfDay(ZoneOffset.UTC).toInstant(),
-            ZoneOffset.UTC
         )
     }
 

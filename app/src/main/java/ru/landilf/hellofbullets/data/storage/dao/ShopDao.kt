@@ -36,6 +36,33 @@ interface ShopDao {
     @Query("SELECT * FROM shop_artifact_offers ORDER BY position ASC")
     fun observeArtifactOffers(): Flow<List<ShopArtifactOfferEntity>>
 
+    @Query(
+        """
+            UPDATE shop_weapon_offers
+            SET isSold = 1
+            WHERE itemId = :itemId AND isSold = 0
+        """
+    )
+    suspend fun markWeaponOfferSold(itemId: Long): Int
+
+    @Query(
+        """
+            UPDATE shop_armor_offers
+            SET isSold = 1
+            WHERE itemId = :itemId AND isSold = 0
+        """
+    )
+    suspend fun markArmorOfferSold(itemId: Long): Int
+
+    @Query(
+        """
+            UPDATE shop_artifact_offers
+            SET isSold = 1
+            WHERE itemId = :itemId AND isSold = 0
+        """
+    )
+    suspend fun markArtifactOfferSold(itemId: Long): Int
+
     @Upsert
     suspend fun upsertShopState(shopState: ShopStateEntity)
 

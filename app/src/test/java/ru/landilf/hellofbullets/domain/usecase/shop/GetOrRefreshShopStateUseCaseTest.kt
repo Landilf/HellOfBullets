@@ -10,9 +10,7 @@ import ru.landilf.hellofbullets.domain.usecase.FakeShopRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.LoadPlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
-import java.time.Clock
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 
 class GetOrRefreshShopStateUseCaseTest {
@@ -82,14 +80,7 @@ class GetOrRefreshShopStateUseCaseTest {
                 )
             ),
             generateShopOffersUseCase = ShopTestFixtures.createGenerateShopOffersUseCase(),
-            clock = createClock()
-        )
-    }
-
-    private fun createClock(): Clock {
-        return Clock.fixed(
-            TEST_DATE.atStartOfDay(ZoneOffset.UTC).toInstant(),
-            ZoneOffset.UTC
+            clock = ShopTestFixtures.createClock(TEST_DATE)
         )
     }
 

@@ -9,6 +9,13 @@ import org.junit.Before
 import org.junit.Test
 import ru.landilf.hellofbullets.data.storage.database.AppDatabase
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.ArmorItemDomainToEntityMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.ArmorItemEntityToDomainMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.ArtifactItemDomainToEntityMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.ArtifactItemEntityToDomainMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.EquipmentStorageMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.WeaponItemDomainToEntityMapper
+import ru.landilf.hellofbullets.data.storage.mappers.equipment.WeaponItemEntityToDomainMapper
 import ru.landilf.hellofbullets.data.storage.mappers.shop.ShopArmorOfferDomainToEntityMapper
 import ru.landilf.hellofbullets.data.storage.mappers.shop.ShopArmorOfferEntityToDomainMapper
 import ru.landilf.hellofbullets.data.storage.mappers.shop.ShopArtifactOfferDomainToEntityMapper
@@ -23,6 +30,7 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopOffer
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import java.time.LocalDate
@@ -44,7 +52,9 @@ class ShopRepositoryImplTest {
             database = database,
             shopDao = database.shopDao(),
             shopStorageMapper = createShopStorageMapper(),
-            playerDao = database.playerDao()
+            playerDao = database.playerDao(),
+            equipmentDao = database.equipmentDao(),
+            equipmentStorageMapper = createEquipmentStorageMapper()
         )
     }
 
@@ -125,6 +135,155 @@ class ShopRepositoryImplTest {
         assertEquals(refreshedShopState, repository.getShopState())
     }
 
+    @Test
+    fun purchasesAvailableOfferDeductsSilverAddsItemAndMarksOfferAsSold() = runBlocking {
+        val playerId = 1L
+        val initialShopState = createShopState()
+        val purchasedOffer = initialShopState.offers.first()
+
+        database.playerDao().upsertPlayerProfile(
+            PlayerProfileEntity(
+                id = playerId,
+                name = "Player",
+                level = 1,
+                totalExperience = 0,
+                silverAmount = 500,
+                skillPointAmount = 0
+            )
+        )
+        repository.saveShopState(initialShopState)
+
+        val result = repository.purchaseOffer(
+            playerId = playerId,
+            itemId = purchasedOffer.item.id
+        )
+
+        assertEquals(
+            PurchaseShopOfferResult.Success(
+                purchasedItem = purchasedOffer.item,
+                spentSilverAmount = purchasedOffer.purchasePrice,
+                remainingSilverAmount = 500 - purchasedOffer.purchasePrice
+            ),
+            result
+        )
+        assertEquals(
+            500 - purchasedOffer.purchasePrice,
+            database.playerDao().getPlayerProfile()?.silverAmount
+        )
+
+        val savedWeapon = database.equipmentDao()
+            .getWeaponItems(playerId)
+            .single()
+
+        assertEquals(purchasedOffer.item.id, savedWeapon.id)
+        assertEquals(playerId, savedWeapon.ownerId)
+
+        val updatedShopState = requireNotNull(repository.getShopState())
+        assertEquals(
+            true,
+            updatedShopState.offers.first {
+                it.item.id == purchasedOffer.item.id
+            }.isSold
+        )
+        assertEquals(
+            false,
+            updatedShopState.offers.filterNot {
+                it.item.id == purchasedOffer.item.id
+            }.any { it.isSold }
+        )
+    }
+
+    @Test
+    fun doesNotPurchaseOfferWhenPlayerHasInsufficientSilver() = runBlocking {
+        val playerId = 1L
+        val initialShopState = createShopState()
+        val offer = initialShopState.offers.first()
+        val silverAmount = offer.purchasePrice - 1
+
+        database.playerDao().upsertPlayerProfile(
+            PlayerProfileEntity(
+                id = playerId,
+                name = "Player",
+                level = 1,
+                totalExperience = 0,
+                silverAmount = silverAmount,
+                skillPointAmount = 0
+            )
+        )
+        repository.saveShopState(initialShopState)
+
+        val result = repository.purchaseOffer(
+            playerId = playerId,
+            itemId = offer.item.id
+        )
+
+        assertEquals(
+            PurchaseShopOfferResult.InsufficientSilver(
+                requiredSilverAmount = offer.purchasePrice,
+                currentSilverAmount = silverAmount
+            ),
+            result
+        )
+        assertEquals(
+            silverAmount,
+            database.playerDao().getPlayerProfile()?.silverAmount
+        )
+        assertEquals(
+            0,
+            database.equipmentDao().getWeaponItems(playerId).size
+        )
+        assertEquals(
+            false,
+            requireNotNull(repository.getShopState())
+                .offers
+                .first { it.item.id == offer.item.id }
+                .isSold
+        )
+    }
+
+    @Test
+    fun doesNotPurchaseAlreadySoldOfferTwice() = runBlocking {
+        val playerId = 1L
+        val initialShopState = createShopState()
+        val offer = initialShopState.offers.first()
+        val initialSilverAmount = 500
+
+        database.playerDao().upsertPlayerProfile(
+            PlayerProfileEntity(
+                id = playerId,
+                name = "Player",
+                level = 1,
+                totalExperience = 0,
+                silverAmount = initialSilverAmount,
+                skillPointAmount = 0
+            )
+        )
+        repository.saveShopState(initialShopState)
+
+        repository.purchaseOffer(
+            playerId = playerId,
+            itemId = offer.item.id
+        )
+
+        val repeatedPurchaseResult = repository.purchaseOffer(
+            playerId = playerId,
+            itemId = offer.item.id
+        )
+
+        assertEquals(
+            PurchaseShopOfferResult.OfferAlreadySold,
+            repeatedPurchaseResult
+        )
+        assertEquals(
+            initialSilverAmount - offer.purchasePrice,
+            database.playerDao().getPlayerProfile()?.silverAmount
+        )
+        assertEquals(
+            1,
+            database.equipmentDao().getWeaponItems(playerId).size
+        )
+    }
+
     private fun createShopStorageMapper(): ShopStorageMapper {
         return ShopStorageMapper(
             shopStateEntityToDomainMapper = ShopStateEntityToDomainMapper(),
@@ -135,6 +294,17 @@ class ShopRepositoryImplTest {
             shopArmorOfferDomainToEntityMapper = ShopArmorOfferDomainToEntityMapper(),
             shopArtifactOfferEntityToDomainMapper = ShopArtifactOfferEntityToDomainMapper(),
             shopArtifactOfferDomainToEntityMapper = ShopArtifactOfferDomainToEntityMapper()
+        )
+    }
+
+    private fun createEquipmentStorageMapper(): EquipmentStorageMapper {
+        return EquipmentStorageMapper(
+            weaponItemEntityToDomainMapper = WeaponItemEntityToDomainMapper(),
+            weaponItemDomainToEntityMapper = WeaponItemDomainToEntityMapper(),
+            armorItemEntityToDomainMapper = ArmorItemEntityToDomainMapper(),
+            armorItemDomainToEntityMapper = ArmorItemDomainToEntityMapper(),
+            artifactItemEntityToDomainMapper = ArtifactItemEntityToDomainMapper(),
+            artifactItemDomainToEntityMapper = ArtifactItemDomainToEntityMapper()
         )
     }
 

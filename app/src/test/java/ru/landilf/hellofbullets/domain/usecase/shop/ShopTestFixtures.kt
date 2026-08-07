@@ -15,6 +15,9 @@ import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefiniti
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
+import java.time.Clock
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 object ShopTestFixtures {
     const val PISTOL_DEFINITION_ID = 1L
@@ -47,6 +50,12 @@ object ShopTestFixtures {
                 equipmentStatConfigRepository = FakeEquipmentStatConfigRepository()
             ),
             equipmentPurchasePriceCalculator = EquipmentPurchasePriceCalculator()
+        )
+    }
+
+    fun createClock(date: LocalDate): Clock {
+        return Clock.fixed(
+            date.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC
         )
     }
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
@@ -175,6 +176,17 @@ class FakeShopRepository(
     var manualRefreshCallCount = 0
         private set
 
+    var purchaseOfferResult: PurchaseShopOfferResult = PurchaseShopOfferResult.OfferNotFound
+
+    var lastPurchasedPlayerId: Long? = null
+        private set
+
+    var lastPurchasedItemId: Long? = null
+        private set
+
+    var purchaseOfferCallCount = 0
+        private set
+
     override suspend fun getShopState(): ShopState? {
         return state
     }
@@ -197,5 +209,16 @@ class FakeShopRepository(
 
     override fun observeShopState(): Flow<ShopState?> {
         return stateFlow
+    }
+
+    override suspend fun purchaseOffer(
+        playerId: Long,
+        itemId: Long
+    ): PurchaseShopOfferResult {
+        lastPurchasedPlayerId = playerId
+        lastPurchasedItemId = itemId
+        purchaseOfferCallCount++
+
+        return purchaseOfferResult
     }
 }

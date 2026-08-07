@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 
 interface ShopRepository {
@@ -13,4 +14,9 @@ interface ShopRepository {
     )
 
     fun observeShopState(): Flow<ShopState?>
+
+    suspend fun purchaseOffer(
+        playerId: Long,
+        itemId: Long
+    ): PurchaseShopOfferResult
 }
