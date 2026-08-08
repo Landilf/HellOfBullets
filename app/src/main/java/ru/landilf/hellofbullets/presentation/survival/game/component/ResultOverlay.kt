@@ -11,6 +11,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.presentation.common.formatter.formatElapsedTime
+import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
+import ru.landilf.hellofbullets.presentation.common.overlay.OverlayContentColumn
 import ru.landilf.hellofbullets.presentation.survival.game.SurvivalResultUiState
 
 @Composable

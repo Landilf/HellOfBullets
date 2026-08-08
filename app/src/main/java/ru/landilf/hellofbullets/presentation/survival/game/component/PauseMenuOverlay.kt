@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.landilf.hellofbullets.R
+import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
+import ru.landilf.hellofbullets.presentation.common.overlay.OverlayContentColumn
 
 @Composable
 fun PauseMenuOverlay(

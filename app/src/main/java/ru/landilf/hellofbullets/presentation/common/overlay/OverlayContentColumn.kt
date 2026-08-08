@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.presentation.survival.game.component
+package ru.landilf.hellofbullets.presentation.common.overlay
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

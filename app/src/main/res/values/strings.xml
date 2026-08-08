@@ -38,6 +38,7 @@
     <string name="game_resume_button">Продолжить</string>
     <string name="game_restart_button">Начать заново</string>
     <string name="game_exit_button">В меню</string>
+    <string name="confirm_button">Подтвердить</string>
 
     <string name="result_title">Результаты</string>
     <string name="result_time_value">Время: %1$s</string>
@@ -50,6 +51,39 @@
     <string name="leaderboard_empty">Записей пока нет</string>
     <string name="leaderboard_rank">%1$d.</string>
     <string name="leaderboard_time">%1$s</string>
+
+    <string name="shop_title">Магазин</string>
+    <string name="shop_price">Цена: %1$d</string>
+    <string name="shop_buy">Купить</string>
+    <string name="shop_sold">Продано</string>
+    <string name="shop_purchase_success">Предмет добавлен в инвентарь</string>
+    <string name="shop_insufficient_silver">Недостаточно серебра</string>
+    <string name="shop_offer_unavailable">Этот товар больше недоступен</string>
+    <string name="shop_refresh">Обновить</string>
+    <string name="shop_refresh_count">%1$d/%2$d</string>
+    <string name="shop_refresh_success">Ассортимент обновлён</string>
+    <string name="shop_refresh_limit_reached">Дневной лимит обновлений исчерпан</string>
+    <string name="shop_refresh_confirmation_title">Обновить ассортимент?</string>
+    <string name="shop_refresh_confirmation_message">Обновить ассортимент за %1$d серебра?</string>
+    <string name="shop_refresh_remaining_count">Останется обновлений: %1$d</string>
+
+    <string name="equipment_level">Ур. %1$d</string>
+    <string name="equipment_quality">Качество</string>
+    <string name="equipment_property_value">%1$s: %2$s</string>
+    <string name="equipment_additional_stat">Дополнительная характеристика</string>
+    <string name="equipment_quality_normal">Обычное</string>
+    <string name="equipment_quality_fine">Хорошее</string>
+    <string name="equipment_quality_superior">Превосходное</string>
+    <string name="equipment_quality_exquisite">Изысканное</string>
+    <string name="equipment_quality_flawless">Безупречное</string>
+    <string name="equipment_quality_epic">Эпическое</string>
+    <string name="equipment_quality_legendary">Легендарное</string>
+    <string name="equipment_stat_damage">Урон</string>
+    <string name="equipment_stat_attack_speed">Скорость атаки</string>
+    <string name="equipment_stat_hp">Здоровье</string>
+    <string name="equipment_stat_defense">Защита</string>
+    <string name="equipment_stat_cooldown_reduction">Сокращение перезарядки навыков</string>
+    <string name="equipment_stat_duration">Длительность навыков</string>
 
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
