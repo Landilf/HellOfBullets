@@ -213,8 +213,7 @@ class ShopViewModel @Inject constructor(
                         _uiState.update { currentState ->
                             currentState.copy(
                                 refreshConfirmation = ShopRefreshConfirmationUiModel(
-                                    refreshCost = result.refreshCost,
-                                    remainingRefreshCount = result.remainingRefreshCount
+                                    refreshCost = result.refreshCost
                                 ),
                                 errorMessage = null
                             )

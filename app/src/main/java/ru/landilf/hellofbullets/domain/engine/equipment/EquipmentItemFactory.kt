@@ -33,6 +33,9 @@ class EquipmentItemFactory @Inject constructor(
         )]
 
         val id = equipmentItemIdGenerator.generateId()
+        val primaryFirstStatValue =
+            definition.primaryFirstStatRange.valueFor(specializationCoef) *
+                    quality.primaryFirstStatQualityMultiplier
         val additionalStatValue = createAdditionalStatValue(
             definition = definition,
             additionalStatType = additionalStatType
@@ -46,7 +49,7 @@ class EquipmentItemFactory @Inject constructor(
                 quality = quality,
                 additionalStatType = additionalStatType,
                 additionalStatValue = additionalStatValue,
-                damage = definition.primaryFirstStatRange.valueFor(specializationCoef),
+                damage = primaryFirstStatValue,
                 attackSpeed = definition.primarySecondStatRange.valueFor(-specializationCoef),
                 specializationCoef = specializationCoef
             )
@@ -58,7 +61,7 @@ class EquipmentItemFactory @Inject constructor(
                 quality = quality,
                 additionalStatType = additionalStatType,
                 additionalStatValue = additionalStatValue,
-                hp = definition.primaryFirstStatRange.valueFor(specializationCoef),
+                hp = primaryFirstStatValue,
                 defense = definition.primarySecondStatRange.valueFor(-specializationCoef),
                 specializationCoef = specializationCoef
             )
@@ -70,9 +73,7 @@ class EquipmentItemFactory @Inject constructor(
                 quality = quality,
                 additionalStatType = additionalStatType,
                 additionalStatValue = additionalStatValue,
-                cooldownReductionPercent = definition.primaryFirstStatRange.valueFor(
-                    specializationCoef = specializationCoef
-                ),
+                cooldownReductionPercent = primaryFirstStatValue,
                 durationBonusPercent = definition.primarySecondStatRange.valueFor(
                     specializationCoef = -specializationCoef
                 ),

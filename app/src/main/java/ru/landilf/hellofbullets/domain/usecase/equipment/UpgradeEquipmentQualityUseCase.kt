@@ -47,8 +47,8 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
             "Материалы должны совпадать с предметом по типу, виду и качеству"
         }
 
-        val qualityBonus = item.quality.qualityLevel * QUALITY_BONUS_STEP *
-                definition.primaryFirstGrowthMultiplier
+        val qualityMultiplier = nextQuality.primaryFirstStatQualityMultiplier /
+                item.quality.primaryFirstStatQualityMultiplier
 
         val upgradedItem = when (item) {
             is WeaponItem -> {
@@ -58,7 +58,7 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
 
                 item.copy(
                     quality = nextQuality,
-                    damage = item.damage + qualityBonus
+                    damage = item.damage * qualityMultiplier
                 )
             }
 
@@ -69,7 +69,7 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
 
                 item.copy(
                     quality = nextQuality,
-                    hp = item.hp + qualityBonus
+                    hp = item.hp * qualityMultiplier
                 )
             }
 
@@ -80,7 +80,7 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
 
                 item.copy(
                     quality = nextQuality,
-                    cooldownReductionPercent = item.cooldownReductionPercent + qualityBonus
+                    cooldownReductionPercent = item.cooldownReductionPercent * qualityMultiplier
                 )
             }
         }
@@ -89,9 +89,5 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
             upgradedItem = upgradedItem,
             consumedMaterialIds = materials.map(Item::id)
         )
-    }
-
-    private companion object {
-        const val QUALITY_BONUS_STEP = 25f
     }
 }

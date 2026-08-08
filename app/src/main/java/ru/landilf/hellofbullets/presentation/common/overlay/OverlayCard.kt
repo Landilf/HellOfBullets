@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.landilf.hellofbullets.R
@@ -81,8 +82,10 @@ fun OverlayCard(
                 ) {
                     Text(
                         text = title,
+                        modifier = Modifier.fillMaxWidth(),
                         color = Color.White,
-                        fontSize = 28.sp
+                        fontSize = 28.sp,
+                        textAlign = TextAlign.Center
                     )
 
                     content()

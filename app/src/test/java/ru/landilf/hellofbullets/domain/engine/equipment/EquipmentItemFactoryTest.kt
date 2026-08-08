@@ -29,7 +29,7 @@ class EquipmentItemFactoryTest {
         assertEquals(42L, item.id)
         assertEquals(EquipmentQuality.FINE, item.quality)
         assertEquals(1f, item.specializationCoef, EPSILON)
-        assertEquals(11f, item.damage, EPSILON)
+        assertEquals(12.1f, item.damage, EPSILON)
         assertEquals(1.8f, item.attackSpeed, EPSILON)
         assertEquals(EquipmentStatType.DAMAGE, item.additionalStatType)
         assertEquals(5f, item.additionalStatValue, EPSILON)

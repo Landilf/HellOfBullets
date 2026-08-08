@@ -28,7 +28,8 @@ class UpgradeEquipmentQualityUseCaseTest {
     fun `upgrades normal weapon and returns selected material ids`() {
         val item = createWeapon(
             id = 1L,
-            level = 7
+            level = 10,
+            damage = 23.5f
         )
         val materials = createWeaponMaterials(
             quality = EquipmentQuality.NORMAL,
@@ -44,17 +45,19 @@ class UpgradeEquipmentQualityUseCaseTest {
         val upgradeItem = result.upgradedItem as WeaponItem
 
         assertEquals(EquipmentQuality.FINE, upgradeItem.quality)
-        assertEquals(7, upgradeItem.level)
+        assertEquals(10, upgradeItem.level)
         assertEquals(25, upgradeItem.maxLevel)
-        assertEquals(47.5f, upgradeItem.damage, EPSILON)
+        assertEquals(25.85f, upgradeItem.damage, EPSILON)
         assertEquals(materials.map { it.id }, result.consumedMaterialIds)
     }
 
     @Test
-    fun `uses current quality level and definition multiplier for bonus`() {
+    fun `scales accumulated first stat when quality is upgraded`() {
         val item = createWeapon(
             id = 1L,
-            quality = EquipmentQuality.FINE
+            quality = EquipmentQuality.FINE,
+            level = 10,
+            damage = 25.85f
         )
         val materials = createWeaponMaterials(
             quality = EquipmentQuality.FINE,
@@ -70,7 +73,7 @@ class UpgradeEquipmentQualityUseCaseTest {
         val upgradeItem = result.upgradedItem as WeaponItem
 
         assertEquals(EquipmentQuality.SUPERIOR, upgradeItem.quality)
-        assertEquals(85f, upgradeItem.damage, EPSILON)
+        assertEquals(29.375f, upgradeItem.damage, EPSILON)
     }
 
     @Test(expected = IllegalArgumentException::class)

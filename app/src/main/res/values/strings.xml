@@ -60,17 +60,15 @@
     <string name="shop_insufficient_silver">Недостаточно серебра</string>
     <string name="shop_offer_unavailable">Этот товар больше недоступен</string>
     <string name="shop_refresh">Обновить</string>
-    <string name="shop_refresh_count">%1$d/%2$d</string>
     <string name="shop_refresh_success">Ассортимент обновлён</string>
     <string name="shop_refresh_limit_reached">Дневной лимит обновлений исчерпан</string>
     <string name="shop_refresh_confirmation_title">Обновить ассортимент?</string>
     <string name="shop_refresh_confirmation_message">Обновить ассортимент за %1$d серебра?</string>
-    <string name="shop_refresh_remaining_count">Останется обновлений: %1$d</string>
+    <string name="shop_refresh_remaining_count">%1$d/%2$d</string>
 
     <string name="equipment_level">Ур. %1$d</string>
     <string name="equipment_quality">Качество</string>
     <string name="equipment_property_value">%1$s: %2$s</string>
-    <string name="equipment_additional_stat">Дополнительная характеристика</string>
     <string name="equipment_quality_normal">Обычное</string>
     <string name="equipment_quality_fine">Хорошее</string>
     <string name="equipment_quality_superior">Превосходное</string>

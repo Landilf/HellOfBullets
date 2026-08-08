@@ -114,8 +114,9 @@ fun ShopScreen(
 
                         Text(
                             text = stringResource(
-                                R.string.shop_refresh_count,
-                                state.manualRefreshCount,
+                                R.string.shop_refresh_remaining_count,
+                                ShopState.MAX_MANUAL_REFRESH_COUNT -
+                                        state.manualRefreshCount,
                                 ShopState.MAX_MANUAL_REFRESH_COUNT
                             ),
                             modifier = Modifier.padding(start = 8.dp),

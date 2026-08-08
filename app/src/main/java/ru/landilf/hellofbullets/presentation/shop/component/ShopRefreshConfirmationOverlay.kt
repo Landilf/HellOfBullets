@@ -15,6 +15,7 @@ import androidx.compose.ui.window.DialogProperties
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayContentColumn
+import ru.landilf.hellofbullets.presentation.common.window.HideDialogSystemBars
 import ru.landilf.hellofbullets.presentation.shop.ShopRefreshConfirmationUiModel
 
 @Composable
@@ -32,13 +33,16 @@ fun ShopRefreshConfirmationOverlay(
             }
         },
         properties = DialogProperties(
-            usePlatformDefaultWidth = false
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
         )
     ) {
+        HideDialogSystemBars()
+
         OverlayCard(
             title = stringResource(R.string.shop_refresh_confirmation_title),
             modifier = modifier,
-            cardHeightFraction = 0.45f,
+            cardHeightFraction = 0.55f,
             onCloseClick = if (isRefreshing) {
                 null
             } else {
@@ -60,15 +64,6 @@ fun ShopRefreshConfirmationOverlay(
                     text = stringResource(
                         R.string.shop_refresh_confirmation_message,
                         confirmation.refreshCost
-                    ),
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = stringResource(
-                        R.string.shop_refresh_remaining_count,
-                        confirmation.remainingRefreshCount
                     ),
                     color = Color.White,
                     textAlign = TextAlign.Center

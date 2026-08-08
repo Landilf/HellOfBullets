@@ -15,6 +15,7 @@ import androidx.compose.ui.window.DialogProperties
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayContentColumn
+import ru.landilf.hellofbullets.presentation.common.window.HideDialogSystemBars
 import ru.landilf.hellofbullets.presentation.equipment.formatValue
 import ru.landilf.hellofbullets.presentation.equipment.toStringRes
 import ru.landilf.hellofbullets.presentation.shop.EquipmentStatUiModel
@@ -30,13 +31,16 @@ fun ShopOfferDetailsOverlay(
     Dialog(
         onDismissRequest = onDismissClick,
         properties = DialogProperties(
-            usePlatformDefaultWidth = false
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
         )
     ) {
+        HideDialogSystemBars()
+
         OverlayCard(
             title = offer.itemName,
             modifier = modifier,
-            cardHeightFraction = 0.7f,
+            cardHeightFraction = 0.75f,
             onCloseClick = onDismissClick,
             onBackgroundClick = onDismissClick
         ) {
@@ -61,11 +65,6 @@ fun ShopOfferDetailsOverlay(
                 offer.primaryStats.forEach { stat ->
                     EquipmentStatText(stat)
                 }
-
-                Text(
-                    text = stringResource(R.string.equipment_additional_stat),
-                    color = MaterialTheme.colorScheme.secondary
-                )
 
                 EquipmentStatText(offer.additionalStat)
 

@@ -25,9 +25,7 @@ class GetManualShopRefreshPreviewUseCase @Inject constructor(
         )
 
         return ManualShopRefreshPreviewResult.Available(
-            refreshCost = refreshCost,
-            remainingRefreshCount =
-                ShopState.MAX_MANUAL_REFRESH_COUNT - shopState.manualRefreshCount - 1
+            refreshCost = refreshCost
         )
     }
 }

@@ -39,7 +39,7 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
         val upgradedWeapon = result.upgradedItem as WeaponItem
 
         assertEquals(EquipmentQuality.FINE, upgradedWeapon.quality)
-        assertEquals(47.5f, upgradedWeapon.damage, EPSILON)
+        assertEquals(11f, upgradedWeapon.damage, EPSILON)
         assertEquals(materials.map { it.id }, result.consumedMaterialIds)
         assertEquals(
             listOf(upgradedWeapon),
