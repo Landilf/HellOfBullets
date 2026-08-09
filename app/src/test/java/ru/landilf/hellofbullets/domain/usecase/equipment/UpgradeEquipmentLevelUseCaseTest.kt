@@ -2,55 +2,24 @@ package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.armorDefinition
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.artifactDefinition
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmor
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArtifact
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
-import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
-import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
-import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 
 class UpgradeEquipmentLevelUseCaseTest {
     private val useCase = UpgradeEquipmentLevelUseCase(
         equipmentStatConfigRepository = FakeEquipmentStatConfigRepository()
-    )
-
-    private val weaponDefinition = WeaponDefinition(
-        id = 1L,
-        name = "Pistol",
-        primaryFirstGrowthMultiplier = 1.5f,
-        primarySecondGrowthMultiplier = 2f,
-        basePurchasePrice = 100,
-        baseLevelUpgradeCost = 10,
-        damageRange = StatRange(9f, 11f),
-        attackSpeedRange = StatRange(1.8f, 2.2f),
-        attackRange = 50f
-    )
-
-    private val armorDefinition = ArmorDefinition(
-        id = 2L,
-        name = "Light armor",
-        primaryFirstGrowthMultiplier = 2f,
-        primarySecondGrowthMultiplier = 1.5f,
-        basePurchasePrice = 150,
-        baseLevelUpgradeCost = 15,
-        hpRange = StatRange(80f, 120f),
-        defenseRange = StatRange(3f, 7f)
-    )
-
-    private val artifactDefinition = ArtifactDefinition(
-        id = 3L,
-        name = "Hourglass",
-        primaryFirstGrowthMultiplier = 1.25f,
-        primarySecondGrowthMultiplier = 2f,
-        basePurchasePrice = 120,
-        baseLevelUpgradeCost = 12,
-        cooldownReductionPercentRange = StatRange(3f, 7f),
-        durationBonusPercentRange = StatRange(3f, 7f)
     )
 
     @Test
@@ -185,56 +154,6 @@ class UpgradeEquipmentLevelUseCaseTest {
             item = createWeapon(level = 1),
             definition = armorDefinition,
             fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
-        )
-    }
-
-    private fun createWeapon(
-        level: Int,
-        additionalStatType: EquipmentStatType = EquipmentStatType.HP,
-        specializationCoef: Float = 0f
-    ): WeaponItem {
-        return WeaponItem(
-            id = 1L,
-            definitionId = weaponDefinition.id,
-            level = level,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = additionalStatType,
-            additionalStatValue = 3f,
-            damage = 10f,
-            attackSpeed = 5f,
-            specializationCoef = specializationCoef
-        )
-    }
-
-    private fun createArmor(
-        specializationCoef: Float = 0f
-    ): ArmorItem {
-        return ArmorItem(
-            id = 2L,
-            definitionId = armorDefinition.id,
-            level = 4,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = EquipmentStatType.DAMAGE,
-            additionalStatValue = 3f,
-            hp = 20f,
-            defense = 4f,
-            specializationCoef = specializationCoef
-        )
-    }
-
-    private fun createArtifact(
-        specializationCoef: Float = 0f
-    ): ArtifactItem {
-        return ArtifactItem(
-            id = 3L,
-            definitionId = artifactDefinition.id,
-            level = 1,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = EquipmentStatType.DEFENSE,
-            additionalStatValue = 3f,
-            cooldownReductionPercent = 6f,
-            durationBonusPercent = 8f,
-            specializationCoef = specializationCoef
         )
     }
 

@@ -3,6 +3,7 @@ package ru.landilf.hellofbullets.domain.usecase.shop
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.ShopTestFixtures
 import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository

@@ -2,10 +2,10 @@ package ru.landilf.hellofbullets.domain.model.player
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmor
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
+import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
-import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
-import ru.landilf.hellofbullets.domain.model.equipment.Item
-import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 
 class PlayerStateTest {
     @Test
@@ -117,45 +117,55 @@ class PlayerStateTest {
         playerState.replaceItem(unownedWeapon)
     }
 
-    private fun createPlayerState(
-        equippedWeapon: WeaponItem?,
-        items: List<Item>
-    ): PlayerState {
-        return PlayerState(
-            playerProfile = PlayerProfile(
-                id = 1L,
-                name = "Player",
-                level = 1,
-                totalExperience = 0,
-                silverAmount = 0,
-                skillPointAmount = 0
-            ),
-            playerBuild = PlayerBuild(
-                equippedWeaponItem = equippedWeapon,
-                equippedArmorItem = null,
-                equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
-            ),
-            inventory = Inventory(items)
+    @Test
+    fun `equips owned weapon into weapon slot`() {
+        val weapon = createWeapon(id = 1L)
+        val playerState = createPlayerState(
+            equippedWeapon = null,
+            items = listOf(weapon)
+        )
+
+        val updatedState = playerState.setEquippedItem(
+            slot = EquipmentSlot.WEAPON,
+            item = weapon
+        )
+
+        assertEquals(
+            weapon,
+            updatedState.playerBuild.equippedWeaponItem
         )
     }
 
-    private fun createWeapon(
-        id: Long,
-        damage: Float = 10f,
-        specializationCoef: Float = 0f
-    ): WeaponItem {
-        return WeaponItem(
-            id = id,
-            definitionId = 1L,
-            level = 1,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = EquipmentStatType.HP,
-            additionalStatValue = 0f,
-            damage = damage,
-            attackSpeed = 2f,
-            specializationCoef = specializationCoef
+    @Test
+    fun `clears selected equipment slot`() {
+        val weapon = createWeapon(id = 1L)
+        val playerState = createPlayerState(
+            equippedWeapon = weapon,
+            items = listOf(weapon)
+        )
+
+        val updatedState = playerState.setEquippedItem(
+            slot = EquipmentSlot.WEAPON,
+            item = null
+        )
+
+        assertEquals(
+            null,
+            updatedState.playerBuild.equippedWeaponItem
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `throws when item type does not match equipment slot`() {
+        val armor = createArmor()
+        val playerState = createPlayerState(
+            equippedWeapon = null,
+            items = listOf(armor)
+        )
+
+        playerState.setEquippedItem(
+            slot = EquipmentSlot.WEAPON,
+            item = armor
         )
     }
 }

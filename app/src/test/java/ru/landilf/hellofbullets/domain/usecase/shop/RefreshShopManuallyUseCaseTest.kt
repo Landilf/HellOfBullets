@@ -4,10 +4,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.shop.ShopManualRefreshCostCalculator
-import ru.landilf.hellofbullets.domain.model.player.Inventory
-import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
-import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
+import ru.landilf.hellofbullets.domain.fixtures.ShopTestFixtures
 import ru.landilf.hellofbullets.domain.model.shop.ManualShopRefreshResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
@@ -15,9 +13,8 @@ import ru.landilf.hellofbullets.domain.usecase.FakeShopRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.LoadPlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
-import java.time.Clock
+import ru.landilf.hellofbullets.domain.fixtures.ShopTestFixtures.createShopState
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 class RefreshShopManuallyUseCaseTest {
 
@@ -30,6 +27,7 @@ class RefreshShopManuallyUseCaseTest {
         )
         val shopRepository = FakeShopRepository(
             initialState = createShopState(
+                lastAutomaticRefreshDate = TEST_DATE,
                 manualRefreshCount = 0
             )
         )
@@ -57,6 +55,7 @@ class RefreshShopManuallyUseCaseTest {
         )
         val shopRepository = FakeShopRepository(
             initialState = createShopState(
+                lastAutomaticRefreshDate = TEST_DATE,
                 manualRefreshCount = 1
             )
         )
@@ -71,7 +70,10 @@ class RefreshShopManuallyUseCaseTest {
 
     @Test
     fun `returns insufficient silver without changing shop state`() = runBlocking {
-        val initialShopState = createShopState(manualRefreshCount = 0)
+        val initialShopState = createShopState(
+            lastAutomaticRefreshDate = TEST_DATE,
+            manualRefreshCount = 0
+        )
         val playerRepository = FakePlayerRepository(
             initialState = createPlayerState(
                 silverAmount = 54
@@ -99,6 +101,7 @@ class RefreshShopManuallyUseCaseTest {
     @Test
     fun `returns daily limit without changing shop state`() = runBlocking {
         val initialShopState = createShopState(
+            lastAutomaticRefreshDate = TEST_DATE,
             manualRefreshCount = ShopState.MAX_MANUAL_REFRESH_COUNT
         )
         val playerRepository = FakePlayerRepository(
@@ -140,39 +143,6 @@ class RefreshShopManuallyUseCaseTest {
             generateShopOffersUseCase = generateShopOffersUseCase,
             shopManualRefreshCostCalculator = ShopManualRefreshCostCalculator(),
             shopRepository = shopRepository
-        )
-    }
-
-    private fun createPlayerState(
-        silverAmount: Int
-    ): PlayerState {
-        return PlayerState(
-            playerProfile = PlayerProfile(
-                id = TEST_PLAYER_ID,
-                name = "Player",
-                level = 1,
-                totalExperience = 0,
-                silverAmount = silverAmount,
-                skillPointAmount = 0
-            ),
-            playerBuild = PlayerBuild(
-                equippedWeaponItem = null,
-                equippedArmorItem = null,
-                equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
-            ),
-            inventory = Inventory(ownedItems = emptyList())
-        )
-    }
-
-    private fun createShopState(
-        manualRefreshCount: Int
-    ): ShopState {
-        return ShopState(
-            offers = emptyList(),
-            lastAutomaticRefreshDate = TEST_DATE,
-            manualRefreshCount = manualRefreshCount
         )
     }
 

@@ -2,9 +2,9 @@ package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmor
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
-import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
@@ -174,27 +174,6 @@ class UpgradeEquipmentQualityUseCaseTest {
         )
     }
 
-    private fun createWeapon(
-        id: Long,
-        definitionId: Long = weaponDefinition.id,
-        quality: EquipmentQuality = EquipmentQuality.NORMAL,
-        level: Int = 1,
-        damage: Float = 10f,
-        specializationCoef: Float = 0f
-    ): WeaponItem {
-        return WeaponItem(
-            id = id,
-            definitionId = definitionId,
-            level = level,
-            quality = quality,
-            additionalStatType = EquipmentStatType.HP,
-            additionalStatValue = 3f,
-            damage = damage,
-            attackSpeed = 5f,
-            specializationCoef = specializationCoef
-        )
-    }
-
     private fun createWeaponMaterials(
         quality: EquipmentQuality,
         count: Int
@@ -205,22 +184,6 @@ class UpgradeEquipmentQualityUseCaseTest {
                 quality = quality
             )
         }
-    }
-
-    private fun createArmor(
-        specializationCoef: Float = 0f
-    ): ArmorItem {
-        return ArmorItem(
-            id = 7L,
-            definitionId = 2L,
-            level = 1,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = EquipmentStatType.DAMAGE,
-            additionalStatValue = 3f,
-            hp = 20f,
-            defense = 4f,
-            specializationCoef = specializationCoef
-        )
     }
 
     private companion object {

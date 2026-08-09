@@ -4,11 +4,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.player.PlayerProgressionCalculator
+import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.model.battle.common.result.RewardInfo
-import ru.landilf.hellofbullets.domain.model.player.Inventory
-import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
-import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
 
 class ApplyPlayerRewardUseCaseTest {
@@ -92,32 +89,6 @@ class ApplyPlayerRewardUseCaseTest {
         return ApplyPlayerRewardUseCase(
             playerProgressionCalculator = PlayerProgressionCalculator(),
             savePlayerStateUseCase = SavePlayerStateUseCase(playerRepository)
-        )
-    }
-
-    private fun createPlayerState(
-        level: Int,
-        totalExperience: Int,
-        silverAmount: Int,
-        skillPointAmount: Int
-    ): PlayerState {
-        return PlayerState(
-            playerProfile = PlayerProfile(
-                id = 1L,
-                name = "Player",
-                level = level,
-                totalExperience = totalExperience,
-                silverAmount = silverAmount,
-                skillPointAmount = skillPointAmount
-            ),
-            playerBuild = PlayerBuild(
-                equippedWeaponItem = null,
-                equippedArmorItem = null,
-                equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
-            ),
-            inventory = Inventory(ownedItems = emptyList())
         )
     }
 }

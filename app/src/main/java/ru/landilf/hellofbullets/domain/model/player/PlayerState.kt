@@ -10,6 +10,53 @@ data class PlayerState(
     val playerBuild: PlayerBuild,
     val inventory: Inventory
 ) {
+    fun setEquippedItem(
+        slot: EquipmentSlot,
+        item: Item?
+    ): PlayerState {
+        require(
+            item == null || inventory.ownedItems.any { ownedItem ->
+                ownedItem.id == item.id
+            }
+        ) {
+            "Игрок не владеет выбранным предметом"
+        }
+
+        val updatedBuild = when (slot) {
+            EquipmentSlot.WEAPON -> {
+                require(item == null || item is WeaponItem) {
+                    "В слот оружия можно экипировать только оружие"
+                }
+
+                playerBuild.copy(
+                    equippedWeaponItem = item
+                )
+            }
+
+            EquipmentSlot.ARMOR -> {
+                require(item == null || item is ArmorItem) {
+                    "В слот брони можно экипировать только броню"
+                }
+
+                playerBuild.copy(
+                    equippedArmorItem = item
+                )
+            }
+
+            EquipmentSlot.ARTIFACT -> {
+                require(item == null || item is ArtifactItem) {
+                    "В слот артефакта можно экипировать только артефакт"
+                }
+
+                playerBuild.copy(
+                    equippedArtifactItem = item
+                )
+            }
+        }
+
+        return copy(playerBuild = updatedBuild)
+    }
+
     fun replaceItem(
         updatedItem: Item,
         removedItemIds: Set<Long> = emptySet()

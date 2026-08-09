@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.domain.usecase.shop
+package ru.landilf.hellofbullets.domain.fixtures
 
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentItemFactory
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentPurchasePriceCalculator
@@ -12,9 +12,11 @@ import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStat
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
+import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
+import ru.landilf.hellofbullets.domain.usecase.shop.GenerateShopOffersUseCase
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -50,6 +52,17 @@ object ShopTestFixtures {
                 equipmentStatConfigRepository = FakeEquipmentStatConfigRepository()
             ),
             equipmentPurchasePriceCalculator = EquipmentPurchasePriceCalculator()
+        )
+    }
+
+    fun createShopState(
+        lastAutomaticRefreshDate: LocalDate,
+        manualRefreshCount: Int
+    ): ShopState {
+        return ShopState(
+            offers = emptyList(),
+            lastAutomaticRefreshDate = lastAutomaticRefreshDate,
+            manualRefreshCount = manualRefreshCount
         )
     }
 

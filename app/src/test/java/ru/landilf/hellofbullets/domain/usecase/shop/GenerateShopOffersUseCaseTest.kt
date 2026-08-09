@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.ShopTestFixtures
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 
 class GenerateShopOffersUseCaseTest {

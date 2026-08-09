@@ -5,16 +5,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCostCalculator
-import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
+import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
-import ru.landilf.hellofbullets.domain.model.player.Inventory
-import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
-import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
@@ -27,7 +25,11 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
     fun `upgrades item and saves updated player state`() = runBlocking {
         val weapon = createWeapon()
         val playerRepository = FakePlayerRepository(
-            initialState = createPlayerState(weapon)
+            initialState = createPlayerState(
+                silverAmount = 100,
+                equippedWeapon = weapon,
+                items = listOf(weapon)
+            )
         )
         val useCase = createUseCase(
             playerRepository = playerRepository,
@@ -60,8 +62,12 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun `throws when item is absent from player inventory`(): Unit = runBlocking {
+        val weapon = createWeapon()
         val playerRepository = FakePlayerRepository(
-            initialState = createPlayerState(createWeapon())
+            initialState = createPlayerState(
+                equippedWeapon = createWeapon(),
+                items = listOf(weapon)
+            )
         )
         val useCase = createUseCase(
             playerRepository = playerRepository,
@@ -78,7 +84,10 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
     fun `throws when item definition is absent from catalog`(): Unit = runBlocking {
         val weapon = createWeapon()
         val playerRepository = FakePlayerRepository(
-            initialState = createPlayerState(weapon)
+            initialState = createPlayerState(
+                equippedWeapon = weapon,
+                items = listOf(weapon)
+            )
         )
         val useCase = createUseCase(
             playerRepository = playerRepository,
@@ -95,15 +104,10 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
     fun `throws when player does not have enough silver`(): Unit = runBlocking {
         val weapon = createWeapon()
         val playerRepository = FakePlayerRepository(
-            initialState = createPlayerState(weapon).copy(
-                playerProfile = PlayerProfile(
-                    id = 1L,
-                    name = "Player",
-                    level = 1,
-                    totalExperience = 0,
-                    silverAmount = 19,
-                    skillPointAmount = 0
-                )
+            initialState = createPlayerState(
+                silverAmount = 19,
+                equippedWeapon = weapon,
+                items = listOf(weapon)
             )
         )
         val useCase = createUseCase(
@@ -155,58 +159,7 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
         )
     }
 
-    private fun createPlayerState(
-        weapon: WeaponItem
-    ): PlayerState {
-        return PlayerState(
-            playerProfile = PlayerProfile(
-                id = 1L,
-                name = "Player",
-                level = 1,
-                totalExperience = 0,
-                silverAmount = 100,
-                skillPointAmount = 0
-            ),
-            playerBuild = PlayerBuild(
-                equippedWeaponItem = weapon,
-                equippedArmorItem = null,
-                equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
-            ),
-            inventory = Inventory(listOf(weapon))
-        )
-    }
-
-    private fun createWeapon(
-        specializationCoef: Float = 0f
-    ): WeaponItem {
-        return WeaponItem(
-            id = 1L,
-            definitionId = weaponDefinition.id,
-            level = 1,
-            quality = EquipmentQuality.NORMAL,
-            additionalStatType = EquipmentStatType.HP,
-            additionalStatValue = 0f,
-            damage = 10f,
-            attackSpeed = 2f,
-            specializationCoef = specializationCoef
-        )
-    }
-
     private companion object {
-        val weaponDefinition = WeaponDefinition(
-            id = 1L,
-            name = "Pistol",
-            primaryFirstGrowthMultiplier = 1.5f,
-            primarySecondGrowthMultiplier = 0.25f,
-            basePurchasePrice = 100,
-            baseLevelUpgradeCost = 10,
-            damageRange = StatRange(9f, 11f),
-            attackSpeedRange = StatRange(1.8f, 2.2f),
-            attackRange = 500f
-        )
-
         const val EPSILON = 0.0001f
     }
 }
