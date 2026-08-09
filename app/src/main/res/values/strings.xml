@@ -83,6 +83,22 @@
     <string name="equipment_stat_cooldown_reduction">Сокращение перезарядки навыков</string>
     <string name="equipment_stat_duration">Длительность навыков</string>
 
+    <string name="equipment_title">Снаряжение</string>
+    <string name="equipment_tab_weapon">Оружие</string>
+    <string name="equipment_tab_armor">Броня</string>
+    <string name="equipment_tab_artifact">Артефакт</string>
+    <string name="equipment_slot_weapon">Оружие</string>
+    <string name="equipment_slot_armor">Броня</string>
+    <string name="equipment_slot_artifact">Артефакт</string>
+    <string name="equipment_not_selected">Не выбрано</string>
+    <string name="equipment_empty">Предметов этой категории пока нет</string>
+    <string name="equipment_level_progress">Ур. %1$d/%2$d</string>
+    <string name="equipment_additional_stat">Дополнительная характеристика</string>
+    <string name="equipment_equip">Экипировать</string>
+    <string name="equipment_unequip">Снять</string>
+    <string name="equipment_equipped">Экипировано</string>
+    <string name="equipment_not_equipped">Не экипировано</string>
+
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>

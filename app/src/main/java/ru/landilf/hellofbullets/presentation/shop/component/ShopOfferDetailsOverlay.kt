@@ -13,12 +13,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import ru.landilf.hellofbullets.R
+import ru.landilf.hellofbullets.presentation.common.equipment.EquipmentStatUiModel
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
 import ru.landilf.hellofbullets.presentation.common.overlay.OverlayContentColumn
 import ru.landilf.hellofbullets.presentation.common.window.HideDialogSystemBars
 import ru.landilf.hellofbullets.presentation.equipment.formatValue
 import ru.landilf.hellofbullets.presentation.equipment.toStringRes
-import ru.landilf.hellofbullets.presentation.shop.EquipmentStatUiModel
 import ru.landilf.hellofbullets.presentation.shop.ShopOfferUiModel
 
 @Composable

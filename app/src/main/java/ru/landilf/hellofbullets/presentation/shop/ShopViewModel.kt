@@ -30,6 +30,7 @@ import ru.landilf.hellofbullets.domain.usecase.shop.GetOrRefreshShopStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.shop.ObserveShopStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.shop.PurchaseShopOfferUseCase
 import ru.landilf.hellofbullets.domain.usecase.shop.RefreshShopManuallyUseCase
+import ru.landilf.hellofbullets.presentation.common.equipment.EquipmentStatUiModel
 import javax.inject.Inject
 
 @HiltViewModel

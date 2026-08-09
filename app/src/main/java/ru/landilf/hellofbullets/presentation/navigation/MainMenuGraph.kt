@@ -7,6 +7,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.landilf.hellofbullets.R
 import ru.landilf.hellofbullets.presentation.common.PlaceholderScreen
+import ru.landilf.hellofbullets.presentation.equipment.EquipmentScreen
+import ru.landilf.hellofbullets.presentation.equipment.EquipmentViewModel
 import ru.landilf.hellofbullets.presentation.selectmode.SelectModeScreen
 import ru.landilf.hellofbullets.presentation.settings.SettingsScreen
 import ru.landilf.hellofbullets.presentation.settings.SettingsViewModel
@@ -23,16 +25,9 @@ fun NavGraphBuilder.mainMenuGraph(
         )
     }
 
-    composable(AppDestination.Skills.route) {
+    composable(AppDestination.Duel.route) {
         PlaceholderScreen(
-            titleRes = R.string.main_menu_skills,
-            onBackClick = { navController.popBackStack() }
-        )
-    }
-
-    composable(AppDestination.Equipment.route) {
-        PlaceholderScreen(
-            titleRes = R.string.main_menu_equipment,
+            titleRes = R.string.select_mode_duel,
             onBackClick = { navController.popBackStack() }
         )
     }
@@ -48,6 +43,23 @@ fun NavGraphBuilder.mainMenuGraph(
         )
     }
 
+    composable(AppDestination.Skills.route) {
+        PlaceholderScreen(
+            titleRes = R.string.main_menu_skills,
+            onBackClick = { navController.popBackStack() }
+        )
+    }
+
+    composable(AppDestination.Equipment.route) {
+        val viewModel: EquipmentViewModel = hiltViewModel()
+        val state = viewModel.uiState.collectAsStateWithLifecycle()
+
+        EquipmentScreen(
+            state = state.value,
+            onAction = viewModel::onAction
+        )
+    }
+
     composable(AppDestination.Settings.route) {
         val viewModel: SettingsViewModel = hiltViewModel()
         val state = viewModel.uiState.collectAsStateWithLifecycle()
@@ -56,13 +68,6 @@ fun NavGraphBuilder.mainMenuGraph(
             state = state.value,
             events = viewModel.events,
             onAction = viewModel::onAction
-        )
-    }
-
-    composable(AppDestination.Duel.route) {
-        PlaceholderScreen(
-            titleRes = R.string.select_mode_duel,
-            onBackClick = { navController.popBackStack() }
         )
     }
 }
