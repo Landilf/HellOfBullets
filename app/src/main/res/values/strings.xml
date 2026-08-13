@@ -98,6 +98,17 @@
     <string name="equipment_unequip">Снять</string>
     <string name="equipment_equipped">Экипировано</string>
     <string name="equipment_not_equipped">Не экипировано</string>
+    <string name="equipment_upgrade_level">Повысить уровень</string>
+
+    <string name="equipment_upgrade_overlay_title">Повышение уровня</string>
+    <string name="equipment_upgrade_level_range">Уровень: %1$d → %2$d/%3$d</string>
+    <string name="equipment_upgrade_selected_levels">Уровней: %1$d</string>
+    <string name="equipment_upgrade_cost">Стоимость: %1$d серебра</string>
+    <string name="equipment_upgrade_available_silver">Серебро: %1$d</string>
+    <string name="equipment_upgrade_guaranteed_stats">Гарантированные улучшения</string>
+    <string name="equipment_upgrade_random_upgrades">Случайные улучшения</string>
+    <string name="equipment_upgrade_random_level">Ур. %1$d: ?</string>
+    <string name="equipment_upgrade_stat_change">%1$s: %2$s + %3$s</string>
 
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>

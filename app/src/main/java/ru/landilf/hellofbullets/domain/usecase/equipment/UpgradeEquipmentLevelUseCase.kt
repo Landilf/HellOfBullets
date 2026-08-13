@@ -1,24 +1,25 @@
 package ru.landilf.hellofbullets.domain.usecase.equipment
 
+import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeStatCalculator
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
-import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArmorDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.ArtifactDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
-import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeRules.isFifthLevel
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.FifthLevelUpgradeTarget
 import javax.inject.Inject
 
 class UpgradeEquipmentLevelUseCase @Inject constructor(
-    private val equipmentStatConfigRepository: EquipmentStatConfigRepository
+    private val equipmentLevelUpgradeStatCalculator: EquipmentLevelUpgradeStatCalculator
 ) {
     operator fun invoke(
         item: Item,
         definition: EquipmentDefinition,
-        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
+        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget?
     ): Item {
         require(item.definitionId == definition.id) {
             "Определение не соответствует улучшаемому предмету"
@@ -28,7 +29,12 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
         }
 
         val nextLevel = item.level + 1
-        val baseIncrement = baseIncrementFor(nextLevel)
+
+        if (isFifthLevel(nextLevel)) {
+            requireNotNull(fifthLevelUpgradeTarget) {
+                "Для каждого пятого уровня нужно выбрать улучшаемую характеристику"
+            }
+        }
 
         return when (item) {
             is WeaponItem -> {
@@ -40,7 +46,6 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                     item = item,
                     definition = definition,
                     nextLevel = nextLevel,
-                    baseIncrement = baseIncrement,
                     fifthLevelUpgradeTarget = fifthLevelUpgradeTarget
                 )
             }
@@ -54,7 +59,6 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                     item = item,
                     definition = definition,
                     nextLevel = nextLevel,
-                    baseIncrement = baseIncrement,
                     fifthLevelUpgradeTarget = fifthLevelUpgradeTarget
                 )
             }
@@ -68,21 +72,9 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                     item = item,
                     definition = definition,
                     nextLevel = nextLevel,
-                    baseIncrement = baseIncrement,
                     fifthLevelUpgradeTarget = fifthLevelUpgradeTarget
                 )
             }
-        }
-    }
-
-    private fun baseIncrementFor(level: Int): Float {
-        return when (level) {
-            in 1..10 -> 1f
-            in 11..20 -> 5f
-            in 21..30 -> 10f
-            in 31..40 -> 15f
-            in 41..50 -> 20f
-            else -> error("Не определён базовый прирост для уровня $level")
         }
     }
 
@@ -90,27 +82,31 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
         item: WeaponItem,
         definition: WeaponDefinition,
         nextLevel: Int,
-        baseIncrement: Float,
-        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
+        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget?
     ): WeaponItem {
-        val primaryFirstIncrement = baseIncrement *
-                definition.primaryFirstGrowthMultiplierFor(item.specializationCoef) *
-                item.quality.primaryFirstStatQualityMultiplier
+        val primaryFirstIncrement = equipmentLevelUpgradeStatCalculator.primaryFirstIncrement(
+            item = item,
+            definition = definition,
+            targetLevel = nextLevel
+        )
 
-        if (nextLevel % LEVEL_STEP != 0) {
+        if (!isFifthLevel(nextLevel)) {
             return item.copy(
                 level = nextLevel,
                 damage = item.damage + primaryFirstIncrement
             )
         }
 
-        return when (fifthLevelUpgradeTarget) {
+        return when (requireNotNull(fifthLevelUpgradeTarget)) {
             FifthLevelUpgradeTarget.PRIMARY_SECOND -> {
                 item.copy(
                     level = nextLevel,
                     damage = item.damage + primaryFirstIncrement,
-                    attackSpeed = item.attackSpeed + baseIncrement *
-                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
+                    attackSpeed = item.attackSpeed + equipmentLevelUpgradeStatCalculator.primarySecondIncrement(
+                        item = item,
+                        definition = definition,
+                        targetLevel = nextLevel
+                    )
                 )
             }
 
@@ -118,9 +114,9 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                 item.copy(
                     level = nextLevel,
                     damage = item.damage + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                    additionalStatValue = item.additionalStatValue + equipmentLevelUpgradeStatCalculator.additionalStatIncrement(
                         statType = item.additionalStatType,
-                        baseIncrement = baseIncrement
+                        targetLevel = nextLevel
                     )
                 )
             }
@@ -131,27 +127,31 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
         item: ArmorItem,
         definition: ArmorDefinition,
         nextLevel: Int,
-        baseIncrement: Float,
-        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
+        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget?
     ): ArmorItem {
-        val primaryFirstIncrement = baseIncrement *
-                definition.primaryFirstGrowthMultiplierFor(item.specializationCoef) *
-                item.quality.primaryFirstStatQualityMultiplier
+        val primaryFirstIncrement = equipmentLevelUpgradeStatCalculator.primaryFirstIncrement(
+            item = item,
+            definition = definition,
+            targetLevel = nextLevel
+        )
 
-        if (nextLevel % LEVEL_STEP != 0) {
+        if (!isFifthLevel(nextLevel)) {
             return item.copy(
                 level = nextLevel,
                 hp = item.hp + primaryFirstIncrement
             )
         }
 
-        return when (fifthLevelUpgradeTarget) {
+        return when (requireNotNull(fifthLevelUpgradeTarget)) {
             FifthLevelUpgradeTarget.PRIMARY_SECOND -> {
                 item.copy(
                     level = nextLevel,
                     hp = item.hp + primaryFirstIncrement,
-                    defense = item.defense + baseIncrement *
-                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
+                    defense = item.defense + equipmentLevelUpgradeStatCalculator.primarySecondIncrement(
+                        item = item,
+                        definition = definition,
+                        targetLevel = nextLevel
+                    )
                 )
             }
 
@@ -159,9 +159,9 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                 item.copy(
                     level = nextLevel,
                     hp = item.hp + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                    additionalStatValue = item.additionalStatValue + equipmentLevelUpgradeStatCalculator.additionalStatIncrement(
                         statType = item.additionalStatType,
-                        baseIncrement = baseIncrement
+                        targetLevel = nextLevel
                     )
                 )
             }
@@ -172,27 +172,31 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
         item: ArtifactItem,
         definition: ArtifactDefinition,
         nextLevel: Int,
-        baseIncrement: Float,
-        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
+        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget?
     ): ArtifactItem {
-        val primaryFirstIncrement = baseIncrement *
-                definition.primaryFirstGrowthMultiplierFor(item.specializationCoef) *
-                item.quality.primaryFirstStatQualityMultiplier
+        val primaryFirstIncrement = equipmentLevelUpgradeStatCalculator.primaryFirstIncrement(
+            item = item,
+            definition = definition,
+            targetLevel = nextLevel
+        )
 
-        if (nextLevel % LEVEL_STEP != 0) {
+        if (!isFifthLevel(nextLevel)) {
             return item.copy(
                 level = nextLevel,
                 cooldownReductionPercent = item.cooldownReductionPercent + primaryFirstIncrement
             )
         }
 
-        return when (fifthLevelUpgradeTarget) {
+        return when (requireNotNull(fifthLevelUpgradeTarget)) {
             FifthLevelUpgradeTarget.PRIMARY_SECOND -> {
                 item.copy(
                     level = nextLevel,
                     cooldownReductionPercent = item.cooldownReductionPercent + primaryFirstIncrement,
-                    durationBonusPercent = item.durationBonusPercent + baseIncrement *
-                            definition.primarySecondGrowthMultiplierFor(item.specializationCoef)
+                    durationBonusPercent = item.durationBonusPercent + equipmentLevelUpgradeStatCalculator.primarySecondIncrement(
+                        item = item,
+                        definition = definition,
+                        targetLevel = nextLevel
+                    )
                 )
             }
 
@@ -200,26 +204,12 @@ class UpgradeEquipmentLevelUseCase @Inject constructor(
                 item.copy(
                     level = nextLevel,
                     cooldownReductionPercent = item.cooldownReductionPercent + primaryFirstIncrement,
-                    additionalStatValue = item.additionalStatValue + additionalStatIncrement(
+                    additionalStatValue = item.additionalStatValue + equipmentLevelUpgradeStatCalculator.additionalStatIncrement(
                         statType = item.additionalStatType,
-                        baseIncrement = baseIncrement
+                        targetLevel = nextLevel
                     )
                 )
             }
         }
-    }
-
-    private fun additionalStatIncrement(
-        statType: EquipmentStatType,
-        baseIncrement: Float
-    ): Float {
-        return baseIncrement *
-                equipmentStatConfigRepository
-                    .getAdditionalStatConfig(statType)
-                    .levelGrowthMultiplier
-    }
-
-    private companion object {
-        const val LEVEL_STEP = 5
     }
 }

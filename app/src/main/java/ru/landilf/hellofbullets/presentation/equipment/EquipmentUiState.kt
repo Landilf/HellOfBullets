@@ -10,6 +10,8 @@ data class EquipmentUiState(
     val equippedWeaponItemId: Long? = null,
     val equippedArmorItemId: Long? = null,
     val equippedArtifactItemId: Long? = null,
+    val levelUpgradeOverlay: EquipmentLevelUpgradeOverlayUiState? = null,
+    val isLevelUpgradeInProgress: Boolean = false,
     val errorMessage: String? = null
 ) {
     fun selectedItem(): EquipmentItemUiModel? {

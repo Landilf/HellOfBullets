@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
 import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
@@ -90,6 +91,19 @@ class FakePlayerRepository(
 
     override fun observePlayerState(): Flow<PlayerState?> {
         return stateFlow
+    }
+
+    override suspend fun <T> updatePlayerState(
+        transform: (PlayerState) -> PlayerStateUpdate<T>
+    ): T {
+        val currentState = requireNotNull(state) {
+            "Состояние игрока не найдено"
+        }
+        val update = transform(currentState)
+
+        state = update.updatedState
+
+        return update.result
     }
 }
 

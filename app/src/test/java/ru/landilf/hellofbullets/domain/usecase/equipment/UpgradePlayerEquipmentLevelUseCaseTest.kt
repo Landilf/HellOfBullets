@@ -5,15 +5,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCostCalculator
+import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeStatCalculator
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.domain.fixtures.FakeEquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
+import ru.landilf.hellofbullets.domain.generator.EquipmentRandomGenerator
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
-import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
-import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
 import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
-import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
@@ -36,17 +37,14 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             definitions = listOf(weaponDefinition)
         )
 
-        val updatedItem = useCase(
-            itemId = weapon.id,
-            fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
-        ) as WeaponItem
+        val updatedItem = useCase(itemId = weapon.id) as WeaponItem
 
         assertEquals(
             80,
             playerRepository.state?.playerProfile?.silverAmount
         )
         assertEquals(2, updatedItem.level)
-        assertEquals(11.5f, updatedItem.damage, EPSILON)
+        assertEquals(11.5f, updatedItem.damage, FLOAT_EPSILON)
         assertEquals(
             updatedItem,
             playerRepository.state
@@ -58,6 +56,35 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             updatedItem,
             playerRepository.state?.playerBuild?.equippedWeaponItem
         )
+    }
+
+    @Test
+    fun `upgrades additional stat selected randomly on fifth level`() = runBlocking {
+        val weapon = createWeapon(
+            level = 4,
+            additionalStatType = EquipmentStatType.DAMAGE
+        )
+        val playerRepository = FakePlayerRepository(
+            initialState = createPlayerState(
+                silverAmount = 100,
+                items = listOf(weapon)
+            )
+        )
+        val useCase = createUseCase(
+            playerRepository = playerRepository,
+            definitions = listOf(weaponDefinition),
+            equipmentRandomGenerator = FakeEquipmentRandomGenerator(
+                nextIntValue = 1
+            )
+        )
+
+        val updatedItem = useCase(weapon.id) as WeaponItem
+
+        assertEquals(5, updatedItem.level)
+        assertEquals(11.5f, updatedItem.damage, FLOAT_EPSILON)
+        assertEquals(5f, updatedItem.attackSpeed, FLOAT_EPSILON)
+        assertEquals(3.3f, updatedItem.additionalStatValue, FLOAT_EPSILON)
+        assertEquals(50, playerRepository.state?.playerProfile?.silverAmount)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -74,10 +101,7 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             definitions = listOf(weaponDefinition)
         )
 
-        useCase(
-            itemId = 999L,
-            fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
-        )
+        useCase(itemId = 999L)
     }
 
     @Test(expected = IllegalStateException::class)
@@ -94,10 +118,7 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             definitions = emptyList()
         )
 
-        useCase(
-            itemId = weapon.id,
-            fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
-        )
+        useCase(itemId = weapon.id)
     }
 
     @Test
@@ -118,20 +139,17 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
         val initialState = playerRepository.state
 
         val exception = runCatching {
-            useCase(
-                itemId = weapon.id,
-                fifthLevelUpgradeTarget = FifthLevelUpgradeTarget.PRIMARY_SECOND
-            )
+            useCase(itemId = weapon.id)
         }.exceptionOrNull()
 
         assertTrue(exception is IllegalArgumentException)
         assertEquals(initialState, playerRepository.state)
-
     }
 
     private fun createUseCase(
         playerRepository: FakePlayerRepository,
-        definitions: List<WeaponDefinition>
+        definitions: List<WeaponDefinition>,
+        equipmentRandomGenerator: EquipmentRandomGenerator = FakeEquipmentRandomGenerator()
     ): UpgradePlayerEquipmentLevelUseCase {
         val savePlayerStateUseCase = SavePlayerStateUseCase(playerRepository)
 
@@ -146,20 +164,26 @@ class UpgradePlayerEquipmentLevelUseCaseTest {
             ),
             equipmentLevelUpgradeCostCalculator = EquipmentLevelUpgradeCostCalculator(),
             upgradeEquipmentLevelUseCase = UpgradeEquipmentLevelUseCase(
-                equipmentStatConfigRepository = object : EquipmentStatConfigRepository {
-                    override fun getReferenceRange(statType: EquipmentStatType): StatRange {
-                        error("Диапазон характеристики не должен использоваться в этом тесте")
-                    }
-
-                    override fun getAdditionalStatConfig(statType: EquipmentStatType): AdditionalStatConfig {
-                        error("Конфиг дополнительной характеристики не должен использоваться в этом тесте")
-                    }
-                }
-            )
+                equipmentLevelUpgradeStatCalculator = EquipmentLevelUpgradeStatCalculator(
+                    equipmentStatConfigRepository = FakeEquipmentStatConfigRepository()
+                )
+            ),
+            equipmentRandomGenerator = equipmentRandomGenerator
         )
     }
 
-    private companion object {
-        const val EPSILON = 0.0001f
+    private class FakeEquipmentRandomGenerator(
+        private val nextIntValue: Int = 0
+    ) : EquipmentRandomGenerator {
+        override fun nextFloat(
+            from: Float,
+            until: Float
+        ): Float {
+            error("nextFloat не должен вызываться в тестах повышения уровня")
+        }
+
+        override fun nextInt(until: Int): Int {
+            return nextIntValue
+        }
     }
 }

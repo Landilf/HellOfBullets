@@ -1,4 +1,4 @@
-package ru.landilf.hellofbullets.domain.usecase.equipment
+package ru.landilf.hellofbullets.domain.model.equipment.upgrade
 
 enum class FifthLevelUpgradeTarget {
     PRIMARY_SECOND,

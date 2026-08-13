@@ -2,6 +2,7 @@ package ru.landilf.hellofbullets.domain.engine.battle.common
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
@@ -25,7 +26,6 @@ class ProjectileMovementUpdaterTest {
             projectiles = listOf(
                 createLaser(
                     remainingLifetimeMs = 1_500,
-                    phase = LaserPhase.WARNING,
                     remainingWarningMs = 500
                 )
             ),
@@ -52,7 +52,6 @@ class ProjectileMovementUpdaterTest {
             projectiles = listOf(
                 createLaser(
                     remainingLifetimeMs = 1_200,
-                    phase = LaserPhase.WARNING,
                     remainingWarningMs = 200
                 )
             ),
@@ -80,8 +79,7 @@ class ProjectileMovementUpdaterTest {
                     y = 0f
                 ),
                 remainingHomingTimeMs = 1_000
-            ),
-            deltaTimeMs = 500
+            )
         )
 
         val expectedAngle = (Math.PI / 4.0).toFloat()
@@ -89,19 +87,19 @@ class ProjectileMovementUpdaterTest {
         assertEquals(
             10f * cos(expectedAngle),
             rocket.velocity.x,
-            EPSILON
+            FLOAT_EPSILON
         )
         assertEquals(
             10f * sin(expectedAngle),
             rocket.velocity.y,
-            EPSILON
+            FLOAT_EPSILON
         )
         assertEquals(500, rocket.remainingHomingTimeMs)
 
         val speed = sqrt(
             rocket.velocity.x * rocket.velocity.x + rocket.velocity.y * rocket.velocity.y
         )
-        assertEquals(10f, speed, EPSILON)
+        assertEquals(10f, speed, FLOAT_EPSILON)
     }
 
     @Test
@@ -113,8 +111,7 @@ class ProjectileMovementUpdaterTest {
                     y = 0f
                 ),
                 remainingHomingTimeMs = 200
-            ),
-            deltaTimeMs = 500
+            )
         )
 
         val expectedAngle = (Math.PI / 10.0).toFloat()
@@ -122,23 +119,23 @@ class ProjectileMovementUpdaterTest {
         assertEquals(
             10f * cos(expectedAngle),
             rocket.velocity.x,
-            EPSILON
+            FLOAT_EPSILON
         )
         assertEquals(
             10f * sin(expectedAngle),
             rocket.velocity.y,
-            EPSILON
+            FLOAT_EPSILON
         )
         assertEquals(0, rocket.remainingHomingTimeMs)
         assertEquals(
             20f + 10f * cos(expectedAngle) * 0.5f,
             rocket.position.x,
-            EPSILON
+            FLOAT_EPSILON
         )
         assertEquals(
             20f + 10f * sin(expectedAngle) * 0.5f,
             rocket.position.y,
-            EPSILON
+            FLOAT_EPSILON
         )
     }
 
@@ -151,19 +148,18 @@ class ProjectileMovementUpdaterTest {
                     y = 0f
                 ),
                 remainingHomingTimeMs = 0
-            ),
-            deltaTimeMs = 500
+            )
         )
 
-        assertEquals(10f, rocket.velocity.x, EPSILON)
-        assertEquals(0f, rocket.velocity.y, EPSILON)
-        assertEquals(25f, rocket.position.x, EPSILON)
-        assertEquals(20f, rocket.position.y, EPSILON)
+        assertEquals(10f, rocket.velocity.x, FLOAT_EPSILON)
+        assertEquals(0f, rocket.velocity.y, FLOAT_EPSILON)
+        assertEquals(25f, rocket.position.x, FLOAT_EPSILON)
+        assertEquals(20f, rocket.position.y, FLOAT_EPSILON)
     }
 
     private fun createLaser(
         remainingLifetimeMs: Int,
-        phase: LaserPhase,
+        phase: LaserPhase = LaserPhase.WARNING,
         remainingWarningMs: Int
     ): LaserProjectile {
         return LaserProjectile(
@@ -205,7 +201,7 @@ class ProjectileMovementUpdaterTest {
 
     private fun updateRocket(
         rocket: RocketProjectile,
-        deltaTimeMs: Int
+        deltaTimeMs: Int = 500
     ): RocketProjectile {
         return updater.update(
             projectiles = listOf(rocket),
@@ -216,9 +212,5 @@ class ProjectileMovementUpdaterTest {
                 y = 100f
             )
         ).single() as RocketProjectile
-    }
-
-    companion object {
-        const val EPSILON = 0.0001f
     }
 }

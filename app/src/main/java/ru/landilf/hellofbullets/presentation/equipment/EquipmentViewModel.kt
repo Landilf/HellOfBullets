@@ -17,10 +17,14 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeOptions
 import ru.landilf.hellofbullets.domain.model.player.EquipmentSlot
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentDefinitionByIdUseCase
+import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentLevelUpgradeOptionsUseCase
 import ru.landilf.hellofbullets.domain.usecase.equipment.SetEquippedItemUseCase
+import ru.landilf.hellofbullets.domain.usecase.equipment.UpgradePlayerEquipmentLevelsUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.ObservePlayerStateUseCase
 import ru.landilf.hellofbullets.presentation.common.equipment.EquipmentStatUiModel
@@ -32,7 +36,9 @@ class EquipmentViewModel @Inject constructor(
     private val getOrCreatePlayerStateUseCase: GetOrCreatePlayerStateUseCase,
     private val observePlayerStateUseCase: ObservePlayerStateUseCase,
     private val getEquipmentDefinitionByIdUseCase: GetEquipmentDefinitionByIdUseCase,
-    private val setEquippedItemUseCase: SetEquippedItemUseCase
+    private val setEquippedItemUseCase: SetEquippedItemUseCase,
+    private val getEquipmentLevelUpgradeOptionsUseCase: GetEquipmentLevelUpgradeOptionsUseCase,
+    private val upgradePlayerEquipmentLevelsUseCase: UpgradePlayerEquipmentLevelsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EquipmentUiState())
     val uiState: StateFlow<EquipmentUiState> = _uiState.asStateFlow()
@@ -62,6 +68,28 @@ class EquipmentViewModel @Inject constructor(
 
             EquipmentAction.OnToggleEquipmentClick -> {
                 toggleSelectedItemEquipment()
+            }
+
+            EquipmentAction.OnLevelUpgradeClick -> {
+                openLevelUpgradeOverlay()
+            }
+
+            EquipmentAction.OnLevelUpgradeConfirmClick -> {
+                confirmLevelUpgrade()
+            }
+
+            EquipmentAction.OnLevelUpgradeLevelsDecrease -> {
+                decreaseSelectedUpgradeLevels()
+            }
+
+            EquipmentAction.OnLevelUpgradeLevelsIncrease -> {
+                increaseSelectedUpgradeLevels()
+            }
+
+            EquipmentAction.OnLevelUpgradeOverlayDismiss -> {
+                _uiState.update { state ->
+                    state.copy(levelUpgradeOverlay = null)
+                }
             }
         }
     }
@@ -165,13 +193,153 @@ class EquipmentViewModel @Inject constructor(
         }
     }
 
+    private fun openLevelUpgradeOverlay() {
+        if (_uiState.value.isLevelUpgradeInProgress) return
+
+        val itemId = _uiState.value.selectedItemId ?: return
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { state ->
+                    state.copy(
+                        isLevelUpgradeInProgress = true,
+                        errorMessage = null
+                    )
+                }
+
+                val options = getEquipmentLevelUpgradeOptionsUseCase(itemId)
+
+                _uiState.update { state ->
+                    state.copy(
+                        levelUpgradeOverlay = options.toOverlayUiState(),
+                        isLevelUpgradeInProgress = false,
+                        errorMessage = null
+                    )
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isLevelUpgradeInProgress = false,
+                        errorMessage = exception.message
+                            ?: "Не удалось подготовить улучшение"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun confirmLevelUpgrade() {
+        if (_uiState.value.isLevelUpgradeInProgress) return
+
+        val overlay = _uiState.value.levelUpgradeOverlay ?: return
+        val selectedOption = overlay.selectedOption
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { state ->
+                    state.copy(
+                        isLevelUpgradeInProgress = true,
+                        errorMessage = null
+                    )
+                }
+
+                upgradePlayerEquipmentLevelsUseCase(
+                    itemId = overlay.itemId,
+                    levelsToUpgrade = selectedOption.levelsToUpgrade
+                )
+
+                _uiState.update { state ->
+                    state.copy(
+                        levelUpgradeOverlay = null,
+                        isLevelUpgradeInProgress = false
+                    )
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isLevelUpgradeInProgress = false,
+                        errorMessage = exception.message
+                            ?: "Не удалось улучшить предмет"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun decreaseSelectedUpgradeLevels() {
+        _uiState.update { state ->
+            val overlay = state.levelUpgradeOverlay ?: return@update state
+            val previousLevels = overlay.selectedLevelsToUpgrade - 1
+
+            if (overlay.options.none { it.levelsToUpgrade == previousLevels }) {
+                return@update state
+            }
+
+            state.copy(
+                levelUpgradeOverlay = overlay.copy(
+                    selectedLevelsToUpgrade = previousLevels
+                ),
+                errorMessage = null
+            )
+        }
+    }
+
+    private fun increaseSelectedUpgradeLevels() {
+        _uiState.update { state ->
+            val overlay = state.levelUpgradeOverlay ?: return@update state
+            val nextLevels = overlay.selectedLevelsToUpgrade + 1
+
+            if (overlay.options.none { it.levelsToUpgrade == nextLevels }) {
+                return@update state
+            }
+
+            state.copy(
+                levelUpgradeOverlay = overlay.copy(
+                    selectedLevelsToUpgrade = nextLevels
+                ),
+                errorMessage = null
+            )
+        }
+    }
+
     private fun Item.toUiModel(
         isEquipped: Boolean
     ): EquipmentItemUiModel {
         val definition = getEquipmentDefinitionByIdUseCase(definitionId)
             ?: error("Не найдено определение снаряжения с id $definitionId")
 
-        val primaryStats = when (this) {
+        val primaryStats = toPrimaryStatsUiModel(definition)
+
+        return EquipmentItemUiModel(
+            itemId = id,
+            slot = when (this) {
+                is WeaponItem -> EquipmentSlot.WEAPON
+                is ArmorItem -> EquipmentSlot.ARMOR
+                is ArtifactItem -> EquipmentSlot.ARTIFACT
+            },
+            itemName = definition.name,
+            icon = when (this) {
+                is WeaponItem -> Icons.Outlined.GpsFixed
+                is ArmorItem -> Icons.Outlined.Shield
+                is ArtifactItem -> Icons.Outlined.AutoAwesome
+            },
+            level = level,
+            maxLevel = maxLevel,
+            quality = quality,
+            primaryStats = primaryStats,
+            additionalStat = toAdditionalStatUiModel(),
+            isEquipped = isEquipped,
+        )
+    }
+
+    private fun Item.toPrimaryStatsUiModel(
+        definition: EquipmentDefinition
+    ): List<EquipmentStatUiModel> {
+        return when (this) {
             is WeaponItem -> listOf(
                 EquipmentStatUiModel(
                     type = definition.primaryFirstStatType,
@@ -205,29 +373,39 @@ class EquipmentViewModel @Inject constructor(
                 )
             )
         }
+    }
 
-        return EquipmentItemUiModel(
-            itemId = id,
-            slot = when (this) {
-                is WeaponItem -> EquipmentSlot.WEAPON
-                is ArmorItem -> EquipmentSlot.ARMOR
-                is ArtifactItem -> EquipmentSlot.ARTIFACT
-            },
-            itemName = definition.name,
-            icon = when (this) {
-                is WeaponItem -> Icons.Outlined.GpsFixed
-                is ArmorItem -> Icons.Outlined.Shield
-                is ArtifactItem -> Icons.Outlined.AutoAwesome
-            },
-            level = level,
+    private fun Item.toAdditionalStatUiModel(): EquipmentStatUiModel {
+        return EquipmentStatUiModel(
+            type = additionalStatType,
+            value = additionalStatValue
+        )
+    }
+
+    private fun EquipmentLevelUpgradeOptions.toOverlayUiState():
+            EquipmentLevelUpgradeOverlayUiState {
+
+        return EquipmentLevelUpgradeOverlayUiState(
+            itemId = itemId,
+            currentLevel = currentLevel,
             maxLevel = maxLevel,
-            quality = quality,
-            primaryStats = primaryStats,
-            additionalStat = EquipmentStatUiModel(
-                type = additionalStatType,
-                value = additionalStatValue
-            ),
-            isEquipped = isEquipped,
+            availableSilver = availableSilver,
+            selectedLevelsToUpgrade = options.first().levelsToUpgrade,
+            options = options.map { option ->
+                EquipmentLevelUpgradeOptionUiModel(
+                    levelsToUpgrade = option.levelsToUpgrade,
+                    targetLevel = option.targetLevel,
+                    totalCost = option.totalCost,
+                    guaranteedStatChanges = option.guaranteedStatChanges.map { change ->
+                        EquipmentStatUpgradeUiModel(
+                            statType = change.statType,
+                            currentValue = change.previousValue,
+                            increment = change.updatedValue - change.previousValue
+                        )
+                    },
+                    randomUpgradeLevels = option.randomUpgradeLevels
+                )
+            }
         )
     }
 }

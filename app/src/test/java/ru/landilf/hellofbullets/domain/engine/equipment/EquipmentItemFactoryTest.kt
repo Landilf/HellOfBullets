@@ -3,6 +3,8 @@ package ru.landilf.hellofbullets.domain.engine.equipment
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.generator.EquipmentItemIdGenerator
 import ru.landilf.hellofbullets.domain.generator.EquipmentRandomGenerator
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
@@ -10,7 +12,6 @@ import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.AdditionalStatConfig
 import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
-import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 
 class EquipmentItemFactoryTest {
@@ -22,17 +23,17 @@ class EquipmentItemFactoryTest {
         )
 
         val item = factory(
-            definition = pistolDefinition,
+            definition = weaponDefinition,
             quality = EquipmentQuality.FINE
         ) as WeaponItem
 
         assertEquals(42L, item.id)
         assertEquals(EquipmentQuality.FINE, item.quality)
-        assertEquals(1f, item.specializationCoef, EPSILON)
-        assertEquals(12.1f, item.damage, EPSILON)
-        assertEquals(1.8f, item.attackSpeed, EPSILON)
+        assertEquals(1f, item.specializationCoef, FLOAT_EPSILON)
+        assertEquals(12.1f, item.damage, FLOAT_EPSILON)
+        assertEquals(1.8f, item.attackSpeed, FLOAT_EPSILON)
         assertEquals(EquipmentStatType.DAMAGE, item.additionalStatType)
-        assertEquals(5f, item.additionalStatValue, EPSILON)
+        assertEquals(5f, item.additionalStatValue, FLOAT_EPSILON)
     }
 
     @Test
@@ -42,12 +43,12 @@ class EquipmentItemFactoryTest {
             intValues = listOf(indexOf(EquipmentStatType.HP))
         )
 
-        val item = factory(definition = pistolDefinition) as WeaponItem
+        val item = factory(definition = weaponDefinition) as WeaponItem
 
-        assertEquals(10f, item.damage, EPSILON)
-        assertEquals(2f, item.attackSpeed, EPSILON)
+        assertEquals(10f, item.damage, FLOAT_EPSILON)
+        assertEquals(2f, item.attackSpeed, FLOAT_EPSILON)
         assertEquals(EquipmentStatType.HP, item.additionalStatType)
-        assertEquals(25f, item.additionalStatValue, EPSILON)
+        assertEquals(25f, item.additionalStatValue, FLOAT_EPSILON)
     }
 
     private fun createFactory(
@@ -99,20 +100,6 @@ class EquipmentItemFactoryTest {
     }
 
     private companion object {
-        const val EPSILON = 0.0001f
-
-        val pistolDefinition = WeaponDefinition(
-            id = 1L,
-            name = "Pistol",
-            primaryFirstGrowthMultiplier = 1.5f,
-            primarySecondGrowthMultiplier = 0.25f,
-            basePurchasePrice = 100,
-            baseLevelUpgradeCost = 10,
-            damageRange = StatRange(9f, 11f),
-            attackSpeedRange = StatRange(1.8f, 2.2f),
-            attackRange = 500f
-        )
-
         val referenceRanges = mapOf(
             EquipmentStatType.HP to StatRange(80f, 120f)
         )

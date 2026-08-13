@@ -6,16 +6,10 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
-import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
-import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
-import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
-import ru.landilf.hellofbullets.domain.model.player.Inventory
-import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
-import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
-import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
@@ -24,7 +18,7 @@ import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
 
 class UpgradePlayerEquipmentQualityUseCaseTest {
     @Test
-    fun `upgrades quality consumes meterials and updates player state`() = runBlocking {
+    fun `upgrades quality consumes materials and updates player state`() = runBlocking {
         val targetWeapon = createWeapon(id = 1L)
         val materials = (2L..7L).map(::createWeapon)
         val playerRepository = FakePlayerRepository(
@@ -42,7 +36,7 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
         val upgradedWeapon = result.upgradedItem as WeaponItem
 
         assertEquals(EquipmentQuality.FINE, upgradedWeapon.quality)
-        assertEquals(11f, upgradedWeapon.damage, EPSILON)
+        assertEquals(11f, upgradedWeapon.damage, FLOAT_EPSILON)
         assertEquals(materials.map { it.id }, result.consumedMaterialIds)
         assertEquals(
             listOf(upgradedWeapon),
@@ -84,9 +78,5 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
             ),
             upgradeEquipmentQualityUseCase = UpgradeEquipmentQualityUseCase()
         )
-    }
-
-    private companion object {
-        const val EPSILON = 0.0001f
     }
 }

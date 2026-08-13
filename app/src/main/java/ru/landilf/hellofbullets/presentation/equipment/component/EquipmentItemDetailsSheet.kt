@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +35,9 @@ import ru.landilf.hellofbullets.presentation.equipment.toStringRes
 @Composable
 fun EquipmentItemDetailsSheet(
     item: EquipmentItemUiModel,
+    onLevelUpgradeClick: () -> Unit,
     onToggleEquipmentClick: () -> Unit,
+    isLevelUpgradeInProgress: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -61,14 +67,31 @@ fun EquipmentItemDetailsSheet(
                     style = MaterialTheme.typography.headlineSmall
                 )
 
-                Text(
-                    text = stringResource(
-                        R.string.equipment_level_progress,
-                        item.level,
-                        item.maxLevel
-                    ),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.equipment_level_progress,
+                            item.level,
+                            item.maxLevel
+                        ),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    IconButton(
+                        onClick = onLevelUpgradeClick,
+                        enabled = item.level < item.maxLevel && !isLevelUpgradeInProgress
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowUpward,
+                            contentDescription =
+                                stringResource(R.string.equipment_upgrade_level)
+                        )
+                    }
+                }
             }
         }
 
@@ -92,17 +115,6 @@ fun EquipmentItemDetailsSheet(
         EquipmentStatRow(stat = item.additionalStat)
 
         Spacer(modifier = Modifier.weight(1f))
-
-        Text(
-            text = if (item.isEquipped) {
-                stringResource(R.string.equipment_equipped)
-            } else {
-                stringResource(R.string.equipment_not_equipped)
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
 
         Button(
             onClick = onToggleEquipmentClick,

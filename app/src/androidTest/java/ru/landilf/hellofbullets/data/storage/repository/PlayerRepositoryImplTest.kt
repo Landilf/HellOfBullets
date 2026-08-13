@@ -39,6 +39,7 @@ import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
 
 @RunWith(AndroidJUnit4::class)
 class PlayerRepositoryImplTest {
@@ -151,6 +152,31 @@ class PlayerRepositoryImplTest {
     }
 
     @Test
+    fun updatesPlayerStateAndReturnsTranscationResult() = runBlocking {
+        val initialState = createPlayerState()
+        repository.savePlayerState(initialState)
+
+        val result = repository.updatePlayerState { state ->
+            val updatedState = state.copy(
+                playerProfile = state.playerProfile.copy(
+                    silverAmount = 50
+                )
+            )
+
+            PlayerStateUpdate(
+                updatedState = updatedState,
+                result = "updated"
+            )
+        }
+
+        assertEquals("updated", result)
+        assertEquals(
+            50,
+            repository.getPlayerState()?.playerProfile?.silverAmount
+        )
+    }
+
+    @Test
     fun emitsEmptyAndThenSavedPlayerState() = runBlocking {
         val expectedState = createPlayerState()
         val emptyStateObserved = CompletableDeferred<Unit>()
@@ -178,6 +204,21 @@ class PlayerRepositoryImplTest {
                 observedStates.await()
             }
         )
+    }
+
+    @Test
+    fun keepsPreviousStateWhenTransactionTransformFails() = runBlocking {
+        val initialState = createPlayerState()
+        repository.savePlayerState(initialState)
+
+        val exception = runCatching {
+            repository.updatePlayerState<Nothing> {
+                error("Ошибка тестового преобразования")
+            }
+        }.exceptionOrNull()
+
+        assertTrue(exception is IllegalStateException)
+        assertEquals(initialState, repository.getPlayerState())
     }
 
     private fun createPlayerStateStorageMapper(): PlayerStateStorageMapper {

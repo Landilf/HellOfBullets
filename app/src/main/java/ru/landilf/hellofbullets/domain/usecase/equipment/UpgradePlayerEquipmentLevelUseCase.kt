@@ -1,7 +1,10 @@
 package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCostCalculator
+import ru.landilf.hellofbullets.domain.generator.EquipmentRandomGenerator
 import ru.landilf.hellofbullets.domain.model.equipment.Item
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeRules.isFifthLevel
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.FifthLevelUpgradeTarget
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
@@ -12,11 +15,11 @@ class UpgradePlayerEquipmentLevelUseCase @Inject constructor(
     private val savePlayerStateUseCase: SavePlayerStateUseCase,
     private val equipmentDefinitionRepository: EquipmentDefinitionRepository,
     private val equipmentLevelUpgradeCostCalculator: EquipmentLevelUpgradeCostCalculator,
-    private val upgradeEquipmentLevelUseCase: UpgradeEquipmentLevelUseCase
+    private val upgradeEquipmentLevelUseCase: UpgradeEquipmentLevelUseCase,
+    private val equipmentRandomGenerator: EquipmentRandomGenerator
 ) {
     suspend operator fun invoke(
-        itemId: Long,
-        fifthLevelUpgradeTarget: FifthLevelUpgradeTarget
+        itemId: Long
     ): Item {
         val playerState = getOrCreatePlayerStateUseCase()
         val item = requireNotNull(
@@ -29,6 +32,10 @@ class UpgradePlayerEquipmentLevelUseCase @Inject constructor(
         ) {
             "Не найдено определение предмета с id ${item.definitionId}"
         }
+
+        val fifthLevelUpgradeTarget = selectFifthLevelUpgradeTarget(
+            nextLevel = item.level + 1
+        )
 
         val updatedItem = upgradeEquipmentLevelUseCase(
             item = item,
@@ -56,5 +63,17 @@ class UpgradePlayerEquipmentLevelUseCase @Inject constructor(
         savePlayerStateUseCase(updatedPlayerState)
 
         return updatedItem
+    }
+
+    private fun selectFifthLevelUpgradeTarget(
+        nextLevel: Int
+    ): FifthLevelUpgradeTarget? {
+        if (!isFifthLevel(nextLevel)) {
+            return null
+        }
+
+        return FifthLevelUpgradeTarget.entries[equipmentRandomGenerator.nextInt(
+            FifthLevelUpgradeTarget.entries.size
+        )]
     }
 }

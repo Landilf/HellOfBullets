@@ -4,25 +4,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmor
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
+import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
-import ru.landilf.hellofbullets.domain.model.equipment.definition.StatRange
-import ru.landilf.hellofbullets.domain.model.equipment.definition.WeaponDefinition
 
 class UpgradeEquipmentQualityUseCaseTest {
     private val useCase = UpgradeEquipmentQualityUseCase()
-
-    private val weaponDefinition = WeaponDefinition(
-        id = 1L,
-        name = "Pistol",
-        primaryFirstGrowthMultiplier = 1.5f,
-        primarySecondGrowthMultiplier = 2f,
-        basePurchasePrice = 100,
-        baseLevelUpgradeCost = 10,
-        damageRange = StatRange(9f, 11f),
-        attackSpeedRange = StatRange(1.8f, 2.2f),
-        attackRange = 50f
-    )
 
     @Test
     fun `upgrades normal weapon and returns selected material ids`() {
@@ -47,7 +35,7 @@ class UpgradeEquipmentQualityUseCaseTest {
         assertEquals(EquipmentQuality.FINE, upgradeItem.quality)
         assertEquals(10, upgradeItem.level)
         assertEquals(25, upgradeItem.maxLevel)
-        assertEquals(25.85f, upgradeItem.damage, EPSILON)
+        assertEquals(25.85f, upgradeItem.damage, FLOAT_EPSILON)
         assertEquals(materials.map { it.id }, result.consumedMaterialIds)
     }
 
@@ -73,7 +61,7 @@ class UpgradeEquipmentQualityUseCaseTest {
         val upgradeItem = result.upgradedItem as WeaponItem
 
         assertEquals(EquipmentQuality.SUPERIOR, upgradeItem.quality)
-        assertEquals(29.375f, upgradeItem.damage, EPSILON)
+        assertEquals(29.375f, upgradeItem.damage, FLOAT_EPSILON)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -184,9 +172,5 @@ class UpgradeEquipmentQualityUseCaseTest {
                 quality = quality
             )
         }
-    }
-
-    private companion object {
-        const val EPSILON = 0.0001f
     }
 }

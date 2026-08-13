@@ -12,6 +12,7 @@ import ru.landilf.hellofbullets.data.storage.database.AppDatabase
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerStateStorageMapper
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 import javax.inject.Inject
 
@@ -23,46 +24,12 @@ class PlayerRepositoryImpl @Inject constructor(
 ) : PlayerRepository {
     override suspend fun getPlayerState(): PlayerState? {
         return database.withTransaction {
-            val profileEntity = playerDao.getPlayerProfile()
-                ?: return@withTransaction null
-
-            val ownerId = profileEntity.id
-
-            playerStateStorageMapper.toDomain(
-                profileEntity = profileEntity,
-                buildEntity = playerDao.getPlayerBuild(ownerId),
-                weaponEntities = equipmentDao.getWeaponItems(ownerId),
-                armorEntities = equipmentDao.getArmorItems(ownerId),
-                artifactEntities = equipmentDao.getArtifactItems(ownerId)
-            )
+            getPlayerStateInTransaction()
         }
     }
 
     override suspend fun savePlayerState(state: PlayerState) {
-        database.withTransaction {
-            val ownerId = state.playerProfile.id
-            val equipmentData = playerStateStorageMapper.toEquipmentStorageData(
-                state = state,
-                ownerId = ownerId
-            )
-
-            playerDao.upsertPlayerProfile(
-                playerStateStorageMapper.toProfileEntity(state)
-            )
-            equipmentDao.replaceEquipment(
-                ownerId = ownerId,
-                weaponItems = equipmentData.weaponItems,
-                armorItems = equipmentData.armorItems,
-                artifactItems = equipmentData.artifactItems
-
-            )
-            playerDao.upsertPlayerBuild(
-                playerStateStorageMapper.toBuildEntity(
-                    state = state,
-                    playerId = ownerId
-                )
-            )
-        }
+        database.withTransaction { savePlayerStateInTransaction(state) }
     }
 
     override suspend fun clearPlayerState() {
@@ -79,6 +46,21 @@ class PlayerRepositoryImpl @Inject constructor(
                     observePlayerState(profileEntity)
                 }
             }
+    }
+
+    override suspend fun <T> updatePlayerState(
+        transform: (PlayerState) -> PlayerStateUpdate<T>
+    ): T {
+        return database.withTransaction {
+            val playerState = requireNotNull(getPlayerStateInTransaction()) {
+                "Состояние игрока не найдено"
+            }
+            val update = transform(playerState)
+
+            savePlayerStateInTransaction(update.updatedState)
+
+            update.result
+        }
     }
 
     private fun observePlayerState(
@@ -100,5 +82,43 @@ class PlayerRepositoryImpl @Inject constructor(
                 artifactEntities = artifactEntities
             )
         }
+    }
+
+    private suspend fun getPlayerStateInTransaction(): PlayerState? {
+        val profileEntity = playerDao.getPlayerProfile() ?: return null
+        val ownerId = profileEntity.id
+
+        return playerStateStorageMapper.toDomain(
+            profileEntity = profileEntity,
+            buildEntity = playerDao.getPlayerBuild(ownerId),
+            weaponEntities = equipmentDao.getWeaponItems(ownerId),
+            armorEntities = equipmentDao.getArmorItems(ownerId),
+            artifactEntities = equipmentDao.getArtifactItems(ownerId)
+        )
+    }
+
+    private suspend fun savePlayerStateInTransaction(state: PlayerState) {
+        val ownerId = state.playerProfile.id
+        val equipmentData = playerStateStorageMapper.toEquipmentStorageData(
+            state = state,
+            ownerId = ownerId
+        )
+
+        playerDao.upsertPlayerProfile(
+            playerStateStorageMapper.toProfileEntity(state)
+        )
+        equipmentDao.replaceEquipment(
+            ownerId = ownerId,
+            weaponItems = equipmentData.weaponItems,
+            armorItems = equipmentData.armorItems,
+            artifactItems = equipmentData.artifactItems
+
+        )
+        playerDao.upsertPlayerBuild(
+            playerStateStorageMapper.toBuildEntity(
+                state = state,
+                playerId = ownerId
+            )
+        )
     }
 }

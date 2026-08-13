@@ -28,6 +28,7 @@ import ru.landilf.hellofbullets.presentation.common.CenteredMessage
 import ru.landilf.hellofbullets.presentation.common.sheet.AppBottomSheet
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentItemCard
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentItemDetailsSheet
+import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentLevelUpgradeOverlay
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentSlotCard
 
 @Composable
@@ -127,12 +128,36 @@ fun EquipmentScreen(
             ) {
                 EquipmentItemDetailsSheet(
                     item = item,
+                    onLevelUpgradeClick = {
+                        onAction(EquipmentAction.OnLevelUpgradeClick)
+                    },
                     onToggleEquipmentClick = {
                         onAction(EquipmentAction.OnToggleEquipmentClick)
-                    }
+                    },
+                    isLevelUpgradeInProgress = state.isLevelUpgradeInProgress
                 )
             }
         }
+    }
+
+    state.levelUpgradeOverlay?.let { overlayState ->
+        EquipmentLevelUpgradeOverlay(
+            state = overlayState,
+            isUpgradeInProgress = state.isLevelUpgradeInProgress,
+            onDecreaseClick = {
+                onAction(EquipmentAction.OnLevelUpgradeLevelsDecrease)
+            },
+            onIncreaseClick = {
+                onAction(EquipmentAction.OnLevelUpgradeLevelsIncrease)
+            },
+            onConfirmClick = {
+                onAction(EquipmentAction.OnLevelUpgradeConfirmClick)
+            },
+            onDismissClick = {
+                onAction(EquipmentAction.OnLevelUpgradeOverlayDismiss)
+            },
+            errorMessage = state.errorMessage
+        )
     }
 }
 
