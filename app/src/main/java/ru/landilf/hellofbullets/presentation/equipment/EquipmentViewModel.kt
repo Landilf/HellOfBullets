@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,7 @@ import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeOptions
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeResult
 import ru.landilf.hellofbullets.domain.model.player.EquipmentSlot
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentDefinitionByIdUseCase
@@ -42,6 +45,8 @@ class EquipmentViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EquipmentUiState())
     val uiState: StateFlow<EquipmentUiState> = _uiState.asStateFlow()
+
+    private var levelUpgradeAnimationJob: Job? = null
 
     init {
         observePlayerState()
@@ -86,11 +91,26 @@ class EquipmentViewModel @Inject constructor(
                 increaseSelectedUpgradeLevels()
             }
 
+            EquipmentAction.OnLevelUpgradeAnimationAccelerate -> {
+                accelerateLevelUpgradeResult()
+            }
+
             EquipmentAction.OnLevelUpgradeOverlayDismiss -> {
+                levelUpgradeAnimationJob?.cancel()
+                levelUpgradeAnimationJob = null
+
                 _uiState.update { state ->
-                    state.copy(levelUpgradeOverlay = null)
+                    state.copy(
+                        levelUpgradeOverlay = null,
+                        levelUpgradeResult = null,
+                        currentLevelUpgradeStepIndex = 0,
+                        isLevelUpgradeResultAnimating = false,
+                        levelUpgradeStepDurationMs = EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS,
+                        errorMessage = null
+                    )
                 }
             }
+
         }
     }
 
@@ -196,6 +216,9 @@ class EquipmentViewModel @Inject constructor(
     private fun openLevelUpgradeOverlay() {
         if (_uiState.value.isLevelUpgradeInProgress) return
 
+        levelUpgradeAnimationJob?.cancel()
+        levelUpgradeAnimationJob = null
+
         val itemId = _uiState.value.selectedItemId ?: return
 
         viewModelScope.launch {
@@ -203,6 +226,10 @@ class EquipmentViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         isLevelUpgradeInProgress = true,
+                        levelUpgradeResult = null,
+                        currentLevelUpgradeStepIndex = 0,
+                        isLevelUpgradeResultAnimating = false,
+                        levelUpgradeStepDurationMs = EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS,
                         errorMessage = null
                     )
                 }
@@ -245,17 +272,27 @@ class EquipmentViewModel @Inject constructor(
                     )
                 }
 
-                upgradePlayerEquipmentLevelsUseCase(
+                val result = upgradePlayerEquipmentLevelsUseCase(
                     itemId = overlay.itemId,
                     levelsToUpgrade = selectedOption.levelsToUpgrade
                 )
+                val resultUiState = result.toUiState()
 
                 _uiState.update { state ->
                     state.copy(
-                        levelUpgradeOverlay = null,
-                        isLevelUpgradeInProgress = false
+                        isLevelUpgradeInProgress = false,
+                        levelUpgradeResult = resultUiState,
+                        currentLevelUpgradeStepIndex = 0,
+                        isLevelUpgradeResultAnimating = true,
+                        levelUpgradeStepDurationMs = EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS
                     )
                 }
+
+                playLevelUpgradeResult(
+                    stepsCount = resultUiState.steps.size,
+                    startStepIndex = 0,
+                    stepDurationMs = EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS
+                )
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
@@ -303,6 +340,59 @@ class EquipmentViewModel @Inject constructor(
                 ),
                 errorMessage = null
             )
+        }
+    }
+
+    private fun accelerateLevelUpgradeResult() {
+        val state = _uiState.value
+        val result = state.levelUpgradeResult ?: return
+
+        if (!state.isLevelUpgradeResultAnimating ||
+            state.levelUpgradeStepDurationMs == EQUIPMENT_LEVEL_UPGRADE_ACCELERATED_STEP_DURATION_MS
+        ) {
+            return
+        }
+
+        _uiState.update {
+            it.copy(
+                levelUpgradeStepDurationMs = EQUIPMENT_LEVEL_UPGRADE_ACCELERATED_STEP_DURATION_MS
+            )
+        }
+
+        playLevelUpgradeResult(
+            stepsCount = result.steps.size,
+            startStepIndex = state.currentLevelUpgradeStepIndex,
+            stepDurationMs = EQUIPMENT_LEVEL_UPGRADE_ACCELERATED_STEP_DURATION_MS
+        )
+    }
+
+    private fun playLevelUpgradeResult(
+        stepsCount: Int,
+        startStepIndex: Int,
+        stepDurationMs: Int
+    ) {
+        levelUpgradeAnimationJob?.cancel()
+
+        levelUpgradeAnimationJob = viewModelScope.launch {
+            for (index in startStepIndex until stepsCount) {
+                _uiState.update { state ->
+                    if (state.levelUpgradeResult == null) {
+                        state
+                    } else {
+                        state.copy(currentLevelUpgradeStepIndex = index)
+                    }
+                }
+
+                delay(stepDurationMs.toLong())
+            }
+
+            _uiState.update { state ->
+                if (state.levelUpgradeResult == null) {
+                    state
+                } else {
+                    state.copy(isLevelUpgradeResultAnimating = false)
+                }
+            }
         }
     }
 
@@ -400,10 +490,32 @@ class EquipmentViewModel @Inject constructor(
                         EquipmentStatUpgradeUiModel(
                             statType = change.statType,
                             currentValue = change.previousValue,
-                            increment = change.updatedValue - change.previousValue
+                            increment = change.updatedValue - change.previousValue,
+                            source = change.source
                         )
                     },
                     randomUpgradeLevels = option.randomUpgradeLevels
+                )
+            }
+        )
+    }
+
+    private fun EquipmentLevelUpgradeResult.toUiState(): EquipmentLevelUpgradeResultUiState {
+        return EquipmentLevelUpgradeResultUiState(
+            originalLevel = originalItem.level,
+            upgradedLevel = upgradedItem.level,
+            spentSilver = spentSilver,
+            steps = steps.map { step ->
+                EquipmentLevelUpgradeStepUiModel(
+                    targetLevel = step.targetLevel,
+                    statChanges = step.statChanges.map { change ->
+                        EquipmentStatUpgradeUiModel(
+                            statType = change.statType,
+                            currentValue = change.previousValue,
+                            increment = change.updatedValue - change.previousValue,
+                            source = change.source
+                        )
+                    }
                 )
             }
         )

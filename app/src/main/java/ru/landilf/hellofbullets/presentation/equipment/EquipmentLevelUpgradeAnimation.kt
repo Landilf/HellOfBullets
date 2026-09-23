@@ -1,0 +1,4 @@
+package ru.landilf.hellofbullets.presentation.equipment
+
+internal const val EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS = 2000
+internal const val EQUIPMENT_LEVEL_UPGRADE_ACCELERATED_STEP_DURATION_MS = 500

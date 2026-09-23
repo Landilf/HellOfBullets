@@ -12,6 +12,10 @@ data class EquipmentUiState(
     val equippedArtifactItemId: Long? = null,
     val levelUpgradeOverlay: EquipmentLevelUpgradeOverlayUiState? = null,
     val isLevelUpgradeInProgress: Boolean = false,
+    val levelUpgradeResult: EquipmentLevelUpgradeResultUiState? = null,
+    val currentLevelUpgradeStepIndex: Int = 0,
+    val isLevelUpgradeResultAnimating: Boolean = false,
+    val levelUpgradeStepDurationMs: Int = EQUIPMENT_LEVEL_UPGRADE_STEP_DURATION_MS,
     val errorMessage: String? = null
 ) {
     fun selectedItem(): EquipmentItemUiModel? {

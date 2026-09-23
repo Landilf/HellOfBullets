@@ -1,6 +1,7 @@
 package ru.landilf.hellofbullets.presentation.equipment
 
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentStatType
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentStatSource
 
 data class EquipmentLevelUpgradeOverlayUiState(
     val itemId: Long,
@@ -24,8 +25,21 @@ data class EquipmentLevelUpgradeOptionUiModel(
     val randomUpgradeLevels: List<Int>
 )
 
+data class EquipmentLevelUpgradeResultUiState(
+    val originalLevel: Int,
+    val upgradedLevel: Int,
+    val spentSilver: Int,
+    val steps: List<EquipmentLevelUpgradeStepUiModel>
+)
+
+data class EquipmentLevelUpgradeStepUiModel(
+    val targetLevel: Int,
+    val statChanges: List<EquipmentStatUpgradeUiModel>
+)
+
 data class EquipmentStatUpgradeUiModel(
     val statType: EquipmentStatType,
     val currentValue: Float,
-    val increment: Float
+    val increment: Float,
+    val source: EquipmentStatSource
 )

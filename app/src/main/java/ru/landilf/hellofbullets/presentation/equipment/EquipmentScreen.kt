@@ -144,6 +144,10 @@ fun EquipmentScreen(
         EquipmentLevelUpgradeOverlay(
             state = overlayState,
             isUpgradeInProgress = state.isLevelUpgradeInProgress,
+            result = state.levelUpgradeResult,
+            currentStepIndex = state.currentLevelUpgradeStepIndex,
+            levelUpgradeStepDurationMs = state.levelUpgradeStepDurationMs,
+            isResultAnimating = state.isLevelUpgradeResultAnimating,
             onDecreaseClick = {
                 onAction(EquipmentAction.OnLevelUpgradeLevelsDecrease)
             },
@@ -155,6 +159,9 @@ fun EquipmentScreen(
             },
             onDismissClick = {
                 onAction(EquipmentAction.OnLevelUpgradeOverlayDismiss)
+            },
+            onAnimationAccelerate = {
+                onAction(EquipmentAction.OnLevelUpgradeAnimationAccelerate)
             },
             errorMessage = state.errorMessage
         )

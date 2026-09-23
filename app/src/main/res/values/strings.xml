@@ -110,6 +110,11 @@
     <string name="equipment_upgrade_random_level">Ур. %1$d: ?</string>
     <string name="equipment_upgrade_stat_change">%1$s: %2$s + %3$s</string>
 
+    <string name="equipment_upgrade_result_level_range">Уровень: %1$d → %2$d</string>
+    <string name="equipment_upgrade_result_spent_silver">Потрачено серебра: %1$d</string>
+    <string name="equipment_upgrade_result_step">Уровень %1$d</string>
+    <string name="done_button">Готово</string>
+
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>

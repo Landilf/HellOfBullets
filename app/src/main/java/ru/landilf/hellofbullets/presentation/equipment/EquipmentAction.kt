@@ -12,4 +12,5 @@ sealed interface EquipmentAction {
     data object OnLevelUpgradeLevelsIncrease : EquipmentAction
     data object OnLevelUpgradeLevelsDecrease : EquipmentAction
     data object OnLevelUpgradeConfirmClick : EquipmentAction
+    data object OnLevelUpgradeAnimationAccelerate : EquipmentAction
 }
