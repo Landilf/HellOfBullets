@@ -47,8 +47,11 @@ class UpgradeEquipmentQualityUseCase @Inject constructor() {
             "Материалы должны совпадать с предметом по типу, виду и качеству"
         }
 
-        val qualityMultiplier = nextQuality.primaryFirstStatQualityMultiplier /
-                item.quality.primaryFirstStatQualityMultiplier
+        val qualityMultiplier = checkNotNull(
+            item.quality.primaryFirstStatUpgradeMultiplier
+        ) {
+            "Не найден множитель повышения качества"
+        }
 
         val upgradedItem = when (item) {
             is WeaponItem -> {

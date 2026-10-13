@@ -115,6 +115,14 @@
     <string name="equipment_upgrade_result_step">Уровень %1$d</string>
     <string name="done_button">Готово</string>
 
+    <string name="equipment_upgrade_quality">Повысить качество</string>
+    <string name="equipment_quality_upgrade_overlay_title">Повышение качества</string>
+    <string name="equipment_quality_upgrade_range">Качество: %1$s → %2$s</string>
+    <string name="equipment_quality_upgrade_materials">Копии: %1$d/%2$d</string>
+    <string name="equipment_quality_upgrade_selected_materials">Выбрано копий: %1$d/%2$d</string>
+    <string name="equipment_quality_upgrade_stat_preview">%1$s: %2$s → %3$s</string>
+    <string name="equipment_quality_upgrade_confirm">Повысить качество</string>
+
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>

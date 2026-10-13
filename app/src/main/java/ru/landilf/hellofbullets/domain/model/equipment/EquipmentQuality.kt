@@ -70,4 +70,12 @@ enum class EquipmentQuality(
 
     val primaryFirstStatQualityMultiplier: Float
         get() = 1f + primaryFirstStatQualityBonusCoef
+
+    val primaryFirstStatUpgradeMultiplier: Float?
+        get() {
+            val nextQuality = nextQuality ?: return null
+
+            return nextQuality.primaryFirstStatQualityMultiplier /
+                    primaryFirstStatQualityMultiplier
+        }
 }

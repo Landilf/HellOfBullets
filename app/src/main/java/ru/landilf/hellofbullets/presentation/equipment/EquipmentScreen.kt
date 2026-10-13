@@ -29,6 +29,7 @@ import ru.landilf.hellofbullets.presentation.common.sheet.AppBottomSheet
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentItemCard
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentItemDetailsSheet
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentLevelUpgradeOverlay
+import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentQualityUpgradeOverlay
 import ru.landilf.hellofbullets.presentation.equipment.component.EquipmentSlotCard
 
 @Composable
@@ -134,7 +135,11 @@ fun EquipmentScreen(
                     onToggleEquipmentClick = {
                         onAction(EquipmentAction.OnToggleEquipmentClick)
                     },
-                    isLevelUpgradeInProgress = state.isLevelUpgradeInProgress
+                    onQualityUpgradeClick = {
+                        onAction(EquipmentAction.OnQualityUpgradeClick)
+                    },
+                    isLevelUpgradeInProgress = state.isLevelUpgradeInProgress,
+                    isQualityUpgradeInProgress = state.isQualityUpgradeInProgress
                 )
             }
         }
@@ -164,6 +169,23 @@ fun EquipmentScreen(
                 onAction(EquipmentAction.OnLevelUpgradeAnimationAccelerate)
             },
             errorMessage = state.errorMessage
+        )
+    }
+
+    state.qualityUpgradeOverlay?.let { overlayState ->
+        EquipmentQualityUpgradeOverlay(
+            state = overlayState,
+            isUpgradeInProgress = state.isQualityUpgradeInProgress,
+            onMaterialClick = { itemId ->
+                onAction(EquipmentAction.OnQualityUpgradeMaterialClick(itemId))
+            },
+            onConfirmClick = {
+                onAction(EquipmentAction.OnQualityUpgradeConfirmClick)
+            },
+            errorMessage = state.errorMessage,
+            onDismissClick = {
+                onAction(EquipmentAction.OnQualityUpgradeOverlayDismiss)
+            }
         )
     }
 }

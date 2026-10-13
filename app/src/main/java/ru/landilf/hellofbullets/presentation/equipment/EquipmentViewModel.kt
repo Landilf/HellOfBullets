@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
+import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQualityUpgradeOptions
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
@@ -26,8 +27,10 @@ import ru.landilf.hellofbullets.domain.model.player.EquipmentSlot
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentDefinitionByIdUseCase
 import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentLevelUpgradeOptionsUseCase
+import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentQualityUpgradeOptionsUseCase
 import ru.landilf.hellofbullets.domain.usecase.equipment.SetEquippedItemUseCase
 import ru.landilf.hellofbullets.domain.usecase.equipment.UpgradePlayerEquipmentLevelsUseCase
+import ru.landilf.hellofbullets.domain.usecase.equipment.UpgradePlayerEquipmentQualityUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
 import ru.landilf.hellofbullets.domain.usecase.player.ObservePlayerStateUseCase
 import ru.landilf.hellofbullets.presentation.common.equipment.EquipmentStatUiModel
@@ -41,7 +44,9 @@ class EquipmentViewModel @Inject constructor(
     private val getEquipmentDefinitionByIdUseCase: GetEquipmentDefinitionByIdUseCase,
     private val setEquippedItemUseCase: SetEquippedItemUseCase,
     private val getEquipmentLevelUpgradeOptionsUseCase: GetEquipmentLevelUpgradeOptionsUseCase,
-    private val upgradePlayerEquipmentLevelsUseCase: UpgradePlayerEquipmentLevelsUseCase
+    private val upgradePlayerEquipmentLevelsUseCase: UpgradePlayerEquipmentLevelsUseCase,
+    private val getEquipmentQualityUpgradeOptionsUseCase: GetEquipmentQualityUpgradeOptionsUseCase,
+    private val upgradePlayerEquipmentQualityUseCase: UpgradePlayerEquipmentQualityUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EquipmentUiState())
     val uiState: StateFlow<EquipmentUiState> = _uiState.asStateFlow()
@@ -63,6 +68,10 @@ class EquipmentViewModel @Inject constructor(
                         errorMessage = null
                     )
                 }
+            }
+
+            is EquipmentAction.OnQualityUpgradeMaterialClick -> {
+                toggleQualityUpgradeMaterial(action.itemId)
             }
 
             EquipmentAction.OnItemDetailsDismiss -> {
@@ -95,6 +104,14 @@ class EquipmentViewModel @Inject constructor(
                 accelerateLevelUpgradeResult()
             }
 
+            EquipmentAction.OnQualityUpgradeClick -> {
+                openQualityUpgradeOverlay()
+            }
+
+            EquipmentAction.OnQualityUpgradeConfirmClick -> {
+                confirmQualityUpgrade()
+            }
+
             EquipmentAction.OnLevelUpgradeOverlayDismiss -> {
                 levelUpgradeAnimationJob?.cancel()
                 levelUpgradeAnimationJob = null
@@ -111,6 +128,14 @@ class EquipmentViewModel @Inject constructor(
                 }
             }
 
+            EquipmentAction.OnQualityUpgradeOverlayDismiss -> {
+                _uiState.update { state ->
+                    state.copy(
+                        qualityUpgradeOverlay = null,
+                        errorMessage = null
+                    )
+                }
+            }
         }
     }
 
@@ -178,6 +203,37 @@ class EquipmentViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun toggleQualityUpgradeMaterial(
+        itemId: Long
+    ) {
+        _uiState.update { state ->
+            val overlay = state.qualityUpgradeOverlay ?: return@update state
+
+            if (overlay.materialItems.none { it.itemId == itemId }) {
+                return@update state
+            }
+
+            val updatedSelectedIds = when {
+                itemId in overlay.selectedMaterialItemIds -> {
+                    overlay.selectedMaterialItemIds - itemId
+                }
+
+                overlay.selectedMaterialsCount < overlay.requiredMaterialsCount -> {
+                    overlay.selectedMaterialItemIds + itemId
+                }
+
+                else -> return@update state
+            }
+
+            state.copy(
+                qualityUpgradeOverlay = overlay.copy(
+                    selectedMaterialItemIds = updatedSelectedIds
+                ),
+                errorMessage = null
+            )
         }
     }
 
@@ -396,6 +452,100 @@ class EquipmentViewModel @Inject constructor(
         }
     }
 
+    private fun openQualityUpgradeOverlay() {
+        if (_uiState.value.isQualityUpgradeInProgress) return
+
+        val itemId = _uiState.value.selectedItemId ?: return
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { state ->
+                    state.copy(
+                        isQualityUpgradeInProgress = true,
+                        errorMessage = null
+                    )
+                }
+
+                when (val options = getEquipmentQualityUpgradeOptionsUseCase(itemId)) {
+                    is EquipmentQualityUpgradeOptions.Available -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                qualityUpgradeOverlay = options.toOverlayUiState(
+                                    materialItems = state.allItems()
+                                        .filter { item ->
+                                            item.itemId in options.eligibleMaterialItemIds
+                                        }
+                                ),
+                                isQualityUpgradeInProgress = false
+                            )
+                        }
+                    }
+
+                    is EquipmentQualityUpgradeOptions.Unavailable -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isQualityUpgradeInProgress = false,
+                                errorMessage = "Достигнуто максимальное качество"
+                            )
+                        }
+                    }
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isQualityUpgradeInProgress = false,
+                        errorMessage = exception.message
+                            ?: "Не удалось подготовить повышение качества"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun confirmQualityUpgrade() {
+        if (_uiState.value.isQualityUpgradeInProgress) return
+
+        val overlay = _uiState.value.qualityUpgradeOverlay ?: return
+
+        if (!overlay.canConfirm) return
+
+        viewModelScope.launch {
+            try {
+                _uiState.update { state ->
+                    state.copy(
+                        isQualityUpgradeInProgress = true,
+                        errorMessage = null
+                    )
+                }
+
+                upgradePlayerEquipmentQualityUseCase(
+                    itemId = overlay.itemId,
+                    materialItemIds = overlay.selectedMaterialItemIds.toList()
+                )
+
+                _uiState.update { state ->
+                    state.copy(
+                        qualityUpgradeOverlay = null,
+                        isQualityUpgradeInProgress = false,
+                        errorMessage = null
+                    )
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isQualityUpgradeInProgress = false,
+                        errorMessage = exception.message
+                            ?: "Не удалось повысить качество"
+                    )
+                }
+            }
+        }
+    }
+
     private fun Item.toUiModel(
         isEquipped: Boolean
     ): EquipmentItemUiModel {
@@ -518,6 +668,24 @@ class EquipmentViewModel @Inject constructor(
                     }
                 )
             }
+        )
+    }
+
+    private fun EquipmentQualityUpgradeOptions.Available.toOverlayUiState(
+        materialItems: List<EquipmentItemUiModel>
+    ): EquipmentQualityUpgradeOverlayUiState {
+        return EquipmentQualityUpgradeOverlayUiState(
+            itemId = itemId,
+            currentQuality = currentQuality,
+            nextQuality = nextQuality,
+            requiredMaterialsCount = requiredMaterialsCount,
+            availableMaterialsCount = eligibleMaterialItemIds.size,
+            materialItems = materialItems,
+            primaryFirstStatPreview = EquipmentQualityUpgradeStatPreviewUiModel(
+                statType = primaryFirstStatPreview.statType,
+                currentValue = primaryFirstStatPreview.currentValue,
+                upgradedValue = primaryFirstStatPreview.upgradedValue
+            )
         )
     }
 }

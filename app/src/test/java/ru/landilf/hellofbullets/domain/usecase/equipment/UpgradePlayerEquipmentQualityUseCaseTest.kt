@@ -2,7 +2,6 @@ package ru.landilf.hellofbullets.domain.usecase.equipment
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
@@ -12,9 +11,6 @@ import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.usecase.FakePlayerRepository
-import ru.landilf.hellofbullets.domain.usecase.player.GetOrCreatePlayerStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.player.LoadPlayerStateUseCase
-import ru.landilf.hellofbullets.domain.usecase.player.SavePlayerStateUseCase
 
 class UpgradePlayerEquipmentQualityUseCaseTest {
     @Test
@@ -23,7 +19,7 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
         val materials = (2L..7L).map(::createWeapon)
         val playerRepository = FakePlayerRepository(
             initialState = createPlayerState(
-                equippedWeapon = materials.first(),
+                equippedWeapon = targetWeapon,
                 items = listOf(targetWeapon) + materials
             )
         )
@@ -42,7 +38,10 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
             listOf(upgradedWeapon),
             playerRepository.state?.inventory?.ownedItems
         )
-        assertNull(playerRepository.state?.playerBuild?.equippedWeaponItem)
+        assertEquals(
+            upgradedWeapon,
+            playerRepository.state?.playerBuild?.equippedWeaponItem
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -65,18 +64,30 @@ class UpgradePlayerEquipmentQualityUseCaseTest {
     private fun createUseCase(
         playerRepository: FakePlayerRepository
     ): UpgradePlayerEquipmentQualityUseCase {
-        val savePlayerStateUseCase = SavePlayerStateUseCase(playerRepository)
-
         return UpgradePlayerEquipmentQualityUseCase(
-            getOrCreatePlayerStateUseCase = GetOrCreatePlayerStateUseCase(
-                loadPlayerStateUseCase = LoadPlayerStateUseCase(playerRepository),
-                savePlayerStateUseCase = savePlayerStateUseCase
-            ),
-            savePlayerStateUseCase = savePlayerStateUseCase,
+            playerRepository = playerRepository,
             equipmentDefinitionRepository = FakeEquipmentDefinitionRepository(
                 initialDefinitions = listOf(weaponDefinition)
             ),
             upgradeEquipmentQualityUseCase = UpgradeEquipmentQualityUseCase()
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `throws when selected material is equipped`(): Unit = runBlocking {
+        val targetWeapon = createWeapon(id = 1L)
+        val materials = (2L..7L).map(::createWeapon)
+        val playerRepository = FakePlayerRepository(
+            initialState = createPlayerState(
+                equippedWeapon = materials.first(),
+                items = listOf(targetWeapon) + materials
+            )
+        )
+        val useCase = createUseCase(playerRepository)
+
+        useCase(
+            itemId = targetWeapon.id,
+            materialItemIds = materials.map { it.id }
         )
     }
 }

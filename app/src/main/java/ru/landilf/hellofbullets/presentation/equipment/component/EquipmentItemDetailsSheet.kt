@@ -37,7 +37,9 @@ fun EquipmentItemDetailsSheet(
     item: EquipmentItemUiModel,
     onLevelUpgradeClick: () -> Unit,
     onToggleEquipmentClick: () -> Unit,
+    onQualityUpgradeClick: () -> Unit,
     isLevelUpgradeInProgress: Boolean,
+    isQualityUpgradeInProgress: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -95,11 +97,27 @@ fun EquipmentItemDetailsSheet(
             }
         }
 
-        Text(
-            text = stringResource(item.quality.toStringRes()),
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(item.quality.toStringRes()),
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+
+            IconButton(
+                onClick = onQualityUpgradeClick,
+                enabled = item.quality.nextQuality != null && !isQualityUpgradeInProgress
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowUp,
+                    contentDescription = stringResource(R.string.equipment_upgrade_quality)
+                )
+            }
+        }
 
         HorizontalDivider()
 

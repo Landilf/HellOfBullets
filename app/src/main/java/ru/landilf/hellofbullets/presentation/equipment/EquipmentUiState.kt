@@ -11,6 +11,8 @@ data class EquipmentUiState(
     val equippedArmorItemId: Long? = null,
     val equippedArtifactItemId: Long? = null,
     val levelUpgradeOverlay: EquipmentLevelUpgradeOverlayUiState? = null,
+    val qualityUpgradeOverlay: EquipmentQualityUpgradeOverlayUiState? = null,
+    val isQualityUpgradeInProgress: Boolean = false,
     val isLevelUpgradeInProgress: Boolean = false,
     val levelUpgradeResult: EquipmentLevelUpgradeResultUiState? = null,
     val currentLevelUpgradeStepIndex: Int = 0,
@@ -21,7 +23,12 @@ data class EquipmentUiState(
     fun selectedItem(): EquipmentItemUiModel? {
         val selectedItemId = selectedItemId ?: return null
 
-        return (weaponItems + armorItems + artifactItems)
-            .firstOrNull { item -> item.itemId == selectedItemId }
+        return allItems().firstOrNull { item ->
+            item.itemId == selectedItemId
+        }
+    }
+
+    fun allItems(): List<EquipmentItemUiModel> {
+        return weaponItems + armorItems + artifactItems
     }
 }
