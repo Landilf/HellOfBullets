@@ -1,0 +1,734 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "53707ec887bafb81857fe4151bfd369d",
+    "entities": [
+      {
+        "tableName": "player_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `level` INTEGER NOT NULL, `expAmount` INTEGER NOT NULL, `silverAmount` INTEGER NOT NULL, `skillPointAmount` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalExperience",
+            "columnName": "expAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "silverAmount",
+            "columnName": "silverAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "skillPointAmount",
+            "columnName": "skillPointAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "player_build",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`playerId` INTEGER NOT NULL, `equippedWeaponItemId` INTEGER, `equippedArmorItemId` INTEGER, `equippedArtifactItemId` INTEGER, PRIMARY KEY(`playerId`), FOREIGN KEY(`playerId`) REFERENCES `player_profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "playerId",
+            "columnName": "playerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equippedWeaponItemId",
+            "columnName": "equippedWeaponItemId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "equippedArmorItemId",
+            "columnName": "equippedArmorItemId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "equippedArtifactItemId",
+            "columnName": "equippedArtifactItemId",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "playerId"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "player_profile",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "playerId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "weapon_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `ownerId` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `damage` REAL NOT NULL, `attackSpeed` REAL NOT NULL, `specializationCoef` REAL NOT NULL DEFAULT 0.0, PRIMARY KEY(`id`), FOREIGN KEY(`ownerId`) REFERENCES `player_profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damage",
+            "columnName": "damage",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attackSpeed",
+            "columnName": "attackSpeed",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_weapon_items_ownerId",
+            "unique": false,
+            "columnNames": [
+              "ownerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_weapon_items_ownerId` ON `${TABLE_NAME}` (`ownerId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "player_profile",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ownerId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "armor_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `ownerId` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `hp` REAL NOT NULL, `defense` REAL NOT NULL, `specializationCoef` REAL NOT NULL DEFAULT 0.0, PRIMARY KEY(`id`), FOREIGN KEY(`ownerId`) REFERENCES `player_profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hp",
+            "columnName": "hp",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "defense",
+            "columnName": "defense",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_armor_items_ownerId",
+            "unique": false,
+            "columnNames": [
+              "ownerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_armor_items_ownerId` ON `${TABLE_NAME}` (`ownerId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "player_profile",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ownerId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "artifact_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `ownerId` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `cooldownReductionPercent` REAL NOT NULL, `durationBonusPercent` REAL NOT NULL, `specializationCoef` REAL NOT NULL DEFAULT 0.0, PRIMARY KEY(`id`), FOREIGN KEY(`ownerId`) REFERENCES `player_profile`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cooldownReductionPercent",
+            "columnName": "cooldownReductionPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationBonusPercent",
+            "columnName": "durationBonusPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0.0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_artifact_items_ownerId",
+            "unique": false,
+            "columnNames": [
+              "ownerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_artifact_items_ownerId` ON `${TABLE_NAME}` (`ownerId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "player_profile",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ownerId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "equipment_item_id_counter",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`counterId` INTEGER NOT NULL, `nextItemId` INTEGER NOT NULL, PRIMARY KEY(`counterId`))",
+        "fields": [
+          {
+            "fieldPath": "counterId",
+            "columnName": "counterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextItemId",
+            "columnName": "nextItemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "counterId"
+          ]
+        }
+      },
+      {
+        "tableName": "leaderboard",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `playerName` TEXT NOT NULL, `time` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "playerName",
+            "columnName": "playerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "shop_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `lastAutomaticRefreshEpochDay` INTEGER NOT NULL, `manualRefreshCount` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAutomaticRefreshEpochDay",
+            "columnName": "lastAutomaticRefreshEpochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "manualRefreshCount",
+            "columnName": "manualRefreshCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "shop_weapon_offers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `damage` REAL NOT NULL, `attackSpeed` REAL NOT NULL, `specializationCoef` REAL NOT NULL, `purchasePrice` INTEGER NOT NULL, `isSold` INTEGER NOT NULL, PRIMARY KEY(`itemId`))",
+        "fields": [
+          {
+            "fieldPath": "itemId",
+            "columnName": "itemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damage",
+            "columnName": "damage",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attackSpeed",
+            "columnName": "attackSpeed",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "purchasePrice",
+            "columnName": "purchasePrice",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSold",
+            "columnName": "isSold",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "itemId"
+          ]
+        }
+      },
+      {
+        "tableName": "shop_armor_offers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `hp` REAL NOT NULL, `defense` REAL NOT NULL, `specializationCoef` REAL NOT NULL, `purchasePrice` INTEGER NOT NULL, `isSold` INTEGER NOT NULL, PRIMARY KEY(`itemId`))",
+        "fields": [
+          {
+            "fieldPath": "itemId",
+            "columnName": "itemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hp",
+            "columnName": "hp",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "defense",
+            "columnName": "defense",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "purchasePrice",
+            "columnName": "purchasePrice",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSold",
+            "columnName": "isSold",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "itemId"
+          ]
+        }
+      },
+      {
+        "tableName": "shop_artifact_offers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `definitionId` INTEGER NOT NULL, `level` INTEGER NOT NULL, `qualityName` TEXT NOT NULL, `additionalStatTypeName` TEXT NOT NULL, `additionalStatValue` REAL NOT NULL, `cooldownReductionPercent` REAL NOT NULL, `durationBonusPercent` REAL NOT NULL, `specializationCoef` REAL NOT NULL, `purchasePrice` INTEGER NOT NULL, `isSold` INTEGER NOT NULL, PRIMARY KEY(`itemId`))",
+        "fields": [
+          {
+            "fieldPath": "itemId",
+            "columnName": "itemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definitionId",
+            "columnName": "definitionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityName",
+            "columnName": "qualityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatTypeName",
+            "columnName": "additionalStatTypeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "additionalStatValue",
+            "columnName": "additionalStatValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cooldownReductionPercent",
+            "columnName": "cooldownReductionPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationBonusPercent",
+            "columnName": "durationBonusPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specializationCoef",
+            "columnName": "specializationCoef",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "purchasePrice",
+            "columnName": "purchasePrice",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSold",
+            "columnName": "isSold",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "itemId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '53707ec887bafb81857fe4151bfd369d')"
+    ]
+  }
+}

@@ -2,11 +2,17 @@ package ru.landilf.hellofbullets.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
+import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
+import ru.landilf.hellofbullets.domain.model.shop.ShopState
+import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
+import ru.landilf.hellofbullets.domain.repository.ShopRepository
 
 class FakeLeaderboardRepository(
     initialRecords: List<LeaderboardRecord> = emptyList()
@@ -86,6 +92,19 @@ class FakePlayerRepository(
     override fun observePlayerState(): Flow<PlayerState?> {
         return stateFlow
     }
+
+    override suspend fun <T> updatePlayerState(
+        transform: (PlayerState) -> PlayerStateUpdate<T>
+    ): T {
+        val currentState = requireNotNull(state) {
+            "Состояние игрока не найдено"
+        }
+        val update = transform(currentState)
+
+        state = update.updatedState
+
+        return update.result
+    }
 }
 
 class FakeOnlineLeaderboardRepository(
@@ -131,5 +150,89 @@ class FakeOnlineLeaderboardRepository(
             recordsById[playerId] = record
             lastSubmittedRecord = record
         }
+    }
+}
+
+class FakeEquipmentDefinitionRepository(
+    initialDefinitions: List<EquipmentDefinition> = emptyList()
+) : EquipmentDefinitionRepository {
+    private val definitionsById = initialDefinitions.associateBy { it.id }
+
+    override fun getDefinitions(): List<EquipmentDefinition> {
+        return definitionsById.values.toList()
+    }
+
+    override fun getDefinitionById(id: Long): EquipmentDefinition? {
+        return definitionsById[id]
+    }
+}
+
+class FakeShopRepository(
+    initialState: ShopState? = null
+) : ShopRepository {
+    private val stateFlow = MutableStateFlow(initialState)
+
+    var state: ShopState?
+        get() = stateFlow.value
+        private set(value) {
+            stateFlow.value = value
+        }
+
+    var saveCallCount = 0
+        private set
+
+    var lastManualRefreshPlayerId: Long? = null
+        private set
+
+    var lastUpdatedSilverAmount: Int? = null
+        private set
+
+    var manualRefreshCallCount = 0
+        private set
+
+    var purchaseOfferResult: PurchaseShopOfferResult = PurchaseShopOfferResult.OfferNotFound
+
+    var lastPurchasedPlayerId: Long? = null
+        private set
+
+    var lastPurchasedItemId: Long? = null
+        private set
+
+    var purchaseOfferCallCount = 0
+        private set
+
+    override suspend fun getShopState(): ShopState? {
+        return state
+    }
+
+    override suspend fun saveShopState(shopState: ShopState) {
+        state = shopState
+        saveCallCount++
+    }
+
+    override suspend fun applyManualRefresh(
+        playerId: Long,
+        updatedSilverAmount: Int,
+        refreshedShopState: ShopState
+    ) {
+        lastManualRefreshPlayerId = playerId
+        lastUpdatedSilverAmount = updatedSilverAmount
+        state = refreshedShopState
+        manualRefreshCallCount++
+    }
+
+    override fun observeShopState(): Flow<ShopState?> {
+        return stateFlow
+    }
+
+    override suspend fun purchaseOffer(
+        playerId: Long,
+        itemId: Long
+    ): PurchaseShopOfferResult {
+        lastPurchasedPlayerId = playerId
+        lastPurchasedItemId = itemId
+        purchaseOfferCallCount++
+
+        return purchaseOfferResult
     }
 }

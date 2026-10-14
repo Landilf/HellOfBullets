@@ -68,11 +68,7 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = state.playerName,
                     onValueChange = { playerName ->
-                        onAction(
-                            SettingsAction.OnPlayerNameChange(
-                                playerName = playerName
-                            )
-                        )
+                        onAction(SettingsAction.OnPlayerNameChange(playerName = playerName))
                     },
                     modifier = Modifier
                         .fillMaxWidth(),

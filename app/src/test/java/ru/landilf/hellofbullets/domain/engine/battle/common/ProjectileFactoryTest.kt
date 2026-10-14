@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomGenerator
+import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ArenaEdgeSection
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType
@@ -87,8 +88,8 @@ class ProjectileFactoryTest {
                 bullet.velocity.x * bullet.velocity.x + bullet.velocity.y * bullet.velocity.y
             )
 
-            assertTrue(speed >= speedRange.min - EPSILON)
-            assertTrue(speed <= speedRange.max + EPSILON)
+            assertTrue(speed >= speedRange.min - FLOAT_EPSILON)
+            assertTrue(speed <= speedRange.max + FLOAT_EPSILON)
         }
     }
 
@@ -171,7 +172,7 @@ class ProjectileFactoryTest {
         val rocket = result.projectiles.single() as RocketProjectile
 
         assertEquals(1_000, rocket.remainingHomingTimeMs)
-        assertEquals(1.5f, rocket.maxTurnRateRadiansPerSecond, EPSILON)
+        assertEquals(1.5f, rocket.maxTurnRateRadiansPerSecond, FLOAT_EPSILON)
     }
 
     private fun createPattern(
@@ -208,9 +209,5 @@ class ProjectileFactoryTest {
                 seed = seed
             )
         )
-    }
-
-    private companion object {
-        const val EPSILON = 0.0001f
     }
 }

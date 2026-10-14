@@ -127,7 +127,7 @@ private fun SurvivalGameContent(
 
         SurvivalGameHud(
             elapsedTimeMs = gameState.elapsedTimeMs,
-            onPausedClick = { onAction(SurvivalGameAction.OnPauseClick) },
+            onPauseClick = { onAction(SurvivalGameAction.OnPauseClick) },
             modifier = Modifier.align(Alignment.TopCenter)
         )
 

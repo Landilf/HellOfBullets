@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +23,7 @@ import ru.landilf.hellofbullets.presentation.common.formatter.formatElapsedTime
 @Composable
 fun SurvivalGameHud(
     elapsedTimeMs: Int,
-    onPausedClick: () -> Unit,
+    onPauseClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,14 +35,22 @@ fun SurvivalGameHud(
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Button(
-            onClick = onPausedClick
+        IconButton(
+            onClick = onPauseClick,
+            modifier = Modifier.background(
+                color = Color(0xAA000000),
+                shape = RoundedCornerShape(12.dp)
+            )
         ) {
-            Text(stringResource(R.string.pause_title))
+            Icon(
+                imageVector = Icons.Outlined.Pause,
+                contentDescription = stringResource(R.string.pause_title),
+                tint = Color.White
+            )
         }
 
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .background(
                     color = Color(0xAA000000),
                     shape = RoundedCornerShape(12.dp)

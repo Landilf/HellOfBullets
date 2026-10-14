@@ -1,8 +1,8 @@
 package ru.landilf.hellofbullets.data.storage.repository
 
 import ru.landilf.hellofbullets.data.storage.dao.LeaderboardDao
-import ru.landilf.hellofbullets.data.storage.mappers.LeaderboardRecordDomainToEntityMapper
-import ru.landilf.hellofbullets.data.storage.mappers.LeaderboardRecordEntityToDomainMapper
+import ru.landilf.hellofbullets.data.storage.mappers.leaderboard.LeaderboardRecordDomainToEntityMapper
+import ru.landilf.hellofbullets.data.storage.mappers.leaderboard.LeaderboardRecordEntityToDomainMapper
 import ru.landilf.hellofbullets.domain.model.leaderboard.LeaderboardRecord
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import javax.inject.Inject
