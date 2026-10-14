@@ -175,6 +175,7 @@ fun EquipmentScreen(
     state.qualityUpgradeOverlay?.let { overlayState ->
         EquipmentQualityUpgradeOverlay(
             state = overlayState,
+            result = state.qualityUpgradeResult,
             isUpgradeInProgress = state.isQualityUpgradeInProgress,
             onMaterialClick = { itemId ->
                 onAction(EquipmentAction.OnQualityUpgradeMaterialClick(itemId))

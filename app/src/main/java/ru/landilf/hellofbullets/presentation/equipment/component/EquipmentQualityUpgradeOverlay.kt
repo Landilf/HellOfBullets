@@ -28,12 +28,14 @@ import ru.landilf.hellofbullets.presentation.common.overlay.OverlayCard
 import ru.landilf.hellofbullets.presentation.common.window.HideDialogSystemBars
 import ru.landilf.hellofbullets.presentation.equipment.EquipmentItemUiModel
 import ru.landilf.hellofbullets.presentation.equipment.EquipmentQualityUpgradeOverlayUiState
+import ru.landilf.hellofbullets.presentation.equipment.EquipmentQualityUpgradeResultUiState
 import ru.landilf.hellofbullets.presentation.equipment.formatValue
 import ru.landilf.hellofbullets.presentation.equipment.toStringRes
 
 @Composable
 fun EquipmentQualityUpgradeOverlay(
     state: EquipmentQualityUpgradeOverlayUiState,
+    result: EquipmentQualityUpgradeResultUiState?,
     isUpgradeInProgress: Boolean,
     onMaterialClick: (Long) -> Unit,
     onConfirmClick: () -> Unit,
@@ -55,19 +57,32 @@ fun EquipmentQualityUpgradeOverlay(
         HideDialogSystemBars()
 
         OverlayCard(
-            title = stringResource(R.string.equipment_quality_upgrade_overlay_title),
+            title = stringResource(
+                if (result == null) {
+                    R.string.equipment_quality_upgrade_overlay_title
+                } else {
+                    R.string.equipment_quality_upgrade_result_title
+                }
+            ),
             modifier = modifier,
             cardHeightFraction = 0.8f,
             onCloseClick = if (isUpgradeInProgress) null else onDismissClick,
             onBackgroundClick = if (isUpgradeInProgress) null else onDismissClick
         ) {
-            QualityUpgradeContent(
-                state = state,
-                isUpgradeInProgress = isUpgradeInProgress,
-                onMaterialClick = onMaterialClick,
-                onConfirmClick = onConfirmClick,
-                errorMessage = errorMessage,
-            )
+            if (result == null) {
+                QualityUpgradeContent(
+                    state = state,
+                    isUpgradeInProgress = isUpgradeInProgress,
+                    onMaterialClick = onMaterialClick,
+                    onConfirmClick = onConfirmClick,
+                    errorMessage = errorMessage,
+                )
+            } else {
+                QualityUpgradeResultContent(
+                    result = result,
+                    onDoneClick = onDismissClick
+                )
+            }
         }
     }
 }
@@ -205,6 +220,107 @@ private fun QualityUpgradeMaterialRow(
         Column(
             modifier = Modifier.padding(start = 8.dp)
         ) {
+            Text(
+                text = item.itemName,
+                color = Color.White
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.equipment_level_progress,
+                    item.level,
+                    item.maxLevel
+                ),
+                color = Color.LightGray
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.QualityUpgradeResultContent(
+    result: EquipmentQualityUpgradeResultUiState,
+    onDoneClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(
+                R.string.equipment_quality_upgrade_range,
+                stringResource(result.previousQuality.toStringRes()),
+                stringResource(result.upgradedQuality.toStringRes())
+            ),
+            color = Color.White
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = result.primaryFirstStat.statType.toIcon(),
+                contentDescription = null,
+                tint = Color.White
+            )
+
+            Text(
+                text = stringResource(
+                    R.string.equipment_quality_upgrade_stat_preview,
+                    stringResource(result.primaryFirstStat.statType.toStringRes()),
+                    result.primaryFirstStat.statType.formatValue(
+                        result.primaryFirstStat.currentValue
+                    ),
+                    result.primaryFirstStat.statType.formatValue(
+                        result.primaryFirstStat.upgradedValue
+                    )
+                ),
+                color = Color.White
+            )
+        }
+
+        Text(
+            text = stringResource(
+                R.string.equipment_quality_upgrade_consumed_materials
+            ),
+            color = Color.White
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            items(
+                items = result.consumedMaterialItems,
+                key = { item -> item.itemId }
+            ) { item ->
+                QualityUpgradeConsumedMaterialRow(item)
+            }
+        }
+
+        Button(
+            onClick = onDoneClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.done_button))
+        }
+    }
+}
+
+@Composable
+private fun QualityUpgradeConsumedMaterialRow(
+    item: EquipmentItemUiModel
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
             Text(
                 text = item.itemName,
                 color = Color.White

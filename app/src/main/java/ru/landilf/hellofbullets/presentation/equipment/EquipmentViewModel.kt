@@ -18,11 +18,14 @@ import kotlinx.coroutines.launch
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQualityUpgradeOptions
+import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQualityUpgradeResult
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.equipment.definition.EquipmentDefinition
 import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeOptions
 import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentLevelUpgradeResult
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.EquipmentStatSource
+import ru.landilf.hellofbullets.domain.model.equipment.upgrade.statValue
 import ru.landilf.hellofbullets.domain.model.player.EquipmentSlot
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.usecase.equipment.GetEquipmentDefinitionByIdUseCase
@@ -132,6 +135,7 @@ class EquipmentViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         qualityUpgradeOverlay = null,
+                        qualityUpgradeResult = null,
                         errorMessage = null
                     )
                 }
@@ -462,6 +466,7 @@ class EquipmentViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         isQualityUpgradeInProgress = true,
+                        qualityUpgradeResult = null,
                         errorMessage = null
                     )
                 }
@@ -520,15 +525,15 @@ class EquipmentViewModel @Inject constructor(
                     )
                 }
 
-                upgradePlayerEquipmentQualityUseCase(
+                val result = upgradePlayerEquipmentQualityUseCase(
                     itemId = overlay.itemId,
                     materialItemIds = overlay.selectedMaterialItemIds.toList()
                 )
 
                 _uiState.update { state ->
                     state.copy(
-                        qualityUpgradeOverlay = null,
                         isQualityUpgradeInProgress = false,
+                        qualityUpgradeResult = result.toUiState(overlay),
                         errorMessage = null
                     )
                 }
@@ -686,6 +691,25 @@ class EquipmentViewModel @Inject constructor(
                 currentValue = primaryFirstStatPreview.currentValue,
                 upgradedValue = primaryFirstStatPreview.upgradedValue
             )
+        )
+    }
+
+    private fun EquipmentQualityUpgradeResult.toUiState(
+        overlay: EquipmentQualityUpgradeOverlayUiState
+    ): EquipmentQualityUpgradeResultUiState {
+        return EquipmentQualityUpgradeResultUiState(
+            previousQuality = overlay.currentQuality,
+            upgradedQuality = upgradedItem.quality,
+            primaryFirstStat = EquipmentQualityUpgradeStatPreviewUiModel(
+                statType = overlay.primaryFirstStatPreview.statType,
+                currentValue = overlay.primaryFirstStatPreview.currentValue,
+                upgradedValue = upgradedItem.statValue(
+                    EquipmentStatSource.PRIMARY_FIRST
+                )
+            ),
+            consumedMaterialItems = overlay.materialItems.filter { item ->
+                item.itemId in consumedMaterialIds
+            }
         )
     }
 }

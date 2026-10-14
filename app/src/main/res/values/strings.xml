@@ -122,7 +122,9 @@
     <string name="equipment_quality_upgrade_selected_materials">Выбрано копий: %1$d/%2$d</string>
     <string name="equipment_quality_upgrade_stat_preview">%1$s: %2$s → %3$s</string>
     <string name="equipment_quality_upgrade_confirm">Повысить качество</string>
-
+    <string name="equipment_quality_upgrade_result_title">Качество повышено</string>
+    <string name="equipment_quality_upgrade_consumed_materials">Использованные копии</string>
+    
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>

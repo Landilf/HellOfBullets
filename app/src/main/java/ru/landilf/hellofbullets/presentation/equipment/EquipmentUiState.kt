@@ -12,6 +12,7 @@ data class EquipmentUiState(
     val equippedArtifactItemId: Long? = null,
     val levelUpgradeOverlay: EquipmentLevelUpgradeOverlayUiState? = null,
     val qualityUpgradeOverlay: EquipmentQualityUpgradeOverlayUiState? = null,
+    val qualityUpgradeResult: EquipmentQualityUpgradeResultUiState? = null,
     val isQualityUpgradeInProgress: Boolean = false,
     val isLevelUpgradeInProgress: Boolean = false,
     val levelUpgradeResult: EquipmentLevelUpgradeResultUiState? = null,

@@ -25,3 +25,10 @@ data class EquipmentQualityUpgradeStatPreviewUiModel(
     val currentValue: Float,
     val upgradedValue: Float
 )
+
+data class EquipmentQualityUpgradeResultUiState(
+    val previousQuality: EquipmentQuality,
+    val upgradedQuality: EquipmentQuality,
+    val primaryFirstStat: EquipmentQualityUpgradeStatPreviewUiModel,
+    val consumedMaterialItems: List<EquipmentItemUiModel>
+)
