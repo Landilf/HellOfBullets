@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentDefinitionRepository
 import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentQualityDistributionRepository
 import ru.landilf.hellofbullets.data.catalog.equipment.StaticEquipmentStatConfigRepository
+import ru.landilf.hellofbullets.data.catalog.skills.StaticSkillDefinitionRepository
 import ru.landilf.hellofbullets.data.remote.FirestoreOnlineLeaderboardRepository
 import ru.landilf.hellofbullets.data.storage.generator.RoomEquipmentItemIdGenerator
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
@@ -22,6 +23,7 @@ import ru.landilf.hellofbullets.domain.repository.EquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.SettingsRepository
 import ru.landilf.hellofbullets.domain.repository.ShopRepository
+import ru.landilf.hellofbullets.domain.repository.SkillDefinitionRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -51,6 +53,11 @@ abstract class RepositoryModule {
     abstract fun bindEquipmentQualityDistributionRepository(
         impl: StaticEquipmentQualityDistributionRepository
     ): EquipmentQualityDistributionRepository
+
+    @Binds
+    abstract fun bindSkillDefinitionRepository(
+        impl: StaticSkillDefinitionRepository
+    ): SkillDefinitionRepository
 
     @Binds
     abstract fun bindLeaderRepository(

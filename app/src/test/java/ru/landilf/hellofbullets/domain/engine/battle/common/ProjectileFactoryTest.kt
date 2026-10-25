@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.engine.battle.common.random.BattleRandomGenerator
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ArenaEdgeSection
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.AttackPattern
 import ru.landilf.hellofbullets.domain.model.battle.common.attackpattern.ProjectileType

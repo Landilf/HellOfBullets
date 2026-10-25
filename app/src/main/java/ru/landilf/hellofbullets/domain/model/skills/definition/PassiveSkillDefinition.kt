@@ -4,8 +4,6 @@ import ru.landilf.hellofbullets.domain.model.skills.PassiveSkillStat
 
 data class PassiveSkillDefinition(
     override val id: Long,
-    override val name: String,
-    override val description: String,
     override val unlockCost: Int,
     val stat: PassiveSkillStat,
     val bonusPercentByLevel: List<Float>,

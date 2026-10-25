@@ -5,7 +5,7 @@ import org.junit.Test
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmor
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 

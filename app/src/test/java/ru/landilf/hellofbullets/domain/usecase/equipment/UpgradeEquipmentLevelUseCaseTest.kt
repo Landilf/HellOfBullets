@@ -9,7 +9,7 @@ import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmo
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArtifact
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.fixtures.FakeEquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem

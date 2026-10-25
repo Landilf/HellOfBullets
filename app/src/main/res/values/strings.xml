@@ -125,6 +125,15 @@
     <string name="equipment_quality_upgrade_result_title">Качество повышено</string>
     <string name="equipment_quality_upgrade_consumed_materials">Использованные копии</string>
 
+    <string name="skill_time_slow_name">Замедление времени</string>
+    <string name="skill_time_slow_description">Замедляет течение игрового времени.</string>
+    <string name="skill_shield_name">Щит</string>
+    <string name="skill_shield_description">Защищает от вражеских атак на ограниченное время.</string>
+    <string name="skill_duration_bonus_name">Продление</string>
+    <string name="skill_duration_bonus_description">Увеличивает длительность активных навыков.</string>
+    <string name="skill_cooldown_reduction_name">Концентрация</string>
+    <string name="skill_cooldown_reduction_description">Сокращает откат активных навыков.</string>
+
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>

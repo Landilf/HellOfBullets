@@ -2,8 +2,6 @@ package ru.landilf.hellofbullets.domain.model.skills.definition
 
 data class TimeSlowSkillDefinition(
     override val id: Long,
-    override val name: String,
-    override val description: String,
     override val unlockCost: Int,
     val levels: List<TimeSlowLevelParameters>
 ) : SkillDefinition() {

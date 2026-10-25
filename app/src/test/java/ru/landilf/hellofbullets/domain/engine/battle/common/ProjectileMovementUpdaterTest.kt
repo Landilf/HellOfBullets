@@ -2,7 +2,7 @@ package ru.landilf.hellofbullets.domain.engine.battle.common
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserPhase
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.LaserProjectile
 import ru.landilf.hellofbullets.domain.model.battle.common.projectile.RocketProjectile
