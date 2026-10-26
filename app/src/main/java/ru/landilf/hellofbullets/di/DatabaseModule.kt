@@ -11,6 +11,7 @@ import ru.landilf.hellofbullets.data.storage.dao.EquipmentDao
 import ru.landilf.hellofbullets.data.storage.dao.EquipmentItemIdDao
 import ru.landilf.hellofbullets.data.storage.dao.LeaderboardDao
 import ru.landilf.hellofbullets.data.storage.dao.PlayerDao
+import ru.landilf.hellofbullets.data.storage.dao.PlayerSkillDao
 import ru.landilf.hellofbullets.data.storage.dao.ShopDao
 import ru.landilf.hellofbullets.data.storage.database.AppDatabase
 import ru.landilf.hellofbullets.data.storage.database.DatabaseMigrations
@@ -37,7 +38,8 @@ object DatabaseModule {
                 DatabaseMigrations.MIGRATION_5_6,
                 DatabaseMigrations.MIGRATION_6_7,
                 DatabaseMigrations.MIGRATION_7_8,
-                DatabaseMigrations.MIGRATION_8_9
+                DatabaseMigrations.MIGRATION_8_9,
+                DatabaseMigrations.MIGRATION_9_10
             )
             .fallbackToDestructiveMigration(true)
             .build()
@@ -56,6 +58,11 @@ object DatabaseModule {
     @Provides
     fun provideEquipmentItemIdDao(database: AppDatabase): EquipmentItemIdDao {
         return database.equipmentItemIdDao()
+    }
+
+    @Provides
+    fun providePlayerSkillDao(database: AppDatabase): PlayerSkillDao {
+        return database.playerSkillDao()
     }
 
     @Provides

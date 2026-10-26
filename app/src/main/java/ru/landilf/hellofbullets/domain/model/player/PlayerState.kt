@@ -4,12 +4,22 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
+import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
 
 data class PlayerState(
     val playerProfile: PlayerProfile,
     val playerBuild: PlayerBuild,
+    val skillProgresses: List<SkillProgress>,
     val inventory: Inventory
 ) {
+    init {
+        require(skillProgresses.map { progress ->
+            progress.skillId
+        }.distinct().size == skillProgresses.size) {
+            "Прогресс одного навыка не может храниться несколько раз"
+        }
+    }
+
     fun setEquippedItem(
         slot: EquipmentSlot,
         item: Item?

@@ -30,9 +30,10 @@ class GetOrCreatePlayerStateUseCase @Inject constructor(
                 equippedWeaponItem = null,
                 equippedArmorItem = null,
                 equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
+                firstSkillId = null,
+                secondSkillId = null
             ),
+            skillProgresses = emptyList(),
             inventory = Inventory(
                 ownedItems = emptyList()
             )

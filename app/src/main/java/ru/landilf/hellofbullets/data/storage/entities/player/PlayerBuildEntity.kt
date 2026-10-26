@@ -20,5 +20,7 @@ data class PlayerBuildEntity(
     val playerId: Long,
     val equippedWeaponItemId: Long?,
     val equippedArmorItemId: Long?,
-    val equippedArtifactItemId: Long?
+    val equippedArtifactItemId: Long?,
+    val firstSkillId: Long?,
+    val secondSkillId: Long?
 )
