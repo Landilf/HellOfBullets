@@ -8,11 +8,13 @@ import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
 import ru.landilf.hellofbullets.domain.model.shop.PurchaseShopOfferResult
 import ru.landilf.hellofbullets.domain.model.shop.ShopState
+import ru.landilf.hellofbullets.domain.model.skills.definition.SkillDefinition
 import ru.landilf.hellofbullets.domain.repository.EquipmentDefinitionRepository
 import ru.landilf.hellofbullets.domain.repository.LeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.OnlineLeaderboardRepository
 import ru.landilf.hellofbullets.domain.repository.PlayerRepository
 import ru.landilf.hellofbullets.domain.repository.ShopRepository
+import ru.landilf.hellofbullets.domain.repository.SkillDefinitionRepository
 
 class FakeLeaderboardRepository(
     initialRecords: List<LeaderboardRecord> = emptyList()
@@ -163,6 +165,22 @@ class FakeEquipmentDefinitionRepository(
     }
 
     override fun getDefinitionById(id: Long): EquipmentDefinition? {
+        return definitionsById[id]
+    }
+}
+
+class FakeSkillDefinitionRepository(
+    definitions: List<SkillDefinition> = emptyList()
+) : SkillDefinitionRepository {
+    private val definitionsById = definitions.associateBy { definition ->
+        definition.id
+    }
+
+    override fun getDefinitions(): List<SkillDefinition> {
+        return definitionsById.values.toList()
+    }
+
+    override fun getDefinitionById(id: Long): SkillDefinition? {
         return definitionsById[id]
     }
 }

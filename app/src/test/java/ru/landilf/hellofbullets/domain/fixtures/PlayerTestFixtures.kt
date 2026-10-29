@@ -6,6 +6,7 @@ import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
 
 object PlayerTestFixtures {
     fun createPlayerState(
@@ -15,6 +16,9 @@ object PlayerTestFixtures {
         silverAmount: Int = 0,
         skillPointAmount: Int = 0,
         equippedWeapon: WeaponItem? = null,
+        firstSkillId: Long? = null,
+        secondSkillId: Long? = null,
+        skillProgresses: List<SkillProgress> = emptyList(),
         items: List<Item> = emptyList()
     ): PlayerState {
         return PlayerState(
@@ -30,9 +34,10 @@ object PlayerTestFixtures {
                 equippedWeaponItem = equippedWeapon,
                 equippedArmorItem = null,
                 equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
+                firstSkillId = firstSkillId,
+                secondSkillId = secondSkillId
             ),
+            skillProgresses = skillProgresses,
             inventory = Inventory(items)
         )
     }
