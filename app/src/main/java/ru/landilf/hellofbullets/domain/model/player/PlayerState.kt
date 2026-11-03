@@ -5,6 +5,7 @@ import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
 import ru.landilf.hellofbullets.domain.model.equipment.Item
 import ru.landilf.hellofbullets.domain.model.equipment.WeaponItem
 import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
+import ru.landilf.hellofbullets.domain.model.skills.SkillSlot
 
 data class PlayerState(
     val playerProfile: PlayerProfile,
@@ -13,10 +14,22 @@ data class PlayerState(
     val inventory: Inventory
 ) {
     init {
-        require(skillProgresses.map { progress ->
+        val unlockedSkillIds = skillProgresses.map { progress ->
             progress.skillId
-        }.distinct().size == skillProgresses.size) {
+        }.toSet()
+
+        require(unlockedSkillIds.size == skillProgresses.size) {
             "Прогресс одного навыка не может храниться несколько раз"
+        }
+        require(
+            listOfNotNull(
+                playerBuild.firstSkillId,
+                playerBuild.secondSkillId
+            ).all { skillId ->
+                skillId in unlockedSkillIds
+            }
+        ) {
+            "В слот можно экипировать только разблокированный навык"
         }
     }
 
@@ -62,6 +75,41 @@ data class PlayerState(
                     equippedArtifactItem = item
                 )
             }
+        }
+
+        return copy(playerBuild = updatedBuild)
+    }
+
+    fun setEquippedSkill(
+        slot: SkillSlot,
+        skillId: Long?
+    ): PlayerState {
+        require(
+            skillId == null || skillProgresses.any { progress ->
+                progress.skillId == skillId
+            }
+        ) {
+            "Игрок не разблокировал навык с id $skillId"
+        }
+
+        val updatedBuild = when (slot) {
+            SkillSlot.FIRST -> playerBuild.copy(
+                firstSkillId = skillId,
+                secondSkillId = if (playerBuild.secondSkillId == skillId) {
+                    null
+                } else {
+                    playerBuild.secondSkillId
+                }
+            )
+
+            SkillSlot.SECOND -> playerBuild.copy(
+                firstSkillId = if (playerBuild.firstSkillId == skillId) {
+                    null
+                } else {
+                    playerBuild.firstSkillId
+                },
+                secondSkillId = skillId
+            )
         }
 
         return copy(playerBuild = updatedBuild)

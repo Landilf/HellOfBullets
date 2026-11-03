@@ -6,6 +6,8 @@ import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createArmo
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality
+import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
+import ru.landilf.hellofbullets.domain.model.skills.SkillSlot
 
 class PlayerStateTest {
     @Test
@@ -166,6 +168,76 @@ class PlayerStateTest {
         playerState.setEquippedItem(
             slot = EquipmentSlot.WEAPON,
             item = armor
+        )
+    }
+
+    @Test
+    fun `equips unlocked skill into selected slot`() {
+        val playerState = createPlayerState(
+            skillProgresses = listOf(
+                SkillProgress(
+                    skillId = 1L,
+                    level = 1
+                )
+            )
+        )
+
+        val updatedState = playerState.setEquippedSkill(
+            slot = SkillSlot.FIRST,
+            skillId = 1L
+        )
+
+        assertEquals(1L, updatedState.playerBuild.firstSkillId)
+        assertEquals(null, updatedState.playerBuild.secondSkillId)
+    }
+
+    @Test
+    fun `clears selected skill slot`() {
+        val playerState = createPlayerState(
+            firstSkillId = 1L,
+            skillProgresses = listOf(
+                SkillProgress(
+                    skillId = 1L,
+                    level = 1
+                )
+            )
+        )
+
+        val updatedState = playerState.setEquippedSkill(
+            slot = SkillSlot.FIRST,
+            skillId = null
+        )
+
+        assertEquals(null, updatedState.playerBuild.firstSkillId)
+    }
+
+    @Test
+    fun `moves equipped skill from another slot`() {
+        val playerState = createPlayerState(
+            firstSkillId = 1L,
+            secondSkillId = 2L,
+            skillProgresses = listOf(
+                SkillProgress(skillId = 1L, level = 1),
+                SkillProgress(skillId = 2L, level = 1)
+            )
+        )
+
+        val updatedState = playerState.setEquippedSkill(
+            slot = SkillSlot.FIRST,
+            skillId = 2L
+        )
+
+        assertEquals(2L, updatedState.playerBuild.firstSkillId)
+        assertEquals(null, updatedState.playerBuild.secondSkillId)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `throws when equipping locked skill`() {
+        val playerState = createPlayerState()
+
+        playerState.setEquippedSkill(
+            slot = SkillSlot.FIRST,
+            skillId = 1L
         )
     }
 }
