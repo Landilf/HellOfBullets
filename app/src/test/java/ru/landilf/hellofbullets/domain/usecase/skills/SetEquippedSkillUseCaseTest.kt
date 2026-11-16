@@ -16,7 +16,7 @@ class SetEquippedSkillUseCaseTest {
             initialState = createPlayerState(
                 skillProgresses = listOf(
                     SkillProgress(
-                        skillId = 1L,
+                        skillId = ACTIVE_SKILL_ID,
                         level = 1
                     )
                 )
@@ -26,11 +26,11 @@ class SetEquippedSkillUseCaseTest {
 
         useCase(
             slot = SkillSlot.FIRST,
-            skillId = 1L
+            skillId = ACTIVE_SKILL_ID
         )
 
         assertEquals(
-            1L,
+            ACTIVE_SKILL_ID,
             playerRepository.state?.playerBuild?.firstSkillId
         )
         assertEquals(
@@ -41,16 +41,17 @@ class SetEquippedSkillUseCaseTest {
 
     @Test
     fun `clears selected skill slot and saves player state`() = runBlocking {
-        val initialState = createPlayerState(
-            firstSkillId = 1L,
-            skillProgresses = listOf(
-                SkillProgress(
-                    skillId = 1L,
-                    level = 1
+        val playerRepository = FakePlayerRepository(
+            initialState = createPlayerState(
+                firstSkillId = ACTIVE_SKILL_ID,
+                skillProgresses = listOf(
+                    SkillProgress(
+                        skillId = ACTIVE_SKILL_ID,
+                        level = 1
+                    )
                 )
             )
         )
-        val playerRepository = FakePlayerRepository(initialState)
         val useCase = SetEquippedSkillUseCase(playerRepository)
 
         useCase(
@@ -65,6 +66,31 @@ class SetEquippedSkillUseCaseTest {
     }
 
     @Test
+    fun `equips unlocked passive skill`() = runBlocking {
+        val playerRepository = FakePlayerRepository(
+            initialState = createPlayerState(
+                skillProgresses = listOf(
+                    SkillProgress(
+                        skillId = PASSIVE_SKILL_ID,
+                        level = 1
+                    )
+                )
+            )
+        )
+        val useCase = SetEquippedSkillUseCase(playerRepository)
+
+        useCase(
+            slot = SkillSlot.FIRST,
+            skillId = PASSIVE_SKILL_ID
+        )
+
+        assertEquals(
+            PASSIVE_SKILL_ID,
+            playerRepository.state?.playerBuild?.firstSkillId
+        )
+    }
+
+    @Test
     fun `fails when equipping locked skill without changing state`() = runBlocking {
         val initialState = createPlayerState()
         val playerRepository = FakePlayerRepository(initialState)
@@ -73,11 +99,16 @@ class SetEquippedSkillUseCaseTest {
         val exception = runCatching {
             useCase(
                 slot = SkillSlot.FIRST,
-                skillId = 1L
+                skillId = ACTIVE_SKILL_ID
             )
         }.exceptionOrNull()
 
         assertTrue(exception is IllegalArgumentException)
         assertEquals(initialState, playerRepository.state)
+    }
+
+    private companion object {
+        const val ACTIVE_SKILL_ID = 1L
+        const val PASSIVE_SKILL_ID = 2L
     }
 }

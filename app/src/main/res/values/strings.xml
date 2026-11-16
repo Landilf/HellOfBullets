@@ -134,6 +134,21 @@
     <string name="skill_cooldown_reduction_name">Концентрация</string>
     <string name="skill_cooldown_reduction_description">Сокращает откат активных навыков.</string>
 
+    <string name="skills_active_title">Активные навыки</string>
+    <string name="skills_passive_title">Пассивные навыки</string>
+    <string name="skills_slots_title">Выбранные навыки</string>
+    <string name="skills_points">Очки навыков: %1$d</string>
+    <string name="skills_slot_first">Слот 1</string>
+    <string name="skills_slot_second">Слот 2</string>
+    <string name="skills_slot_empty">Не выбран</string>
+    <string name="skills_locked">Не разблокирован</string>
+    <string name="skills_level">Ур. %1$d/%2$d</string>
+    <string name="skills_unlock">Разблокировать: %1$d</string>
+    <string name="skills_upgrade">Улучшить: %1$d</string>
+    <string name="skills_equip_first">В слот 1</string>
+    <string name="skills_equip_second">В слот 2</string>
+    <string name="skills_unequip">Снять</string>
+
     <string name="settings_player_name_label">Имя игрока</string>
     <string name="settings_save_name">Сохранить имя</string>
     <string name="settings_input_sensitivity">Чувствительность управления</string>
