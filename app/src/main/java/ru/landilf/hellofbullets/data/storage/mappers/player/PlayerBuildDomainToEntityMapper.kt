@@ -13,7 +13,9 @@ class PlayerBuildDomainToEntityMapper @Inject constructor() {
             playerId = playerId,
             equippedWeaponItemId = build.equippedWeaponItem?.id,
             equippedArmorItemId = build.equippedArmorItem?.id,
-            equippedArtifactItemId = build.equippedArtifactItem?.id
+            equippedArtifactItemId = build.equippedArtifactItem?.id,
+            firstSkillId = build.firstSkillId,
+            secondSkillId = build.secondSkillId,
         )
     }
 }

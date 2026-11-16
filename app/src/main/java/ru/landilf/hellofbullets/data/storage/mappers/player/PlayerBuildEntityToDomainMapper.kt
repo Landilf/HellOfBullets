@@ -23,8 +23,8 @@ class PlayerBuildEntityToDomainMapper @Inject constructor() {
             equippedArtifactItem = items
                 .filterIsInstance<ArtifactItem>()
                 .firstOrNull { it.id == entity?.equippedArtifactItemId },
-            firstSkillSlot = null,
-            secondSkillSlot = null
+            firstSkillId = entity?.firstSkillId,
+            secondSkillId = entity?.secondSkillId
         )
     }
 }

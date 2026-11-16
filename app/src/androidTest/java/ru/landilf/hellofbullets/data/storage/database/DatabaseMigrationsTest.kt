@@ -38,7 +38,7 @@ class DatabaseMigrationsTest {
     }
 
     @Test
-    fun migratesFromVersion3ToVersion9AndPreservesPlayerProfile() = runBlocking {
+    fun migratesFromVersion3ToVersion10AndPreservesPlayerProfile() = runBlocking {
         createVersion3Database()
 
         val migratedDatabase = Room.databaseBuilder(
@@ -52,7 +52,8 @@ class DatabaseMigrationsTest {
                 DatabaseMigrations.MIGRATION_5_6,
                 DatabaseMigrations.MIGRATION_6_7,
                 DatabaseMigrations.MIGRATION_7_8,
-                DatabaseMigrations.MIGRATION_8_9
+                DatabaseMigrations.MIGRATION_8_9,
+                DatabaseMigrations.MIGRATION_9_10
             )
             .allowMainThreadQueries()
             .build()
@@ -287,6 +288,72 @@ class DatabaseMigrationsTest {
     }
 
     @Test
+    fun migratesFromVersion9ToVersion10AndAddsPlayerSkillStorage() {
+        val database = migrationTestHelper.createDatabase(databaseName, 9)
+
+        database.execSQL(
+            """
+                INSERT INTO `player_profile` (
+                    `id`, `name`, `level`, `expAmount`,
+                    `silverAmount`, `skillPointAmount`
+                ) VALUES (1, 'Player', 1, 0, 0, 0)
+            """.trimIndent()
+        )
+        database.execSQL(
+            """
+                INSERT INTO `player_build` (
+                    `playerId`,
+                    `equippedWeaponItemId`,
+                    `equippedArmorItemId`,
+                    `equippedArtifactItemId`
+                ) VALUES (1, NULL, NULL, NULL)
+            """.trimIndent()
+        )
+        database.close()
+
+        val migratedDatabase = migrationTestHelper.runMigrationsAndValidate(
+            databaseName,
+            10,
+            true,
+            DatabaseMigrations.MIGRATION_9_10
+        )
+
+        migratedDatabase.query(
+            """
+                SELECT `firstSkillId`, `secondSkillId`
+                FROM `player_build`
+                WHERE `playerId` = 1
+            """.trimIndent()
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertTrue(cursor.isNull(0))
+            assertTrue(cursor.isNull(1))
+        }
+
+        migratedDatabase.execSQL(
+            """
+                INSERT INTO `player_skill_progress` (
+                    `playerId`, `skillId`, `level`
+                ) VALUES (1, 1, 2)
+            """.trimIndent()
+        )
+
+        migratedDatabase.query(
+            """
+                SELECT `skillId`, `level`
+                FROM `player_skill_progress`
+                WHERE `playerId` = 1
+            """.trimIndent()
+        ).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals(1L, cursor.getLong(0))
+            assertEquals(2, cursor.getInt(1))
+        }
+
+        migratedDatabase.close()
+    }
+
+    @Test
     fun generatesSequentialEquipmentItemIds(): Unit = runBlocking {
         val database = Room.inMemoryDatabaseBuilder(
             context,
@@ -354,5 +421,4 @@ class DatabaseMigrationsTest {
         database.version = 3
         database.close()
     }
-
 }

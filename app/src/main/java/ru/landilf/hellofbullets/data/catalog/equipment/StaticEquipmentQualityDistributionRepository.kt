@@ -72,5 +72,4 @@ class StaticEquipmentQualityDistributionRepository @Inject constructor() :
             )
         )
     }
-
 }

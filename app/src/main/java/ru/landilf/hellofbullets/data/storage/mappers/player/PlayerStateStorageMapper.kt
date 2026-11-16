@@ -5,6 +5,7 @@ import ru.landilf.hellofbullets.data.storage.entities.equipment.ArtifactItemEnti
 import ru.landilf.hellofbullets.data.storage.entities.equipment.WeaponItemEntity
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerBuildEntity
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
+import ru.landilf.hellofbullets.data.storage.entities.player.PlayerSkillProgressEntity
 import ru.landilf.hellofbullets.data.storage.mappers.equipment.EquipmentStorageData
 import ru.landilf.hellofbullets.data.storage.mappers.equipment.EquipmentStorageMapper
 import ru.landilf.hellofbullets.domain.model.player.Inventory
@@ -16,6 +17,8 @@ class PlayerStateStorageMapper @Inject constructor(
     private val playerProfileDomainToEntityMapper: PlayerProfileDomainToEntityMapper,
     private val playerBuildEntityToDomainMapper: PlayerBuildEntityToDomainMapper,
     private val playerBuildDomainToEntityMapper: PlayerBuildDomainToEntityMapper,
+    private val playerSkillProgressDomainToEntityMapper: PlayerSkillProgressDomainToEntityMapper,
+    private val playerSkillProgressEntityToDomainMapper: PlayerSkillProgressEntityToDomainMapper,
     private val equipmentStorageMapper: EquipmentStorageMapper
 ) {
     fun toDomain(
@@ -23,7 +26,8 @@ class PlayerStateStorageMapper @Inject constructor(
         buildEntity: PlayerBuildEntity?,
         weaponEntities: List<WeaponItemEntity>,
         armorEntities: List<ArmorItemEntity>,
-        artifactEntities: List<ArtifactItemEntity>
+        artifactEntities: List<ArtifactItemEntity>,
+        skillProgressEntities: List<PlayerSkillProgressEntity>
     ): PlayerState {
         val items = equipmentStorageMapper.toDomain(
             weaponEntities = weaponEntities,
@@ -37,6 +41,9 @@ class PlayerStateStorageMapper @Inject constructor(
                 entity = buildEntity,
                 items = items
             ),
+            skillProgresses = skillProgressEntities.map { entity ->
+                playerSkillProgressEntityToDomainMapper(entity)
+            },
             inventory = Inventory(ownedItems = items)
         )
     }
@@ -53,6 +60,18 @@ class PlayerStateStorageMapper @Inject constructor(
             build = state.playerBuild,
             playerId = playerId
         )
+    }
+
+    fun toSkillProgressEntities(
+        state: PlayerState,
+        playerId: Long
+    ): List<PlayerSkillProgressEntity> {
+        return state.skillProgresses.map { progress ->
+            playerSkillProgressDomainToEntityMapper(
+                progress = progress,
+                playerId = playerId
+            )
+        }
     }
 
     fun toEquipmentStorageData(

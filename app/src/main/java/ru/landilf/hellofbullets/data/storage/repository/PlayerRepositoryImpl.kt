@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import ru.landilf.hellofbullets.data.storage.dao.EquipmentDao
 import ru.landilf.hellofbullets.data.storage.dao.PlayerDao
+import ru.landilf.hellofbullets.data.storage.dao.PlayerSkillDao
 import ru.landilf.hellofbullets.data.storage.database.AppDatabase
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerStateStorageMapper
@@ -20,6 +21,7 @@ class PlayerRepositoryImpl @Inject constructor(
     private val database: AppDatabase,
     private val playerDao: PlayerDao,
     private val equipmentDao: EquipmentDao,
+    private val playerSkillDao: PlayerSkillDao,
     private val playerStateStorageMapper: PlayerStateStorageMapper
 ) : PlayerRepository {
     override suspend fun getPlayerState(): PlayerState? {
@@ -73,13 +75,15 @@ class PlayerRepositoryImpl @Inject constructor(
             equipmentDao.observeWeaponItems(ownerId),
             equipmentDao.observeArmorItems(ownerId),
             equipmentDao.observeArtifactItems(ownerId),
-        ) { buildEntity, weaponEntities, armorEntities, artifactEntities ->
+            playerSkillDao.observeSkillProgresses(ownerId),
+        ) { buildEntity, weaponEntities, armorEntities, artifactEntities, skillProgressEntities ->
             playerStateStorageMapper.toDomain(
                 profileEntity = profileEntity,
                 buildEntity = buildEntity,
                 weaponEntities = weaponEntities,
                 armorEntities = armorEntities,
-                artifactEntities = artifactEntities
+                artifactEntities = artifactEntities,
+                skillProgressEntities = skillProgressEntities,
             )
         }
     }
@@ -93,7 +97,8 @@ class PlayerRepositoryImpl @Inject constructor(
             buildEntity = playerDao.getPlayerBuild(ownerId),
             weaponEntities = equipmentDao.getWeaponItems(ownerId),
             armorEntities = equipmentDao.getArmorItems(ownerId),
-            artifactEntities = equipmentDao.getArtifactItems(ownerId)
+            artifactEntities = equipmentDao.getArtifactItems(ownerId),
+            skillProgressEntities = playerSkillDao.getSkillProgresses(ownerId),
         )
     }
 
@@ -112,7 +117,13 @@ class PlayerRepositoryImpl @Inject constructor(
             weaponItems = equipmentData.weaponItems,
             armorItems = equipmentData.armorItems,
             artifactItems = equipmentData.artifactItems
-
+        )
+        playerSkillDao.deleteSkillProgresses(ownerId)
+        playerSkillDao.upsertSkillProgresses(
+            playerStateStorageMapper.toSkillProgressEntities(
+                state = state,
+                playerId = ownerId
+            )
         )
         playerDao.upsertPlayerBuild(
             playerStateStorageMapper.toBuildEntity(

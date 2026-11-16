@@ -14,6 +14,8 @@ import ru.landilf.hellofbullets.presentation.settings.SettingsScreen
 import ru.landilf.hellofbullets.presentation.settings.SettingsViewModel
 import ru.landilf.hellofbullets.presentation.shop.ShopScreen
 import ru.landilf.hellofbullets.presentation.shop.ShopViewModel
+import ru.landilf.hellofbullets.presentation.skills.SkillsScreen
+import ru.landilf.hellofbullets.presentation.skills.SkillsViewModel
 
 fun NavGraphBuilder.mainMenuGraph(
     navController: NavController
@@ -44,9 +46,12 @@ fun NavGraphBuilder.mainMenuGraph(
     }
 
     composable(AppDestination.Skills.route) {
-        PlaceholderScreen(
-            titleRes = R.string.main_menu_skills,
-            onBackClick = { navController.popBackStack() }
+        val viewModel: SkillsViewModel = hiltViewModel()
+        val state = viewModel.uiState.collectAsStateWithLifecycle()
+
+        SkillsScreen(
+            state = state.value,
+            onAction = viewModel::onAction
         )
     }
 

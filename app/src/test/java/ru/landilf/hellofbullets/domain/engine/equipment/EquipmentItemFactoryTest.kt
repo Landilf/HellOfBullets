@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.generator.EquipmentItemIdGenerator
 import ru.landilf.hellofbullets.domain.generator.EquipmentRandomGenerator
 import ru.landilf.hellofbullets.domain.model.equipment.EquipmentQuality

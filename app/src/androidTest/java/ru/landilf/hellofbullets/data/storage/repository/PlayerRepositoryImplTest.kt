@@ -29,6 +29,8 @@ import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerBuildDomainToE
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerBuildEntityToDomainMapper
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerProfileDomainToEntityMapper
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerProfileEntityToDomainMapper
+import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerSkillProgressDomainToEntityMapper
+import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerSkillProgressEntityToDomainMapper
 import ru.landilf.hellofbullets.data.storage.mappers.player.PlayerStateStorageMapper
 import ru.landilf.hellofbullets.domain.model.equipment.ArmorItem
 import ru.landilf.hellofbullets.domain.model.equipment.ArtifactItem
@@ -40,6 +42,7 @@ import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
 import ru.landilf.hellofbullets.domain.model.player.PlayerStateUpdate
+import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
 
 @RunWith(AndroidJUnit4::class)
 class PlayerRepositoryImplTest {
@@ -59,6 +62,7 @@ class PlayerRepositoryImplTest {
             database = database,
             playerDao = database.playerDao(),
             equipmentDao = database.equipmentDao(),
+            playerSkillDao = database.playerSkillDao(),
             playerStateStorageMapper = createPlayerStateStorageMapper()
         )
     }
@@ -69,7 +73,7 @@ class PlayerRepositoryImplTest {
     }
 
     @Test
-    fun savesAndLoadsPlayerStateWithInventoryAndBuild() = runBlocking {
+    fun savesAndLoadsPlayerStateWithInventoryBuildAndSkills() = runBlocking {
         val expectedState = createPlayerState()
 
         repository.savePlayerState(expectedState)
@@ -105,9 +109,10 @@ class PlayerRepositoryImplTest {
                 equippedWeaponItem = updatedWeapon,
                 equippedArmorItem = null,
                 equippedArtifactItem = null,
-                firstSkillSlot = null,
-                secondSkillSlot = null
+                firstSkillId = null,
+                secondSkillId = null
             ),
+            skillProgresses = emptyList(),
             inventory = Inventory(
                 ownedItems = listOf(updatedWeapon)
             )
@@ -134,6 +139,11 @@ class PlayerRepositoryImplTest {
         )
         assertTrue(
             database.equipmentDao().getArtifactItems(state.playerProfile.id).isEmpty()
+        )
+        assertTrue(
+            database.playerSkillDao()
+                .getSkillProgresses(state.playerProfile.id)
+                .isEmpty()
         )
         assertEquals(
             null,
@@ -227,6 +237,8 @@ class PlayerRepositoryImplTest {
             playerProfileDomainToEntityMapper = PlayerProfileDomainToEntityMapper(),
             playerBuildEntityToDomainMapper = PlayerBuildEntityToDomainMapper(),
             playerBuildDomainToEntityMapper = PlayerBuildDomainToEntityMapper(),
+            playerSkillProgressDomainToEntityMapper = PlayerSkillProgressDomainToEntityMapper(),
+            playerSkillProgressEntityToDomainMapper = PlayerSkillProgressEntityToDomainMapper(),
             equipmentStorageMapper = EquipmentStorageMapper(
                 weaponItemEntityToDomainMapper = WeaponItemEntityToDomainMapper(),
                 weaponItemDomainToEntityMapper = WeaponItemDomainToEntityMapper(),
@@ -288,8 +300,12 @@ class PlayerRepositoryImplTest {
                 equippedWeaponItem = weapon,
                 equippedArmorItem = armor,
                 equippedArtifactItem = artifact,
-                firstSkillSlot = null,
-                secondSkillSlot = null
+                firstSkillId = 1L,
+                secondSkillId = 2L
+            ),
+            skillProgresses = listOf(
+                SkillProgress(skillId = 1L, level = 2),
+                SkillProgress(skillId = 2L, level = 1)
             ),
             inventory = Inventory(listOf(weapon, armor, artifact))
         )

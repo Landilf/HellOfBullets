@@ -7,7 +7,7 @@ import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeCos
 import ru.landilf.hellofbullets.domain.engine.equipment.EquipmentLevelUpgradeStatCalculator
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.createWeapon
 import ru.landilf.hellofbullets.domain.fixtures.EquipmentTestFixtures.weaponDefinition
-import ru.landilf.hellofbullets.domain.fixtures.FLOAT_EPSILON
+import ru.landilf.hellofbullets.fixtures.FLOAT_EPSILON
 import ru.landilf.hellofbullets.domain.fixtures.FakeEquipmentStatConfigRepository
 import ru.landilf.hellofbullets.domain.fixtures.PlayerTestFixtures.createPlayerState
 import ru.landilf.hellofbullets.domain.usecase.FakeEquipmentDefinitionRepository

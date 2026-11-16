@@ -41,5 +41,4 @@ interface PlayerDao {
 
     @Query("SELECT * FROM player_build WHERE playerId = :playerId LIMIT 1")
     fun observePlayerBuild(playerId: Long): Flow<PlayerBuildEntity?>
-
 }

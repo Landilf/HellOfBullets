@@ -253,4 +253,33 @@ object DatabaseMigrations {
             }
         }
     }
+
+    val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                    ALTER TABLE `player_build`
+                    ADD COLUMN `firstSkillId` INTEGER
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    ALTER TABLE `player_build`
+                    ADD COLUMN `secondSkillId` INTEGER
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                    CREATE TABLE IF NOT EXISTS `player_skill_progress` (
+                        `playerId` INTEGER NOT NULL,
+                        `skillId` INTEGER NOT NULL,
+                        `level` INTEGER NOT NULL,
+                        PRIMARY KEY(`playerId`, `skillId`),
+                        FOREIGN KEY(`playerId`) REFERENCES `player_profile`(`id`)
+                        ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                """.trimIndent()
+            )
+        }
+    }
 }

@@ -6,6 +6,7 @@ import ru.landilf.hellofbullets.data.storage.dao.EquipmentDao
 import ru.landilf.hellofbullets.data.storage.dao.EquipmentItemIdDao
 import ru.landilf.hellofbullets.data.storage.dao.LeaderboardDao
 import ru.landilf.hellofbullets.data.storage.dao.PlayerDao
+import ru.landilf.hellofbullets.data.storage.dao.PlayerSkillDao
 import ru.landilf.hellofbullets.data.storage.dao.ShopDao
 import ru.landilf.hellofbullets.data.storage.entities.equipment.ArmorItemEntity
 import ru.landilf.hellofbullets.data.storage.entities.equipment.ArtifactItemEntity
@@ -14,6 +15,7 @@ import ru.landilf.hellofbullets.data.storage.entities.equipment.WeaponItemEntity
 import ru.landilf.hellofbullets.data.storage.entities.leaderboard.LeaderboardRecordEntity
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerBuildEntity
 import ru.landilf.hellofbullets.data.storage.entities.player.PlayerProfileEntity
+import ru.landilf.hellofbullets.data.storage.entities.player.PlayerSkillProgressEntity
 import ru.landilf.hellofbullets.data.storage.entities.shop.ShopArmorOfferEntity
 import ru.landilf.hellofbullets.data.storage.entities.shop.ShopArtifactOfferEntity
 import ru.landilf.hellofbullets.data.storage.entities.shop.ShopStateEntity
@@ -31,15 +33,17 @@ import ru.landilf.hellofbullets.data.storage.entities.shop.ShopWeaponOfferEntity
         ShopStateEntity::class,
         ShopWeaponOfferEntity::class,
         ShopArmorOfferEntity::class,
-        ShopArtifactOfferEntity::class
+        ShopArtifactOfferEntity::class,
+        PlayerSkillProgressEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun playerDao(): PlayerDao
     abstract fun equipmentDao(): EquipmentDao
     abstract fun equipmentItemIdDao(): EquipmentItemIdDao
+    abstract fun playerSkillDao(): PlayerSkillDao
     abstract fun leaderboardDao(): LeaderboardDao
     abstract fun shopDao(): ShopDao
 }
