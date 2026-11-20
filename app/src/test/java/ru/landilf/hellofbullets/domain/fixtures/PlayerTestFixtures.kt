@@ -6,6 +6,7 @@ import ru.landilf.hellofbullets.domain.model.player.Inventory
 import ru.landilf.hellofbullets.domain.model.player.PlayerBuild
 import ru.landilf.hellofbullets.domain.model.player.PlayerProfile
 import ru.landilf.hellofbullets.domain.model.player.PlayerState
+import ru.landilf.hellofbullets.domain.model.player.PlayerStats
 import ru.landilf.hellofbullets.domain.model.skills.SkillProgress
 
 object PlayerTestFixtures {
@@ -39,6 +40,22 @@ object PlayerTestFixtures {
             ),
             skillProgresses = skillProgresses,
             inventory = Inventory(items)
+        )
+    }
+
+    fun createPlayerStats(
+        maxHp: Int = 100,
+        damage: Int = 10,
+        defense: Int = 5,
+        cooldownReduction: Int = 0,
+        effectDurationBonus: Int = 0
+    ): PlayerStats {
+        return PlayerStats(
+            maxHp = maxHp,
+            damage = damage,
+            defense = defense,
+            cooldownReduction = cooldownReduction,
+            effectDurationBonus = effectDurationBonus
         )
     }
 }
